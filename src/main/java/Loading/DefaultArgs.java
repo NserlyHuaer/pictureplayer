@@ -7,5 +7,5 @@ public @interface DefaultArgs {
 
     boolean EnableHistoryLoader() default true;
 
-    double MouseMoveOffsets() default 0.59;
+    double MouseMoveOffsets() default 0.0;
 }

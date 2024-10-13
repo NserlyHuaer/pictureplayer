@@ -41,7 +41,9 @@ public class Main extends JFrame {
     //全屏模式按钮
     private JButton FullScreen;
     //鼠标移动补偿
-    private static double MouseMoveOffsets = 0.59;
+    private static double MouseMoveOffsets = 0.0;
+    //判断按钮是否被按下
+    private static boolean IsDragging;
 
     //静态代码块
     static {
@@ -101,11 +103,6 @@ public class Main extends JFrame {
                 if (op != null && op.GetX() != 0 && op.GetY() != 0) {
 //                    增加坐标值
 //                    myCanvas.AddCoordinate(e.getX() - op.GetX(), e.getY() - op.GetY());
-                    try {
-                        Thread.sleep(7);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
                     myCanvas.setMouseCoordinate((int) ((1 + MouseMoveOffsets) * (e.getX() - op.GetX())), (int) ((1 + MouseMoveOffsets) * (e.getY() - op.GetY())));
                     sizeOperate.update();
                 }
@@ -124,6 +121,7 @@ public class Main extends JFrame {
             //鼠标滚轮事件
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
+                if (IsDragging) return;
                 myCanvas.setMouseCoordinate(e.getX(), e.getY());
                 //滚轮向后
                 if (e.getWheelRotation() == 1) {
@@ -143,6 +141,8 @@ public class Main extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {//点击、长按触发
                 isDown = false;
+                //将鼠标被按下属性设为true
+                IsDragging = true;
                 new Thread(() -> {
                     do {
                         sizeOperate.adjustPercent(SizeOperate.Enlarge);
@@ -162,6 +162,8 @@ public class Main extends JFrame {
             @Override
             public void mouseReleased(MouseEvent e) {//鼠标放出触发
                 isDown = true;
+                //将鼠标被按下属性设为false
+                IsDragging = false;
             }
         });
         smallest = new JButton("reduce");
@@ -174,6 +176,8 @@ public class Main extends JFrame {
             public void mousePressed(MouseEvent e) {
                 //设置鼠标没有释放
                 isReleased = false;
+                //将鼠标被按下属性设为true
+                IsDragging = true;
                 //创建线程
                 new Thread(() -> {
                     //循环
@@ -197,6 +201,8 @@ public class Main extends JFrame {
             @Override
             public void mouseReleased(MouseEvent e) {
                 isReleased = true;
+                //将鼠标被按下属性设为false
+                IsDragging = false;
             }
         });
         //初始化面板
