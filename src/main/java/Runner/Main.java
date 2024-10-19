@@ -7,6 +7,7 @@ import Size.OperatingCoordinate;
 import Tools.EqualsProportion;
 import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.ImageRotationHelper;
+import Version.Download.DownloadUpdate;
 import Version.Version;
 import Component.FileManagementFrame;
 
@@ -14,6 +15,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -53,6 +55,13 @@ public class Main extends JFrame {
 
     //静态代码块
     static {
+        DownloadUpdate downloadUpdate = new DownloadUpdate("https://gitee.com/nserly-huaer/ImagePlayer/blob/master/artifacts/PicturePlayer_jar/VersionID");
+        try {
+            downloadUpdate.checkIfTheLatestVersion();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         //设置标题风格
         titleStyle = "Pictures player";
         //初始化Init
