@@ -7,6 +7,7 @@ import Tools.EqualsProportion;
 import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.ImageRotationHelper;
 import Version.Version;
+import Component.FileManagementFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,6 +41,10 @@ public class Main extends JFrame {
     private MyCanvas myCanvas;
     //全屏模式按钮
     private JButton FullScreen;
+    //上次是否处于全屏
+    private static boolean isLastInFullScreen;
+    //设备是否支持全屏模式
+    private boolean SupportFullScreen = true;
     //鼠标移动补偿
     private static double MouseMoveOffsets = 0.0;
     //判断按钮是否被按下
@@ -236,35 +241,20 @@ public class Main extends JFrame {
                         myCanvas.changeOriginalPicturePath(CurrentPathOfPicture.get(CurrentIndex + 1));
                         sizeOperate.update();
                     }
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    //设置窗体可见
+                    jFrame.setVisible(true);
+                    //关闭图片显示窗口
+                    Main.main.dispose();
+                    //关闭画布
+                    sizeOperate.close();
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_F11) {
-                    GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-                    if (FullScreen.getText().equals("Full Screen")) {
-                        //检查设备是否支持全屏模式
-                        if (graphicsDevice.isFullScreenSupported()) {
-                            //设置窗口为全屏模式
-                            graphicsDevice.setFullScreenWindow(Main.main);
-                            FullScreen.setText("Exit Full Screen");
-                            On.add(percentLabel);
-                        } else {
-                            JOptionPane.showMessageDialog(jFrame, "The device doesn't support full screen", "Error", JOptionPane.ERROR_MESSAGE);
-                        }
-                    } else {
-                        graphicsDevice.setFullScreenWindow(null);
-                        FullScreen.setText("Full Screen");
-                        On.remove(percentLabel);
-                    }
-                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-                    if (!FullScreen.getText().equals("Full Screen")) {
-                        graphicsDevice.setFullScreenWindow(null);
-                        FullScreen.setText("Full Screen");
-                        On.remove(percentLabel);
-                    }
+                    manageFullScreen(On);
                 }
 
             }
@@ -290,6 +280,17 @@ public class Main extends JFrame {
         });
         //设置窗体可见
         setVisible(true);
+        //如果上次处于全屏模式，则自动启用全屏
+        if (isLastInFullScreen) {
+            //设置窗口为全屏模式
+            GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+            graphicsDevice.setFullScreenWindow(this);
+            FullScreen.setText("Exit Full Screen");
+            On.add(percentLabel);
+            sizeOperate.incomeWindowDimension(myCanvas.getSize());
+            sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
+            sizeOperate.update();
+        }
     }
 
     private JPanel getjPanel() {
@@ -342,28 +343,14 @@ public class Main extends JFrame {
         JButton FlipHorizontally = new JButton("FlipHorizontally");
         //在容器On中添加全屏按钮
         FullScreen = new JButton("Full Screen");
-        //设置全屏按钮可见
-        FullScreen.setVisible(true);
-        GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         //创建全屏按钮监听器
         FullScreen.addActionListener(e -> {
-            if (FullScreen.getText().equals("Full Screen")) {
-                //检查设备是否支持全屏模式
-                if (graphicsDevice.isFullScreenSupported()) {
-                    //设置窗口为全屏模式
-                    graphicsDevice.setFullScreenWindow(this);
-                    FullScreen.setText("Exit Full Screen");
-                    On.add(percentLabel);
-                } else {
-                    JOptionPane.showMessageDialog(jFrame, "The device doesn't support full screen", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            } else {
-                graphicsDevice.setFullScreenWindow(null);
-                FullScreen.setText("Full Screen");
-                On.remove(percentLabel);
-            }
-            myCanvas.requestFocus();
+            manageFullScreen(On);
         });
+        //如果设备支持全屏，设置全屏按钮可见
+        if (SupportFullScreen)
+            FullScreen.setVisible(true);
+
         //将图片左转按钮添加到组件中
         On.add(TurnLeft);
         //将重置按钮添加到组件中
@@ -373,6 +360,31 @@ public class Main extends JFrame {
         //将全屏模式按钮添加到组件中
         On.add(FullScreen);
         return On;
+    }
+
+    //管理全屏
+    private void manageFullScreen(JPanel On) {
+        GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        if (FullScreen.getText().equals("Full Screen")) {
+            //检查设备是否支持全屏模式
+            if (graphicsDevice.isFullScreenSupported()) {
+                //设置窗口为全屏模式
+                graphicsDevice.setFullScreenWindow(this);
+                FullScreen.setText("Exit Full Screen");
+                On.add(percentLabel);
+                isLastInFullScreen = true;
+            } else {
+                JOptionPane.showMessageDialog(jFrame, "The device doesn't support full screen", "Error", JOptionPane.ERROR_MESSAGE);
+                On.remove(FullScreen);
+                SupportFullScreen = isLastInFullScreen = false;
+            }
+        } else {
+            graphicsDevice.setFullScreenWindow(null);
+            FullScreen.setText("Full Screen");
+            On.remove(percentLabel);
+            isLastInFullScreen = false;
+        }
+        myCanvas.requestFocus();
     }
 
 
@@ -389,7 +401,7 @@ public class Main extends JFrame {
         System.out.println("Loading...");
         long begin = System.currentTimeMillis();
         //初始化窗体
-        jFrame = new JDialog();
+        jFrame = new FileManagementFrame();
         //禁止用户调整窗体尺寸
         jFrame.setResizable(false);
         //设置标题
@@ -420,6 +432,8 @@ public class Main extends JFrame {
                         jFrame.setVisible(false);
                         main = new Main(jTextField.getText());
                     }
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    close();
                 }
             }
         });
@@ -432,6 +446,7 @@ public class Main extends JFrame {
                 return;
             }
             JOptionPane.showMessageDialog(jFrame, "Couldn't open or recognize the file:\n\"" + jTextField.getText() + "\"", "Invalid image path", JOptionPane.ERROR_MESSAGE);
+            jFrame.requestFocus();
         });
         FileChoose.addActionListener(e -> {
             JFileChooser jFileChooser = new JFileChooser();
@@ -447,31 +462,31 @@ public class Main extends JFrame {
                 //设置文件选择器的当前目录为上次打开的默认目录
                 jFileChooser.setCurrentDirectory(cachePath);
             }
-            //显示选择文件框
-            jFileChooser.showOpenDialog(jFrame);
-            //获取用户打开的文件
-            File file = jFileChooser.getSelectedFile();
-            //判断文件对象是否为空值，是否为受Java支持的文件格式
-            if (file != null) {
-                if (GetImageInformation.isImageFile(file)) {
-                    //获取String类型文件路径
-                    String path = file.getPath();
-                    //将文件路径文本框设置为path
-                    jTextField.setText(path);
-                    //隐藏文件打开管理窗体
-                    jFrame.setVisible(false);
-                    //创建图片查看窗体
-                    main = new Main(jTextField.getText());
-                } else {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            JOptionPane.showMessageDialog(jFrame, "Couldn't open or recognize the file:\n\"" + file.getPath() + "\"", "Invalid image path", JOptionPane.ERROR_MESSAGE);
-                        }
-                    });
+            File file = null;
+            //是否为受Java支持的文件格式
+            for (int times = 0; !GetImageInformation.isImageFile(file); times++) {
+                if (times > 0) {
+                    JOptionPane.showMessageDialog(jFrame, "Couldn't open or recognize the file:\n\"" + file.getPath() + "\"", "Invalid image path", JOptionPane.ERROR_MESSAGE);
+                }
+                //显示选择文件框
+                int userSelection = jFileChooser.showOpenDialog(jFrame);
+                //获取用户打开的文件
+                file = jFileChooser.getSelectedFile();
+                //判断文件对象是否为空值
+                if (userSelection != JFileChooser.APPROVE_OPTION) {
+                    jFrame.requestFocus();
+                    return;
                 }
             }
-
+            //获取String类型文件路径
+            String path = file.getPath();
+            //将文件路径文本框设置为path
+            jTextField.setText(path);
+            //隐藏文件打开管理窗体
+            jFrame.setVisible(false);
+            //创建图片查看窗体
+            main = new Main(jTextField.getText());
+            jFrame.requestFocus();
         });
         //添加按钮至窗体中
         jFrame.add(OK);
@@ -485,8 +500,7 @@ public class Main extends JFrame {
                 //加载配置文件
                 init.Loading();
                 if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().toLowerCase().equals("false")) {
-                    jFrame.dispose();
-                    System.exit(0);
+                    Main.main.close();
                 }
                 //设置消息对话框窗体
                 var jDialog = new JDialog(jFrame, true);
@@ -542,6 +556,14 @@ public class Main extends JFrame {
         //设置窗体默认关闭规则
         jFrame.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         System.out.println("Done!(Spent " + (System.currentTimeMillis() - begin) + "ms)");
+        //设置窗体在显示时自动获取焦点
+        jFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowActivated(WindowEvent e) {
+                //当前窗体成为活动窗体时，让myCanvas获取焦点
+                jFrame.requestFocus();
+            }
+        });
     }
 
     //改变图片路径
@@ -549,6 +571,13 @@ public class Main extends JFrame {
         myCanvas = new MyCanvas(path);
         sizeOperate = new SizeOperate(myCanvas, myCanvas.getSize());
         add(myCanvas, BorderLayout.CENTER);
+    }
+
+    //关闭
+    public static void close() {
+        if (Main.main != null && Main.main.sizeOperate != null) Main.main.sizeOperate.close();
+        if (jFrame != null) jFrame.dispose();
+        System.exit(0);
     }
 
     public class MyCanvas extends JComponent {
@@ -645,12 +674,17 @@ public class Main extends JFrame {
         }
 
         public void close() {
-            g.dispose();
-            image.flush();
+            if (g != null) {
+                g.dispose();
+                g = null;
+            }
+            if (image != null) {
+                image.flush();
+                image = null;
+            }
             path = null;
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
-            image = null;
-            g = null;
+
             NewWindow = LastWindow = null;
             this.removeAll();
         }
