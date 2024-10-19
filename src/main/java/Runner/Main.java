@@ -1,6 +1,7 @@
 package Runner;//导入包
 
 import Component.PercentLabel;
+import Listener.ChangeFocusListener;
 import Loading.Init;
 import Size.OperatingCoordinate;
 import Tools.EqualsProportion;
@@ -210,9 +211,10 @@ public class Main extends JFrame {
                 IsDragging = false;
             }
         });
+        ChangeFocusListener changeFocusListener = new ChangeFocusListener(myCanvas);
         //初始化面板
         var Enum = new JPanel();
-        var On = getjPanel();
+        var On = getjPanel(changeFocusListener);
         Enum.setLayout(new GridLayout(1, 2));
         //添加组件
         Enum.add(smallest);
@@ -293,7 +295,7 @@ public class Main extends JFrame {
         }
     }
 
-    private JPanel getjPanel() {
+    private JPanel getjPanel(ChangeFocusListener changeFocusListener) {
         var On = new JPanel();
         JButton TurnLeft = new JButton("Left");
         //设置图片左转按钮可见
@@ -301,16 +303,16 @@ public class Main extends JFrame {
         //创建图片左转按钮监听器
         TurnLeft.addActionListener(e -> {
             myCanvas.turnLeft();
-            myCanvas.requestFocus();
         });
+        TurnLeft.addMouseListener(changeFocusListener);
         JButton TurnRight = new JButton("Right");
         //设置图片右转按钮可见
         TurnLeft.setVisible(true);
         //创建图片右转按钮监听器
         TurnRight.addActionListener(e -> {
             myCanvas.turnRight();
-            myCanvas.requestFocus();
         });
+        TurnRight.addMouseListener(changeFocusListener);
         //在容器On中添加还原图片按钮
         JButton Reset = new JButton("reset");
         //设置重置按钮可见
@@ -338,15 +340,17 @@ public class Main extends JFrame {
             }
             ClickedTime.set(System.currentTimeMillis());
             sizeOperate.update();
-            myCanvas.requestFocus();
         });
+        Reset.addMouseListener(changeFocusListener);
         JButton FlipHorizontally = new JButton("FlipHorizontally");
+        FlipHorizontally.addMouseListener(changeFocusListener);
         //在容器On中添加全屏按钮
         FullScreen = new JButton("Full Screen");
         //创建全屏按钮监听器
         FullScreen.addActionListener(e -> {
             manageFullScreen(On);
         });
+        FullScreen.addMouseListener(changeFocusListener);
         //如果设备支持全屏，设置全屏按钮可见
         if (SupportFullScreen)
             FullScreen.setVisible(true);
@@ -384,7 +388,6 @@ public class Main extends JFrame {
             On.remove(percentLabel);
             isLastInFullScreen = false;
         }
-        myCanvas.requestFocus();
     }
 
 
@@ -417,6 +420,7 @@ public class Main extends JFrame {
         jFrame.add(jLabel);
         jFrame.add(jTextField);
 
+        ChangeFocusListener changeFocusListener = new ChangeFocusListener(jFrame);
         //设置按钮
         var OK = new JButton("OK");
         OK.setBounds(150, 100, 100, 30);
@@ -437,6 +441,7 @@ public class Main extends JFrame {
                 }
             }
         });
+        OK.addMouseListener(changeFocusListener);
         //为按钮添加动作监听
         OK.addActionListener(e -> {
             //判断是否为正确的文件地址
@@ -446,8 +451,8 @@ public class Main extends JFrame {
                 return;
             }
             JOptionPane.showMessageDialog(jFrame, "Couldn't open or recognize the file:\n\"" + jTextField.getText() + "\"", "Invalid image path", JOptionPane.ERROR_MESSAGE);
-            jFrame.requestFocus();
         });
+        FileChoose.addMouseListener(changeFocusListener);
         FileChoose.addActionListener(e -> {
             JFileChooser jFileChooser = new JFileChooser();
             File cachePath = null;
@@ -474,7 +479,6 @@ public class Main extends JFrame {
                 file = jFileChooser.getSelectedFile();
                 //判断文件对象是否为空值
                 if (userSelection != JFileChooser.APPROVE_OPTION) {
-                    jFrame.requestFocus();
                     return;
                 }
             }
@@ -486,7 +490,6 @@ public class Main extends JFrame {
             jFrame.setVisible(false);
             //创建图片查看窗体
             main = new Main(jTextField.getText());
-            jFrame.requestFocus();
         });
         //添加按钮至窗体中
         jFrame.add(OK);
@@ -497,60 +500,7 @@ public class Main extends JFrame {
         jFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                //加载配置文件
-                init.Loading();
-                if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().toLowerCase().equals("false")) {
-                    Main.main.close();
-                }
-                //设置消息对话框窗体
-                var jDialog = new JDialog(jFrame, true);
-                //设置窗体标题
-                jDialog.setTitle("Confirm Exit");
-                //设置窗体大小、坐标（获取父窗体坐标）
-                jDialog.setBounds(jFrame.getX(), jFrame.getY(), 260, 170);
-                //创建文字
-                var jLabel1 = new JLabel("Are you sure you want to exit?");
-                //设置文字字体、格式
-                jLabel1.setFont(new Font("隶书", 0, 15));
-                //设置显示大小、坐标
-                jLabel1.setBounds(15, 3, 200, 50);
-                //创建按钮
-                var yes = new JButton("exit");
-                var no = new JButton("cancel");
-                yes.setBounds(20, 50, 100, 35);
-                yes.setForeground(Color.RED);
-                no.setBounds(130, 50, 100, 35);
-                jDialog.setResizable(false);
-                //设置布局
-                jDialog.setLayout(null);
-                //将文字、按钮放入组件中
-                jDialog.add(jLabel1);
-                jDialog.add(yes);
-                jDialog.add(no);
-                JCheckBox jCheckBox = new JCheckBox("Don't ask again");
-                jCheckBox.setBounds(60, 95, 200, 25);
-                jDialog.add(jCheckBox);
-                //如果确定退出软件，运行退出程序
-                yes.addActionListener(e1 -> {
-                    //关闭窗体
-                    jFrame.dispose();
-                    //判断main是否为null值（以防止出现空指针异常）
-                    if (main != null) {
-                        main.dispose();
-                    }
-                    if (jCheckBox.isSelected()) {
-                        init.ChangeValue("EnableConfirmExit", "false");
-                        init.Update();
-                    }
-                });
-                //点击取消以询问隐藏窗体（不会退出程序）
-                no.addActionListener(e1 -> {
-                    jDialog.setVisible(false);
-                });
-                //显示窗体
-                jDialog.setVisible(true);
-
-
+                close();
             }
         });
         //设置窗体默认关闭规则
@@ -575,9 +525,92 @@ public class Main extends JFrame {
 
     //关闭
     public static void close() {
-        if (Main.main != null && Main.main.sizeOperate != null) Main.main.sizeOperate.close();
-        if (jFrame != null) jFrame.dispose();
-        System.exit(0);
+        //加载配置文件
+        init.Loading();
+        if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().toLowerCase().equals("false")) {
+            if (Main.main != null && Main.main.sizeOperate != null) Main.main.sizeOperate.close();
+            if (jFrame != null) jFrame.dispose();
+            System.exit(0);
+        }
+        //设置消息对话框窗体
+        var jDialog = new JDialog(jFrame, true);
+        //设置窗体标题
+        jDialog.setTitle("Confirm Exit");
+        //设置窗体大小、坐标（获取父窗体坐标）
+        jDialog.setBounds(jFrame.getX(), jFrame.getY(), 260, 170);
+        //创建文字
+        var jLabel1 = new JLabel("Are you sure you want to exit?");
+        //设置文字字体、格式
+        jLabel1.setFont(new Font("隶书", 0, 15));
+        //设置显示大小、坐标
+        jLabel1.setBounds(15, 3, 200, 50);
+        //创建按钮
+        var yes = new JButton("exit");
+        var no = new JButton("cancel");
+        yes.setBounds(20, 50, 100, 35);
+        yes.setForeground(Color.RED);
+        no.setBounds(130, 50, 100, 35);
+        jDialog.setResizable(false);
+        //设置布局
+        jDialog.setLayout(null);
+        //将文字、按钮放入组件中
+        jDialog.add(jLabel1);
+        jDialog.add(yes);
+        jDialog.add(no);
+        ChangeFocusListener changeFocusListener = new ChangeFocusListener(jDialog);
+        JCheckBox jCheckBox = new JCheckBox("Don't ask again");
+        jCheckBox.setBounds(60, 95, 200, 25);
+        jCheckBox.addMouseListener(changeFocusListener);
+        jDialog.add(jCheckBox);
+        //如果确定退出软件，运行退出程序
+        yes.addActionListener(e1 -> {
+            //关闭窗体
+            jFrame.dispose();
+            //判断main是否为null值（以防止出现空指针异常）
+            if (Main.main != null && Main.main.sizeOperate != null) Main.main.sizeOperate.close();
+            if (jFrame != null) jFrame.dispose();
+            if (jCheckBox.isSelected()) {
+                init.ChangeValue("EnableConfirmExit", "false");
+                init.Update();
+            }
+            System.exit(0);
+        });
+        yes.addMouseListener(changeFocusListener);
+        //点击取消以询问隐藏窗体（不会退出程序）
+        no.addActionListener(e1 -> {
+            jDialog.setVisible(false);
+        });
+        no.addMouseListener(changeFocusListener);
+        //窗体键盘监听器
+        jDialog.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    jDialog.setVisible(false);
+                } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    //关闭窗体
+                    jFrame.dispose();
+                    //判断main是否为null值（以防止出现空指针异常）
+                    if (Main.main != null && Main.main.sizeOperate != null) Main.main.sizeOperate.close();
+                    if (jFrame != null) jFrame.dispose();
+                    if (jCheckBox.isSelected()) {
+                        init.ChangeValue("EnableConfirmExit", "false");
+                        init.Update();
+                    }
+                    System.exit(0);
+                }
+            }
+        });
+        //设置窗体在显示时自动获取焦点
+        jDialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowActivated(WindowEvent e) {
+                //当前窗体成为活动窗体时，让myCanvas获取焦点
+                jDialog.requestFocus();
+            }
+        });
+        //显示窗体
+        jDialog.setVisible(true);
     }
 
     public class MyCanvas extends JComponent {

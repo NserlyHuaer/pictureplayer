@@ -3,7 +3,7 @@ package Loading;
 public @interface DefaultArgs {
     boolean DoNotThingOnClose() default false;
 
-    boolean EnableConfirmExit() default true;
+    boolean EnableConfirmExit() default false;
 
     boolean EnableHistoryLoader() default true;
 
