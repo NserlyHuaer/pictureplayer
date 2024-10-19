@@ -1,12 +1,16 @@
 package Version.Download;
 
 
-import java.io.File;
-import java.io.IOException;
+import Tools.String.Formation;
+import Version.Version;
+
+import java.io.*;
+import java.util.List;
 
 public class DownloadUpdate {
     File f;
     String webSide;
+    private static String downloadWebSide;
 
     public DownloadUpdate(String DownloadPath, String webSide) {
         this.webSide = webSide;
@@ -20,7 +24,7 @@ public class DownloadUpdate {
     }
 
     public void setDefaultDownloadPath() {
-        f = new File("download\\");
+        f = new File("./download/");
     }
 
     //检查是否存在最新版本
@@ -28,6 +32,22 @@ public class DownloadUpdate {
         DownloadFile downloadFile = new DownloadFile(webSide, f.getPath());
         downloadFile.startToDownload();
 
-        return false;
+        File path = new File(downloadFile.getSaveDir());
+        String lastLine = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(path.getPath()))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                lastLine = line;
+            }
+        }
+        Formation formation = new Formation(lastLine);
+        List<String> list = formation.getArray();
+        if (Long.parseLong(list.getFirst()) <= Long.parseLong(Version.getVersionID())) {
+            path.delete();
+            return false;
+        }
+        downloadWebSide = list.get(1);
+        path.delete();
+        return true;
     }
 }

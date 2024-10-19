@@ -1,14 +1,14 @@
 package Version;
 
 public class Version {
-    private static final String version = "1.0.0 beta1";
-    private static final long VersionID = 1255L;
+    private static final String version = "1.0.0 beta2";
+    private static final String VersionID = "1260";
 
     public static String getVersion() {
         return version;
     }
 
-    public static long getVersionID() {
+    public static String getVersionID() {
         return VersionID;
     }
 }

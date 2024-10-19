@@ -52,15 +52,19 @@ public class Main extends JFrame {
     private static double MouseMoveOffsets = 0.0;
     //判断按钮是否被按下
     private static boolean IsDragging;
+    //判断是否存在最新版本
+    private static boolean hasNewVersion;
 
     //静态代码块
     static {
-        DownloadUpdate downloadUpdate = new DownloadUpdate("https://gitee.com/nserly-huaer/ImagePlayer/blob/master/artifacts/PicturePlayer_jar/VersionID");
-        try {
-            downloadUpdate.checkIfTheLatestVersion();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        DownloadUpdate downloadUpdate = new DownloadUpdate("https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum");
+        new Thread(() -> {
+            try {
+                hasNewVersion = downloadUpdate.checkIfTheLatestVersion();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
 
         //设置标题风格
         titleStyle = "Pictures player";
