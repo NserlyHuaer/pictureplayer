@@ -20,6 +20,33 @@ public class Init<KEY, VALUE> {
                 dire.mkdir();
             }
         }
+        clearDirectory(new File("./cache/"));
+        clearDirectory(new File("./download/"));
+        clearDirectory(new File("replace.sh"));
+        clearDirectory(new File("replace.bat"));
+        clearDirectory(new File("runnable.bat"));
+
+
+    }
+
+    public static void clearDirectory(File directory) {
+        if (!directory.exists()) return;
+        if (directory.isFile()) {
+            directory.delete();
+            return;
+        }
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    clearDirectory(file);
+                    file.delete();
+                    continue;
+                }
+                file.delete();
+
+            }
+        }
     }
 
     public void Run() {

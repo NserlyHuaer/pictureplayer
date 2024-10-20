@@ -63,10 +63,11 @@ public class AdvancedDownloadSpeedDisplay {
             DownloadUpdate downloadUpdate = new DownloadUpdate(Main.UPDATE_WEBSIDE);
             Main.DaemonUpdate = new Thread(() -> {
                 Map<String, java.util.List> map = downloadUpdate.download(downloadUpdate.getUpdateWebSide());
-                CommandCenter.backupCurrentVersion();
                 try {
-                    CommandCenter.replace((String) map.get(downloadUpdate.FilePath.get(0)).get(0));
+                    CommandCenter.moveFileToDirectory((String) map.get(downloadUpdate.FilePath.getFirst()).getFirst());
+                    String osType = CommandCenter.detectOSType();
                     contentPanel.removeAll();
+                    CommandCenter.executeOSSpecificCommands(osType, (String) map.get(downloadUpdate.FilePath.getFirst()).getFirst());
                 } catch (IOException e) {
                     System.out.println("Error:" + e);
                     JOptionPane.showConfirmDialog(frame,

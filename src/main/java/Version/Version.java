@@ -1,8 +1,8 @@
 package Version;
 
 public class Version {
-    private static final String version = "1.0.0 beta3";
-    private static final String VersionID = "1262";
+    private static final String version = "1.0.0 beta4";
+    private static final String VersionID = "1264";
 
     public static String getVersion() {
         return version;
