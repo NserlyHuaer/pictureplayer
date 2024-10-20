@@ -10,13 +10,14 @@ import Tools.ImageManager.ImageRotationHelper;
 import Version.Download.DownloadUpdate;
 import Version.Version;
 import Component.FileManagementFrame;
+import Component.AdvancedDownloadSpeedDisplay;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -52,17 +53,22 @@ public class Main extends JFrame {
     private static double MouseMoveOffsets = 0.0;
     //判断按钮是否被按下
     private static boolean IsDragging;
-    //判断是否存在最新版本
-    private static boolean hasNewVersion;
+    //最新版本下载地址（如果当前是最新版本，则返回null值）
+    private static List<String> NewVersionDownloadingWebSide;
+    //更新界面窗口
+    public static JFrame UpdatingForm;
+    //更新维护线程
+    public static Thread DaemonUpdate;
+    //更新网站（必须指定VersionID.sum下载地址）
+    public static final String UPDATE_WEBSIDE = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum";
 
     //静态代码块
     static {
-        DownloadUpdate downloadUpdate = new DownloadUpdate("https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum");
+        DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSIDE);
         new Thread(() -> {
-            try {
-                hasNewVersion = downloadUpdate.checkIfTheLatestVersion();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
+            if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
+                UpdateForm();
             }
         }).start();
 
@@ -624,6 +630,12 @@ public class Main extends JFrame {
         });
         //显示窗体
         jDialog.setVisible(true);
+    }
+
+    public static void UpdateForm() {
+        AdvancedDownloadSpeedDisplay advancedDownloadSpeedDisplay = new AdvancedDownloadSpeedDisplay();
+        advancedDownloadSpeedDisplay.createAndShowGUI(NewVersionDownloadingWebSide);
+
     }
 
     public class MyCanvas extends JComponent {

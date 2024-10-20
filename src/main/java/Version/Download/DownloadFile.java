@@ -78,8 +78,7 @@ public class DownloadFile {
                 //如果Content-Disposition中有文件名，则使用它
                 saveDir = saveDir + "/" + fileName;
             } else {
-                Random r = new Random();
-                saveDir = saveDir + "/" + r.nextLong();
+                saveDir = saveDir + "/" + fileURL.substring(fileURL.lastIndexOf("/") + 1);
             }
 
             ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
@@ -91,7 +90,16 @@ public class DownloadFile {
                 int bytesRead;
                 long startTime = System.currentTimeMillis();
                 totalBytesRead = 0;
-                fileSize = httpURLConnection.getContentLengthLong();//获取文件总大小
+                for (int i = 0; i < 5; i++) {
+                    fileSize = httpURLConnection.getContentLengthLong();//获取文件总大小
+                    if (fileSize != -1) {
+                        break;
+                    }
+                    Thread.sleep(50);
+                }
+                if (fileSize == -1)
+                    System.out.println("Error:Failed to get file size");
+
                 while ((bytesRead = inputStream.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
                     outputStream.write(dataBuffer, 0, bytesRead);
                     totalBytesRead += bytesRead;
@@ -99,7 +107,9 @@ public class DownloadFile {
                     //计算下载进度
                     progress = (double) totalBytesRead / fileSize * 100;
                 }
+                bps = 0;
                 isCompleted = true;
+                progress = 100;
                 outputStream.flush();
                 outputStream.close();
                 inputStream.close();
@@ -109,70 +119,13 @@ public class DownloadFile {
             httpURLConnection.disconnect();
         } catch (IOException e) {
             System.out.println("Error:Request failed");
+        } catch (InterruptedException e) {
+            System.out.println("Error:Thread interrupted");
         }
     }
 
     public void startToDownloadOnNewThread() {
-        download = new Thread(() -> {
-            try {
-                URL url = new URL(fileURL);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                //设置读取超时
-                httpURLConnection.setReadTimeout(10000);
-                httpURLConnection.setConnectTimeout(10000);
-                int responseCode = 0;
-                String disposition = httpURLConnection.getHeaderField("Content-Disposition");
-                String fileName = null;
-                if (disposition != null && disposition.startsWith("attachment")) {
-                    String tokens[] = disposition.split(";");
-                    for (String token : tokens) {
-                        if (token.trim().startsWith("filename")) {
-//                            String[] parts = token.split("\"");
-//                            String fileName1 = parts[1];
-                            String fileName1 = token.substring(10);
-                            fileName = new String(fileName1.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-                            break;
-                        }
-                    }
-                }
-                if (fileName != null) {
-                    //如果Content-Disposition中有文件名，则使用它
-                    saveDir = saveDir + "/" + fileName;
-                } else {
-                    Random r = new Random();
-                    saveDir = saveDir + "/" + r.nextLong();
-                }
-
-                ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-                responseCode = httpURLConnection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    InputStream inputStream = new BufferedInputStream(httpURLConnection.getInputStream(), BUFFER_SIZE);
-                    FileOutputStream outputStream = new FileOutputStream(saveDir);
-                    byte[] dataBuffer = new byte[BUFFER_SIZE];
-                    int bytesRead;
-                    long startTime = System.currentTimeMillis();
-                    totalBytesRead = 0;
-                    fileSize = httpURLConnection.getContentLengthLong();//获取文件总大小
-                    while ((bytesRead = inputStream.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
-                        outputStream.write(dataBuffer, 0, bytesRead);
-                        totalBytesRead += bytesRead;
-                        processThroughput(totalBytesRead, startTime);
-                        //计算下载进度
-                        progress = (double) totalBytesRead / fileSize * 100;
-                    }
-                    isCompleted = true;
-                    outputStream.flush();
-                    outputStream.close();
-                    inputStream.close();
-                } else {
-                    System.out.println("Error:Invalid HTTP response code:" + responseCode);
-                }
-                httpURLConnection.disconnect();
-            } catch (IOException e) {
-                System.out.println("Error:Request failed");
-            }
-
-        });
+        download = new Thread(this::startToDownload);
         download.start();
 
     }
