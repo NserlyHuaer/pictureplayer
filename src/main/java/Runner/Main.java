@@ -31,6 +31,8 @@ public class Main extends JFrame {
     public static final String titleStyle;
     //初始化
     private static final Init init;
+    //路径输入框
+    private static JTextField jTextField;
     //图片放大按钮
     public JButton biggest;
     //图片缩小按钮
@@ -263,10 +265,24 @@ public class Main extends JFrame {
                         sizeOperate.update();
                     }
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    if (isLastInFullScreen) {
+                        isLastInFullScreen = false;
+                        //退出全屏模式
+                        GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+                        graphicsDevice.setFullScreenWindow(null);
+                        FullScreen.setText("Full Screen");
+                        On.remove(percentLabel);
+                        isLastInFullScreen = false;
+                        return;
+                    }
                     //设置窗体可见
                     jFrame.setVisible(true);
                     //关闭图片显示窗口
                     Main.main.dispose();
+                    //获取图片渲染器存储当前图片路径
+                    if (myCanvas.getPath() != null) {
+                        jTextField.setText(myCanvas.getPath());
+                    }
                     //关闭画布
                     sizeOperate.close();
                 }
@@ -287,6 +303,10 @@ public class Main extends JFrame {
             public void windowClosing(WindowEvent e) {
                 //设置窗体可见
                 jFrame.setVisible(true);
+                //获取图片渲染器存储当前图片路径
+                if (myCanvas.getPath() != null) {
+                    jTextField.setText(myCanvas.getPath());
+                }
                 //关闭画布
                 sizeOperate.close();
             }
@@ -434,7 +454,7 @@ public class Main extends JFrame {
         jLabel.setBounds(20, 20, 50, 35);
         jLabel.setFont(new Font("", 0, 15));
 //        var jTextField = new FileTypeTextField();
-        var jTextField = new JTextField();
+        jTextField = new JTextField();
         jTextField.setBounds(75, 20, 230, 35);
         jFrame.add(jLabel);
         jFrame.add(jTextField);
@@ -677,6 +697,11 @@ public class Main extends JFrame {
             }
             this.path = path;
             image = new ImageIcon(path).getImage();
+        }
+
+        //获取图片路径
+        public String getPath() {
+            return path;
         }
 
         //图片左转

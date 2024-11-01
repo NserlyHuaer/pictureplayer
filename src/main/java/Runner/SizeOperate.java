@@ -1,6 +1,9 @@
 package Runner;
 
+import Size.GetPictureSize;
+
 import java.awt.*;
+import java.io.IOException;
 
 public class SizeOperate {
     //默认缩放比例
@@ -21,12 +24,29 @@ public class SizeOperate {
     private Dimension Component;
     //当前最适合组建的比例
     public double FittestPercent;
+    //最适合的调节比例
+    private int AdjustPercent;
+    //默认调节比例
+    public int DefaultAdjustPercent;
+    //图片信息类
+    private GetPictureSize getPictureSize;
 
     //改变图片渲染器
     public void changeCanvas(Main.MyCanvas myCanvas) {
         this.myCanvas = myCanvas;
+        if (myCanvas.getPath() != null) {
+            try {
+                getPictureSize = new GetPictureSize(myCanvas.getPath());
+                if (Component != null) {
+                    AdjustPercent = (int) (((Math.abs(Component.getHeight() - getPictureSize.height) / 5.5 / getPictureSize.height) + (Math.abs(Component.getWidth() - getPictureSize.width) / 5.5 / getPictureSize.width)) / 2);
+                }
+            } catch (IOException e) {
+                System.out.println("Error:Could not read picture information\n" + e);
+            }
+        }
         FittestPercent = getPictureOptimalSize();
         setPercent(FittestPercent);
+
         update();
     }
 
@@ -64,6 +84,15 @@ public class SizeOperate {
         if (window != null) {
             this.Component = window;
             FittestPercent = getPictureOptimalSize();
+        }
+        if (window != null) {
+            if (getPictureSize == null)
+                try {
+                    getPictureSize = new GetPictureSize(myCanvas.getPath());
+                } catch (IOException e) {
+                    return;
+                }
+            AdjustPercent = (int) (((Math.abs(window.getHeight() - getPictureSize.height) / 5.5 / getPictureSize.height) + (Math.abs(window.getWidth() - getPictureSize.width) / 5.5 / getPictureSize.width)) / 2);
         }
     }
 
@@ -136,17 +165,41 @@ public class SizeOperate {
     public void adjustPercent(int operate) {
         switch (operate) {
             case Enlarge -> {
+//                if (percent >= MaxPercent) return;
+//                if (percent < FittestPercent) decide(4 + percent);
+//                else {
+//                    decide(11 + percent);
+//                }
                 if (percent >= MaxPercent) return;
-                if (percent < FittestPercent) decide(4 + percent);
+                if (AdjustPercent <= 0) {
+                    if (percent < FittestPercent) decide(4 + percent);
+                    else {
+                        decide(11 + percent);
+                    }
+                    return;
+                }
+                if (percent < FittestPercent) decide(AdjustPercent + percent);
                 else {
-                    decide(11 + percent);
+                    decide(2 * AdjustPercent + percent);
                 }
             }
             case Reduce -> {
+//                if (percent <= MinPercent) return;
+//                if (percent < FittestPercent) decide(-4 + percent);
+//                else {
+//                    decide(-11 + percent);
+//                }
                 if (percent <= MinPercent) return;
-                if (percent < FittestPercent) decide(-4 + percent);
+                if (AdjustPercent <= 0) {
+                    if (percent < FittestPercent) decide(-4 + percent);
+                    else {
+                        decide(-11 + percent);
+                    }
+                    return;
+                }
+                if (percent < FittestPercent) decide(-AdjustPercent + percent);
                 else {
-                    decide(-11 + percent);
+                    decide(-2 * AdjustPercent + percent);
                 }
             }
         }
