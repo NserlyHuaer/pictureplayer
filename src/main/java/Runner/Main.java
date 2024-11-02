@@ -90,15 +90,6 @@ public class Main extends JFrame {
                 UPDATE_WEBSITE = website.trim() + ".sum";
             }
         }
-        if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
-            DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
-            new Thread(() -> {
-                NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
-                if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
-                    UpdateForm();
-                }
-            }).start();
-        }
     }
 
     //构造方法（函数）
@@ -449,6 +440,15 @@ public class Main extends JFrame {
         System.out.println("Java Runtime:" + System.getProperty("java.vm.name") + " " + System.getProperty("java.runtime.version") + " (" + System.getProperty("sun.boot.library.path") + ")");
         //获取软件版本
         System.out.println("Software Version:" + Version.getVersion());
+        if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
+            DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
+            new Thread(() -> {
+                NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
+                if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
+                    UpdateForm();
+                }
+            }).start();
+        }
         System.out.println("Loading...");
         long begin = System.currentTimeMillis();
         //初始化窗体
