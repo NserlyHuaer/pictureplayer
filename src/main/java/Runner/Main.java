@@ -87,7 +87,12 @@ public class Main extends JFrame {
             if (website.endsWith(".sum")) {
                 UPDATE_WEBSITE = website;
             } else {
-                UPDATE_WEBSITE = website.trim() + ".sum";
+                UPDATE_WEBSITE = website.trim();
+                if (UPDATE_WEBSITE.endsWith("/")) {
+                    UPDATE_WEBSITE += "VersionID.sum";
+                } else {
+                    UPDATE_WEBSITE += "/VersionID.sum";
+                }
             }
         }
     }
