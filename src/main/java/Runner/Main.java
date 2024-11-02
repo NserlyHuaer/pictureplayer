@@ -62,18 +62,10 @@ public class Main extends JFrame {
     //更新维护线程
     public static Thread DaemonUpdate;
     //更新网站（必须指定VersionID.sum下载地址）
-    public static final String UPDATE_WEBSIDE = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum";
+    public static String UPDATE_WEBSITE = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum";
 
     //静态代码块
     static {
-        DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSIDE);
-        new Thread(() -> {
-            NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
-            if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
-                UpdateForm();
-            }
-        }).start();
-
         //设置标题风格
         titleStyle = "Pictures player";
         //初始化Init
@@ -89,6 +81,23 @@ public class Main extends JFrame {
             }
         } else {
             init.Writer("MouseMoveOffsets", String.valueOf(MouseMoveOffsets));
+        }
+        if (init.containsKey("EnableProxyServer") && init.containsKey("ProxyServer") && init.getProperties().get("EnableProxyServer").equals("true") && !init.getProperties().get("ProxyServer").toString().isBlank()) {
+            String website = init.getProperties().getProperty("ProxyServer");
+            if (website.endsWith(".sum")) {
+                UPDATE_WEBSITE = website;
+            } else {
+                UPDATE_WEBSITE = website.trim() + ".sum";
+            }
+        }
+        if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
+            DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
+            new Thread(() -> {
+                NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
+                if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
+                    UpdateForm();
+                }
+            }).start();
         }
     }
 

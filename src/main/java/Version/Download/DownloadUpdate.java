@@ -4,7 +4,13 @@ package Version.Download;
 import Tools.String.Formation;
 import Version.Version;
 
+import javax.net.ssl.*;
 import java.io.*;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +25,8 @@ public class DownloadUpdate {
     public DownloadFile CurrentDownloadingFile;
     private final static long startTime = System.currentTimeMillis();
     public List<String> FilePath = new ArrayList<>();
+    //启用安全连接模式
+    private static boolean EnableSecureConnection = true;
 
     public DownloadUpdate(String DownloadPath, String webSide) {
         this.webSide = webSide;
@@ -50,6 +58,7 @@ public class DownloadUpdate {
     //检查是否存在最新版本
     public boolean checkIfTheLatestVersion() throws IOException {
         DownloadFile downloadFile = new DownloadFile(webSide, f.getPath());
+        System.out.println("Checking version...");
         downloadFile.startToDownload();
 
         File path = new File(downloadFile.getSaveDir());
@@ -83,6 +92,9 @@ public class DownloadUpdate {
             HaveDownloadedFile = index;
             try {
                 CurrentDownloadingFile = new DownloadFile(down, f.getPath());
+                System.out.println("Downloading " + down);
+                if (!EnableSecureConnection)
+                    System.out.println("Waring:The connection is not secure from " + down + "!");
                 CurrentDownloadingFile.startToDownload();
                 List list = new ArrayList();
                 String cache = CurrentDownloadingFile.getSaveDir();
@@ -96,7 +108,61 @@ public class DownloadUpdate {
             }
             index++;
         }
+        System.out.println("Download completed!");
         return finalA;
     }
 
+    public static boolean isEnableSecureConnection() {
+        return EnableSecureConnection;
+    }
+
+    public static void SecureConnection(boolean Enable) {
+        if (EnableSecureConnection == Enable) {
+            if (!Enable) {
+                //创建一个自定义的TrustManager，它接受所有证书
+                TrustManager[] trustManagers = new TrustManager[]{
+                        new X509TrustManager() {
+                            @Override
+                            public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                            }
+
+                            @Override
+                            public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                            }
+
+                            @Override
+                            public X509Certificate[] getAcceptedIssuers() {
+                                return new X509Certificate[]{};
+                            }
+                        }
+                };
+                try {
+                    //初始化SSLConText
+                    SSLContext sc = SSLContext.getInstance("TLS");
+                    sc.init(null, trustManagers, new SecureRandom());
+                    //获取默认的SSLSocketFactory,并设置为信任所有证书
+                    SSLSocketFactory ssf = sc.getSocketFactory();
+                    HttpsURLConnection.setDefaultSSLSocketFactory(ssf);
+                } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                    System.out.println("Error:" + e);
+                    return;
+                }
+                System.out.println("Waring:SSL validation is turned off and your computer may be vulnerable!");
+            } else {
+                try {
+                    //重新创建默认的SSLContext
+                    SSLContext sc = SSLContext.getInstance("TLS");
+                    sc.init(null, null, null);
+                    //设置默认的SSLSocketFactory
+                    SSLSocketFactory ssf = sc.getSocketFactory();
+                    HttpsURLConnection.setDefaultSSLSocketFactory(ssf);
+                } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                    System.out.println("Error:" + e);
+                    return;
+                }
+                System.out.println("SSL validation is enabled");
+            }
+        }
+        EnableSecureConnection = Enable;
+    }
 }

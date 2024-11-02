@@ -19,7 +19,6 @@ public class AdvancedDownloadSpeedDisplay {
     private JProgressBar currentFileProgress;
     private JLabel speedLabel;
     private DecimalFormat decimalFormat = new DecimalFormat("#.##");
-    public boolean isFinished;
 
     public void createAndShowGUI(java.util.List<String> downloadWebSide) {
         // 创建一个顶级窗口
@@ -60,7 +59,7 @@ public class AdvancedDownloadSpeedDisplay {
             frame.setLocationRelativeTo(null);
 
             frame.setVisible(true);
-            DownloadUpdate downloadUpdate = new DownloadUpdate(Main.UPDATE_WEBSIDE);
+            DownloadUpdate downloadUpdate = new DownloadUpdate(Main.UPDATE_WEBSITE);
             Main.DaemonUpdate = new Thread(() -> {
                 Map<String, java.util.List> map = downloadUpdate.download(downloadUpdate.getUpdateWebSide());
                 try {
