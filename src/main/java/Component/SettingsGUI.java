@@ -326,7 +326,7 @@ public class SettingsGUI extends JFrame {
         DoNotThingOnCloseCheckBox.setSelected(getBoolean("DoNotThingOnClose", DefaultData));
         EnableConfirmExitCheckBox.setSelected(getBoolean("EnableConfirmExit", DefaultData));
         EnableHistoryLoaderCheckBox.setSelected(getBoolean("EnableHistoryLoader", DefaultData));
-        EnableCursorDisplayCheckBox.setSelected(getBoolean("EnableCursorDisplayCheckBox", DefaultData));
+        EnableCursorDisplayCheckBox.setSelected(getBoolean("EnableCursorDisplay", DefaultData));
         MouseMoveOffsetsSlider.setValue((int) getDouble("MouseMoveOffsets", CurrentData, -65, 150));
         EnableProxyServerCheckBox.setSelected(getBoolean("EnableProxyServer", DefaultData));
         EnableSecureConnectionCheckBox.setSelected(getBoolean("EnableSecureConnection", DefaultData));

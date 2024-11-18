@@ -2,7 +2,7 @@ package Version;
 
 public class Version {
     private static final String version = "1.0.0 beta6";
-    private static final String VersionID = "1277";
+    private static final String VersionID = "1278";
 
     public static String getVersion() {
         return version;
