@@ -1,40 +1,26 @@
-package Runner;//导入包
+package Component;//导入包
 
-import Component.PercentLabel;
 import Listener.ChangeFocusListener;
-import Loading.Init;
+import Runner.Settings;
+import Runner.SizeOperate;
 import Size.OperatingCoordinate;
+import Size.SizeOperate1;
 import Tools.EqualsProportion;
 import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.ImageRotationHelper;
-import Version.Download.DownloadUpdate;
-import Version.Version;
-import Component.FileManagementFrame;
-import Component.AdvancedDownloadSpeedDisplay;
-import Component.SettingsGUI;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.MemoryImageSource;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 //创建类
-public class Main extends JFrame {
-    //文件打开界面
-    public static JDialog jFrame;
-    //图片打开窗体
-    public static Main main;
-    //标题风格
-    public static final String titleStyle;
-    //初始化
-    public static final Init init;
-    //路径输入框
-    private static JTextField jTextField;
+public class PaintPicture extends JPanel {
+    //图片打开面板
+    public static PaintPicture paintPicture;
     //图片放大按钮
     public JButton biggest;
     //图片缩小按钮
@@ -44,67 +30,28 @@ public class Main extends JFrame {
     //创建鼠标坐标管理对象
     OperatingCoordinate op = null;
     //图片比例管理
-    public SizeOperate sizeOperate;
+    public SizeOperate1 sizeOperate;
     //图片渲染管理
     private MyCanvas myCanvas;
-    //全屏模式按钮
-    private JButton FullScreen;
-    //上次是否处于全屏
-    private static boolean isLastInFullScreen;
-    //设备是否支持全屏模式
-    private boolean SupportFullScreen = true;
     //判断按钮是否被按下
     private static boolean IsDragging;
-    //最新版本下载地址（如果当前是最新版本，则返回null值）
-    private static List<String> NewVersionDownloadingWebSide;
-    //更新界面窗口
-    public static AdvancedDownloadSpeedDisplay advancedDownloadSpeedDisplay;
-    //更新维护线程
-    public static Thread DaemonUpdate;
-    //更新网站（必须指定VersionID.sum下载地址）
-    public static String UPDATE_WEBSITE = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum";
-    public static final SettingsGUI settingsGUI;
 
-    //静态代码块
-    static {
-        //设置标题风格
-        titleStyle = "Pictures player";
-        //初始化Init
-        init = new Init<String, String>();
-        init.SetUpdate(true);
-        settingsGUI = new SettingsGUI();
-        settingsGUI.ReadFile();
-        if (init.containsKey("EnableProxyServer") && init.containsKey("ProxyServer") && init.getProperties().get("EnableProxyServer").equals("true") && !init.getProperties().get("ProxyServer").toString().isBlank()) {
-            String website = init.getProperties().getProperty("ProxyServer");
-            if (website.endsWith(".sum")) {
-                UPDATE_WEBSITE = website;
-            } else {
-                UPDATE_WEBSITE = website.trim();
-                if (UPDATE_WEBSITE.endsWith("/")) {
-                    UPDATE_WEBSITE += "VersionID.sum";
-                } else {
-                    UPDATE_WEBSITE += "/VersionID.sum";
-                }
-            }
-        }
-    }
 
     //构造方法（函数）
-    public Main(String path) {
+    public PaintPicture(String path) {
         //获取当前图片路径下所有图片
         ArrayList<String> CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(path);
         percentLabel = new PercentLabel();
-        init.Run();
         //向控制台输出打开文件路径
         System.out.println("Opened:\t\"" + path + "\"");
         //创建画布
         myCanvas = new MyCanvas(path);
-        sizeOperate = new SizeOperate(myCanvas, myCanvas.getSize());
-        //设置窗体大小、坐标
+        sizeOperate = new SizeOperate1(myCanvas, myCanvas.getSize());
+        //设置面板大小、坐标
         setBounds(GetImageInformation.getBestSize(path));
         //设置文本中显示的图片缩放比例
         percentLabel.set((int) sizeOperate.getPercent());
-        //添加窗体大小改变监听器
+        //添加面板大小改变监听器
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -144,28 +91,27 @@ public class Main extends JFrame {
                 boolean NeedToMove = false;
                 Dimension di = sizeOperate.getWindowSize();
                 int x = e.getX(), y = e.getY();
-                if (x <= 0) {
+                if (x == 0) {
                     x = (int) di.getWidth() - 2;
                     NeedToMove = true;
-                } else if (x >= di.getWidth() - 1) {
-                    x = 1;
+                } else if (x == di.getWidth() - 1) {
+                    x = 0;
                     NeedToMove = true;
                 }
-                if (y <= 0) {
+                if (y == 0) {
                     y = (int) (di.getHeight() - 2);
                     NeedToMove = true;
-                } else if (y >= di.getHeight() - 1) {
-                    y = 1;
+                } else if (x == di.getHeight() - 1) {
+                    y = 0;
                     NeedToMove = true;
                 }
                 if (NeedToMove) {
+                    finalRobot.mouseMove(x, y);
                     op = new OperatingCoordinate(x, y);
-                    Point point = myCanvas.getLocationOnScreen();
-                    finalRobot.mouseMove(x + point.x, y + point.y);
                     return;
                 }
                 //增加坐标值
-                myCanvas.setMouseCoordinate((int) ((1 + SettingsGUI.getDouble("MouseMoveOffsets", settingsGUI.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + SettingsGUI.getDouble("MouseMoveOffsets", settingsGUI.CurrentData) / 100.0) * (y - op.y())));
+                myCanvas.setMouseCoordinate((int) ((1 + SettingsGUI.getDouble("MouseMoveOffsets", Settings.settings.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + SettingsGUI.getDouble("MouseMoveOffsets", Settings.settings.centre.CurrentData) / 100.0) * (y - op.y())));
                 sizeOperate.update();
                 op = new OperatingCoordinate(x, y);
             }
@@ -268,9 +214,9 @@ public class Main extends JFrame {
         //添加组件
         Enum.add(smallest);
         Enum.add(biggest);
-        //设置菜单为窗体下方并添加至组件中
+        //设置菜单为面板下方并添加至组件中
         add(Enum, BorderLayout.SOUTH);
-        //设置为窗体上方并添加至组件中
+        //设置为面板上方并添加至组件中
         add(On, BorderLayout.NORTH);
         //添加画布至组件中
         add(myCanvas, BorderLayout.CENTER);
@@ -292,75 +238,9 @@ public class Main extends JFrame {
                         myCanvas.changeOriginalPicturePath(CurrentPathOfPicture.get(CurrentIndex + 1));
                         sizeOperate.update();
                     }
-                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    if (isLastInFullScreen) {
-                        isLastInFullScreen = false;
-                        //退出全屏模式
-                        GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-                        graphicsDevice.setFullScreenWindow(null);
-                        FullScreen.setText("Full Screen");
-                        On.remove(percentLabel);
-                        isLastInFullScreen = false;
-                        return;
-                    }
-                    //设置窗体可见
-                    jFrame.setVisible(true);
-                    //关闭图片显示窗口
-                    Main.main.dispose();
-                    //获取图片渲染器存储当前图片路径
-                    if (myCanvas.getPath() != null) {
-                        jTextField.setText(myCanvas.getPath());
-                    }
-                    //关闭画布
-                    sizeOperate.close();
                 }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_F11) {
-                    manageFullScreen(On);
-                }
-
             }
         });
-        //创建窗体监听器
-        this.addWindowListener(new WindowAdapter() {
-            //设置窗体在显示时自动获取焦点
-            @Override
-            public void windowActivated(WindowEvent e) {
-                //当前窗体成为活动窗体时，让myCanvas获取焦点
-                myCanvas.requestFocus();
-            }
-
-            //监听窗体关闭
-            @Override
-            public void windowClosing(WindowEvent e) {
-                //设置窗体可见
-                jFrame.setVisible(true);
-                //获取图片渲染器存储当前图片路径
-                if (myCanvas.getPath() != null) {
-                    jTextField.setText(myCanvas.getPath());
-                }
-                //关闭画布
-                sizeOperate.close();
-            }
-
-        });
-
-        //设置窗体可见
-        setVisible(true);
-        //如果上次处于全屏模式，则自动启用全屏
-        if (isLastInFullScreen) {
-            //设置窗口为全屏模式
-            GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-            graphicsDevice.setFullScreenWindow(this);
-            FullScreen.setText("Exit Full Screen");
-            On.add(percentLabel);
-            sizeOperate.incomeWindowDimension(myCanvas.getSize());
-            sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
-            sizeOperate.update();
-        }
     }
 
     private JPanel getjPanel(ChangeFocusListener changeFocusListener) {
@@ -412,297 +292,20 @@ public class Main extends JFrame {
         Reset.addMouseListener(changeFocusListener);
         JButton FlipHorizontally = new JButton("FlipHorizontally");
         FlipHorizontally.addMouseListener(changeFocusListener);
-        //在容器On中添加全屏按钮
-        FullScreen = new JButton("Full Screen");
-        //创建全屏按钮监听器
-        FullScreen.addActionListener(e -> {
-            manageFullScreen(On);
-        });
-        FullScreen.addMouseListener(changeFocusListener);
-        //如果设备支持全屏，设置全屏按钮可见
-        if (SupportFullScreen)
-            FullScreen.setVisible(true);
-
         //将图片左转按钮添加到组件中
         On.add(TurnLeft);
         //将重置按钮添加到组件中
         On.add(Reset);
         //将图片右转按钮添加到组件中
         On.add(TurnRight);
-        //将全屏模式按钮添加到组件中
-        On.add(FullScreen);
         return On;
-    }
-
-    //管理全屏
-    private void manageFullScreen(JPanel On) {
-        GraphicsDevice graphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        if (FullScreen.getText().equals("Full Screen")) {
-            //检查设备是否支持全屏模式
-            if (graphicsDevice.isFullScreenSupported()) {
-                //设置窗口为全屏模式
-                graphicsDevice.setFullScreenWindow(this);
-                FullScreen.setText("Exit Full Screen");
-                On.add(percentLabel);
-                isLastInFullScreen = true;
-            } else {
-                JOptionPane.showMessageDialog(jFrame, "The device doesn't support full screen", "Error", JOptionPane.ERROR_MESSAGE);
-                On.remove(FullScreen);
-                SupportFullScreen = isLastInFullScreen = false;
-            }
-        } else {
-            graphicsDevice.setFullScreenWindow(null);
-            FullScreen.setText("Full Screen");
-            On.remove(percentLabel);
-            isLastInFullScreen = false;
-        }
-    }
-
-
-    //软件主方法（函数）
-    public static void main(String[] args) {
-        //获取操作系统版本
-        System.out.println("OS:" + System.getProperty("os.name") + " " + System.getProperty("os.arch") + " " + System.getProperty("os.version"));
-        //获取系统语言
-        System.out.println("System Language:" + System.getProperty("user.language"));
-        //获取java版本
-        System.out.println("Java Runtime:" + System.getProperty("java.vm.name") + " " + System.getProperty("java.runtime.version") + " (" + System.getProperty("sun.boot.library.path") + ")");
-        //获取软件版本
-        System.out.println("Software Version:" + Version.getVersion());
-        if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
-            DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
-            new Thread(() -> {
-                NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
-                if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
-                    UpdateForm();
-                }
-            }).start();
-        }
-        System.out.println("Loading...");
-        long begin = System.currentTimeMillis();
-        //初始化窗体
-        jFrame = new FileManagementFrame();
-        //禁止用户调整窗体尺寸
-        jFrame.setResizable(false);
-        //设置标题
-        jFrame.setTitle("Open picture");
-        jFrame.setBounds(500, 500, 400, 200);
-        jFrame.setLayout(null);
-        var jLabel = new JLabel("Path:");
-        jLabel.setBounds(20, 20, 50, 35);
-        jLabel.setFont(new Font("", 0, 15));
-//        var jTextField = new FileTypeTextField();
-        jTextField = new JTextField();
-        jTextField.setBounds(75, 20, 230, 35);
-        jFrame.add(jLabel);
-        jFrame.add(jTextField);
-        ChangeFocusListener changeFocusListener = new ChangeFocusListener(jFrame);
-        //确定按钮
-        var OK = new JButton("OK");
-        OK.setBounds(150, 75, 100, 30);
-        var FileChoose = new JButton("```");
-        FileChoose.setBounds(315, 20, 40, 35);
-        //设置按钮
-        JButton Settings = new JButton("Settings");
-        Settings.setBounds(0, 136, 83, 25);
-        //版本标签
-        JLabel VersionLabel = new JLabel(Version.getVersion());
-        VersionLabel.setBounds(317, 136, 83, 25);
-        //添加键盘监听器
-        jTextField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (GetImageInformation.isRightPath(jTextField.getText())) {
-                        jFrame.setVisible(false);
-                        main = new Main(jTextField.getText());
-                    }
-                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    close();
-                }
-            }
-        });
-        OK.addMouseListener(changeFocusListener);
-        //为按钮添加动作监听
-        OK.addActionListener(e -> {
-            //判断是否为正确的文件地址
-            if (GetImageInformation.isRightPath(jTextField.getText())) {
-                jFrame.setVisible(false);
-                main = new Main(jTextField.getText());
-                return;
-            }
-            JOptionPane.showMessageDialog(jFrame, "Couldn't open or recognize the file:\n\"" + jTextField.getText() + "\"", "Invalid image path", JOptionPane.ERROR_MESSAGE);
-        });
-        Settings.addMouseListener(changeFocusListener);
-        Settings.addActionListener(e -> {
-            jFrame.setVisible(false);
-            settingsGUI.setVisible(true);
-        });
-        FileChoose.addMouseListener(changeFocusListener);
-        FileChoose.addActionListener(e -> {
-            JFileChooser jFileChooser = new JFileChooser();
-            File cachePath = null;
-            //如果文本框中含有字符，则自动打开该目录（非文件）
-            if ((!jTextField.getText().isBlank()) && new File(jTextField.getText()).exists()) {
-                cachePath = new File(jTextField.getText());
-                //判断文件（夹）是否为文件
-                if (cachePath.isFile()) {
-                    //若是文件，则获取文件所在的文件夹的绝对路径
-                    cachePath = new File(cachePath.getParent());
-                }
-                //设置文件选择器的当前目录为上次打开的默认目录
-                jFileChooser.setCurrentDirectory(cachePath);
-            }
-            File file = null;
-            //是否为受Java支持的文件格式
-            for (int times = 0; !GetImageInformation.isImageFile(file); times++) {
-                if (times > 0) {
-                    JOptionPane.showMessageDialog(jFrame, "Couldn't open or recognize the file:\n\"" + file.getPath() + "\"", "Invalid image path", JOptionPane.ERROR_MESSAGE);
-                }
-                //显示选择文件框
-                int userSelection = jFileChooser.showOpenDialog(jFrame);
-                //获取用户打开的文件
-                file = jFileChooser.getSelectedFile();
-                //判断文件对象是否为空值
-                if (userSelection != JFileChooser.APPROVE_OPTION) {
-                    return;
-                }
-            }
-            //获取String类型文件路径
-            String path = file.getPath();
-            //将文件路径文本框设置为path
-            jTextField.setText(path);
-            //隐藏文件打开管理窗体
-            jFrame.setVisible(false);
-            //创建图片查看窗体
-            main = new Main(jTextField.getText());
-        });
-        //添加按钮至窗体中
-        jFrame.add(OK);
-        jFrame.add(FileChoose);
-        jFrame.add(Settings);
-        jFrame.add(VersionLabel);
-        //显示窗体
-        jFrame.setVisible(true);
-        //添加窗体监听器
-        jFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                close();
-            }
-        });
-        System.out.println("Done!(Spent " + (System.currentTimeMillis() - begin) + "ms)");
-        //设置窗体在显示时自动获取焦点
-        jFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowActivated(WindowEvent e) {
-                //当前窗体成为活动窗体时，让myCanvas获取焦点
-                jFrame.requestFocus();
-            }
-        });
     }
 
     //改变图片路径
     public void changePicturePath(String path) {
         myCanvas = new MyCanvas(path);
-        sizeOperate = new SizeOperate(myCanvas, myCanvas.getSize());
+        sizeOperate = new SizeOperate1(myCanvas, myCanvas.getSize());
         add(myCanvas, BorderLayout.CENTER);
-    }
-
-    //关闭
-    public static void close() {
-        //加载配置文件
-        init.Loading();
-        if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().toLowerCase().equals("false")) {
-            if (Main.main != null && Main.main.sizeOperate != null) Main.main.sizeOperate.close();
-            if (jFrame != null) jFrame.dispose();
-            System.exit(0);
-        }
-        //设置消息对话框窗体
-        var jDialog = new JDialog(jFrame, true);
-        //设置窗体标题
-        jDialog.setTitle("Confirm Exit");
-        //设置窗体大小、坐标（获取父窗体坐标）
-        jDialog.setBounds(jFrame.getX(), jFrame.getY(), 260, 170);
-        //创建文字
-        var jLabel1 = new JLabel("Are you sure you want to exit?");
-        //设置文字字体、格式
-        jLabel1.setFont(new Font("隶书", 0, 15));
-        //设置显示大小、坐标
-        jLabel1.setBounds(15, 3, 200, 50);
-        //创建按钮
-        var yes = new JButton("exit");
-        var no = new JButton("cancel");
-        yes.setBounds(20, 50, 100, 35);
-        yes.setForeground(Color.RED);
-        no.setBounds(130, 50, 100, 35);
-        jDialog.setResizable(false);
-        //设置布局
-        jDialog.setLayout(null);
-        //将文字、按钮放入组件中
-        jDialog.add(jLabel1);
-        jDialog.add(yes);
-        jDialog.add(no);
-        ChangeFocusListener changeFocusListener = new ChangeFocusListener(jDialog);
-        JCheckBox jCheckBox = new JCheckBox("Don't ask again");
-        jCheckBox.setBounds(60, 95, 200, 25);
-        jCheckBox.addMouseListener(changeFocusListener);
-        jDialog.add(jCheckBox);
-        //如果确定退出软件，运行退出程序
-        yes.addActionListener(e1 -> {
-            //关闭窗体
-            jFrame.dispose();
-            //判断main是否为null值（以防止出现空指针异常）
-            if (Main.main != null && Main.main.sizeOperate != null) Main.main.sizeOperate.close();
-            if (jFrame != null) jFrame.dispose();
-            if (jCheckBox.isSelected()) {
-                init.ChangeValue("EnableConfirmExit", "false");
-                init.Update();
-            }
-            System.exit(0);
-        });
-        yes.addMouseListener(changeFocusListener);
-        //点击取消以询问隐藏窗体（不会退出程序）
-        no.addActionListener(e1 -> {
-            jDialog.setVisible(false);
-        });
-        no.addMouseListener(changeFocusListener);
-        //窗体键盘监听器
-        jDialog.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    jDialog.setVisible(false);
-                } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    //关闭窗体
-                    jFrame.dispose();
-                    //判断main是否为null值（以防止出现空指针异常）
-                    if (Main.main != null && Main.main.sizeOperate != null) Main.main.sizeOperate.close();
-                    if (jFrame != null) jFrame.dispose();
-                    if (jCheckBox.isSelected()) {
-                        init.ChangeValue("EnableConfirmExit", "false");
-                        init.Update();
-                    }
-                    System.exit(0);
-                }
-            }
-        });
-        //设置窗体在显示时自动获取焦点
-        jDialog.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowActivated(WindowEvent e) {
-                //当前窗体成为活动窗体时，让myCanvas获取焦点
-                jDialog.requestFocus();
-            }
-        });
-        //显示窗体
-        jDialog.setVisible(true);
-    }
-
-    public static void UpdateForm() {
-        advancedDownloadSpeedDisplay = new AdvancedDownloadSpeedDisplay();
-        advancedDownloadSpeedDisplay.createAndShowGUI(NewVersionDownloadingWebSide);
-
     }
 
     public class MyCanvas extends JComponent {
@@ -765,8 +368,7 @@ public class Main extends JFrame {
         //重置旋转度数
         public void reSetDegrees() {
             RotationDegrees = 0;
-            if (lastRotationDegrees != RotationDegrees)
-                sizeOperate.changeCanvas(this);
+            if (lastRotationDegrees != RotationDegrees) sizeOperate.changeCanvas(this);
         }
 
 
@@ -914,7 +516,7 @@ public class Main extends JFrame {
             }
 
             if (NewWindow != null && NewWindow.getHeight() * NewWindow.getWidth() > lastHeight * lastWidth) {
-                sizeOperate.setPercent(sizeOperate.getPercent() + 1);//窗口放大图片比例会变小，没写好该校正代码，暂以+1来校对，以后优化！
+                sizeOperate.setPercent(sizeOperate.getPercent() + 1);//面板·放大图片比例会变小，没写好该校正代码，暂以+1来校对，以后优化！
             }
             if ((RotationDegrees - lastRotationDegrees == 0) && mouseX == 0 && mouseY == 0) {
                 if (RotationDegrees == 0) {
@@ -1005,9 +607,9 @@ public class Main extends JFrame {
             //显示图像
             graphics2D.drawImage(image, FinalX, FinalY, width, height, null);
             //检查比例是否为最大值，如果为最大就把放大按钮禁用
-            Main.main.biggest.setEnabled(!Main.main.sizeOperate.isTheBiggestRatio());
+            PaintPicture.paintPicture.biggest.setEnabled(!PaintPicture.paintPicture.sizeOperate.isTheBiggestRatio());
             //检查比例是否为最小值，如果为最小就把放大按钮禁用
-            Main.main.smallest.setEnabled(!Main.main.sizeOperate.isTheSmallestRatio());
+            PaintPicture.paintPicture.smallest.setEnabled(!PaintPicture.paintPicture.sizeOperate.isTheSmallestRatio());
             //设置文本中显示的图片缩放比例
             percentLabel.set((int) sizeOperate.getPercent());
             this.X = FinalX;

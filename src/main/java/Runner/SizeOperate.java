@@ -30,6 +30,15 @@ public class SizeOperate {
     public int DefaultAdjustPercent;
     //图片信息类
     private GetPictureSize getPictureSize;
+    //屏幕尺寸
+    public static final Dimension screenSize;
+
+    static {
+        // 获取默认的Toolkit实例
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        // 使用Toolkit实例获取屏幕的尺寸
+        screenSize = toolkit.getScreenSize();
+    }
 
     //改变图片渲染器
     public void changeCanvas(Main.MyCanvas myCanvas) {

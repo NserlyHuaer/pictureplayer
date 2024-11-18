@@ -20,6 +20,14 @@
             <artifactId>joal</artifactId>
             <version>2.3.2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.jetbrains.intellij.uiDesigner/ui-designer -->
+        <!-- https://mvnrepository.com/artifact/com.intellij/forms_rt -->
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>forms_rt</artifactId>
+            <version>7.0.3</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.jogamp.jogl/jogl-all -->
         <dependency>
             <groupId>org.jogamp.jogl</groupId>

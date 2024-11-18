@@ -24,4 +24,7 @@ public @interface DefaultArgs {
 
     //启用自动检测更新
     boolean AutoCheckUpdate() default true;
+
+    //启动光标显示
+    boolean EnableCursorDisplay() default false;
 }

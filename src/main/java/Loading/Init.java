@@ -93,11 +93,7 @@ public class Init<KEY, VALUE> {
     }
 
     public void Update() {
-        try {
-            properties.store(new BufferedWriter(new FileWriter(f)), "");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Store();
     }
 
     @SafeVarargs
@@ -110,20 +106,12 @@ public class Init<KEY, VALUE> {
 
     public void Writer(Map<KEY, VALUE> map) {
         properties.putAll(map);
-        try {
-            properties.store(new BufferedWriter(new FileWriter(f)), "");
-        } catch (IOException e) {
-            System.out.println("Error:Failed to save the configuration file");
-        }
+        Store();
     }
 
     public void Writer(KEY key, VALUE value) {
         properties.put(key, value);
-        try {
-            properties.store(new BufferedWriter(new FileWriter(f)), "");
-        } catch (IOException e) {
-            System.out.println("Error:Failed to save the configuration file");
-        }
+        Store();
     }
 
     @DefaultArgs
