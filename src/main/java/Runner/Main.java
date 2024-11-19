@@ -205,7 +205,7 @@ public class Main extends JFrame {
                         try {
                             Thread.sleep(16);
                         } catch (InterruptedException ex) {
-                            throw new RuntimeException(ex);
+                            break;
                         }
                     } while (!isDown);
                     myCanvas.requestFocus();
@@ -244,7 +244,7 @@ public class Main extends JFrame {
                             //线程休眠
                             Thread.sleep(16);
                         } catch (InterruptedException ex) {
-                            throw new RuntimeException(ex);
+                            break;
                         }
                     } while (!isReleased);
                     myCanvas.requestFocus();
