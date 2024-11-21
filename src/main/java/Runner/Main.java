@@ -43,6 +43,14 @@ public class Main extends JFrame {
     PercentLabel percentLabel;
     //创建鼠标坐标管理对象
     OperatingCoordinate op = null;
+    //鼠标最小移动坐标位
+    Point MinPoint;
+    //鼠标最大移动坐标位
+    Point MaxPoint;
+    //图片显示器尺寸
+    Dimension ShowingSize;
+    //图片渲染器在屏幕上的坐标
+    Point LocationOnScreen;
     //图片比例管理
     public SizeOperate sizeOperate;
     //图片渲染管理
@@ -64,6 +72,7 @@ public class Main extends JFrame {
     //更新网站（必须指定VersionID.sum下载地址）
     public static String UPDATE_WEBSITE = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum";
     public static final SettingsGUI settingsGUI;
+
 
     //静态代码块
     static {
@@ -130,12 +139,32 @@ public class Main extends JFrame {
             public void mousePressed(MouseEvent e) {
                 op = new OperatingCoordinate(e.getX(), e.getY());
                 setCursor(Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), null));
+                Point Local = myCanvas.getLocationOnScreen();
+                if (ShowingSize != null && LocationOnScreen != null && ShowingSize.equals(sizeOperate.getWindowSize()) && LocationOnScreen.equals(Local))
+                    return;
+                ShowingSize = sizeOperate.getWindowSize();
+                LocationOnScreen = Local;
+                Point ComponentPointOnDesktop = LocationOnScreen;
+
+                int minX = -ComponentPointOnDesktop.x, minY = -ComponentPointOnDesktop.y;
+                if (minX < 0) minX = 0;
+                //按需添加，一般系统桌面管理器都不允许窗体坐标小于0，这句代码一般用不着
+//                if (minY < 0) minY = 0;
+                MinPoint = new Point(minX, minY);
+
+                ComponentPointOnDesktop = new Point(ShowingSize.width + ComponentPointOnDesktop.x, ShowingSize.height + ComponentPointOnDesktop.y);
+                int maxX = ShowingSize.width, maxY = ShowingSize.height;
+                if (ComponentPointOnDesktop.x > SizeOperate.screenSize.width)
+                    maxX -= ComponentPointOnDesktop.x - SizeOperate.screenSize.width;
+                if (ComponentPointOnDesktop.y > SizeOperate.screenSize.height)
+                    maxY -= ComponentPointOnDesktop.y - SizeOperate.screenSize.height;
+                MaxPoint = new Point(maxX, maxY);
             }
+
 
             //鼠标放出触发
             public void mouseReleased(MouseEvent e) {
                 setCursor(Cursor.getDefaultCursor());
-
             }
         });
         myCanvas.addMouseMotionListener(new MouseAdapter() {
@@ -144,20 +173,21 @@ public class Main extends JFrame {
                 boolean NeedToMove = false;
                 Dimension di = sizeOperate.getWindowSize();
                 int x = e.getX(), y = e.getY();
-                if (x <= 0) {
-                    x = (int) di.getWidth() - 2;
+                if (x <= MinPoint.x) {
+                    x = MaxPoint.x - 2;
                     NeedToMove = true;
-                } else if (x >= di.getWidth() - 1) {
-                    x = 1;
-                    NeedToMove = true;
-                }
-                if (y <= 0) {
-                    y = (int) (di.getHeight() - 2);
-                    NeedToMove = true;
-                } else if (y >= di.getHeight() - 1) {
-                    y = 1;
+                } else if (x >= MaxPoint.x - 1) {
+                    x = MinPoint.x + 1;
                     NeedToMove = true;
                 }
+                if (y <= MinPoint.y) {
+                    y = MaxPoint.y - 2;
+                    NeedToMove = true;
+                } else if (y >= MaxPoint.y - 1) {
+                    y = MinPoint.y + 1;
+                    NeedToMove = true;
+                }
+
                 if (NeedToMove) {
                     op = new OperatingCoordinate(x, y);
                     Point point = myCanvas.getLocationOnScreen();
@@ -170,7 +200,6 @@ public class Main extends JFrame {
                 op = new OperatingCoordinate(x, y);
             }
         });
-
 
         myCanvas.addMouseWheelListener(new MouseAdapter() {
             //鼠标滚轮事件
