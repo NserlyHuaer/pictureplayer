@@ -2,8 +2,7 @@ package Component;//导入包
 
 import Listener.ChangeFocusListener;
 import Runner.Main;
-import Runner.Main$$$;
-import Runner.SizeOperate$$$;
+import Settings.Centre;
 import Size.OperatingCoordinate;
 import Size.SizeOperate;
 import Tools.EqualsProportion;
@@ -86,7 +85,7 @@ public class PaintPicture extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 op = new OperatingCoordinate(e.getX(), e.getY());
-                EnableCursorDisplay[0] = SettingsGUI$$$.getBoolean("EnableCursorDisplay", Main.main.centre.CurrentData);
+                EnableCursorDisplay[0] = Centre.getBoolean("EnableCursorDisplay", Main.main.centre.CurrentData);
                 if (EnableCursorDisplay[0]) return;
                 setCursor(Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), null));
                 Point Local = myCanvas.getLocationOnScreen();
@@ -103,10 +102,10 @@ public class PaintPicture extends JPanel {
 
                 ComponentPointOnDesktop = new Point(ShowingSize.width + ComponentPointOnDesktop.x, ShowingSize.height + ComponentPointOnDesktop.y);
                 int maxX = ShowingSize.width, maxY = ShowingSize.height;
-                if (ComponentPointOnDesktop.x > SizeOperate$$$.screenSize.width)
-                    maxX -= ComponentPointOnDesktop.x - SizeOperate$$$.screenSize.width;
-                if (ComponentPointOnDesktop.y > SizeOperate$$$.screenSize.height)
-                    maxY -= ComponentPointOnDesktop.y - SizeOperate$$$.screenSize.height;
+                if (ComponentPointOnDesktop.x > SizeOperate.screenSize.width)
+                    maxX -= ComponentPointOnDesktop.x - SizeOperate.screenSize.width;
+                if (ComponentPointOnDesktop.y > SizeOperate.screenSize.height)
+                    maxY -= ComponentPointOnDesktop.y - SizeOperate.screenSize.height;
                 MaxPoint = new Point(maxX, maxY);
             }
 
@@ -146,7 +145,7 @@ public class PaintPicture extends JPanel {
                     }
                 }
                 //增加坐标值
-                myCanvas.setMouseCoordinate((int) ((1 + SettingsGUI$$$.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + SettingsGUI$$$.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (y - op.y())));
+                myCanvas.setMouseCoordinate((int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (y - op.y())));
                 sizeOperate.update();
                 op = new OperatingCoordinate(x, y);
             }
@@ -160,12 +159,12 @@ public class PaintPicture extends JPanel {
                 myCanvas.setMouseCoordinate(e.getX(), e.getY());
                 //滚轮向后
                 if (e.getWheelRotation() == 1) {
-                    sizeOperate.adjustPercent(SizeOperate$$$.Reduce);
-                    sizeOperate.adjustPercent(SizeOperate$$$.Reduce);
+                    sizeOperate.adjustPercent(SizeOperate.Reduce);
+                    sizeOperate.adjustPercent(SizeOperate.Reduce);
                 }//滚轮向前
                 else if (e.getWheelRotation() == -1) {
-                    sizeOperate.adjustPercent(SizeOperate$$$.Enlarge);
-                    sizeOperate.adjustPercent(SizeOperate$$$.Enlarge);
+                    sizeOperate.adjustPercent(SizeOperate.Enlarge);
+                    sizeOperate.adjustPercent(SizeOperate.Enlarge);
                 }
             }
         });
@@ -180,7 +179,7 @@ public class PaintPicture extends JPanel {
                 IsDragging = true;
                 new Thread(() -> {
                     do {
-                        sizeOperate.adjustPercent(SizeOperate$$$.Enlarge);
+                        sizeOperate.adjustPercent(SizeOperate.Enlarge);
                         sizeOperate.update();
                         try {
                             Thread.sleep(16);
@@ -217,7 +216,7 @@ public class PaintPicture extends JPanel {
                 new Thread(() -> {
                     //循环
                     do {
-                        sizeOperate.adjustPercent(SizeOperate$$$.Reduce);
+                        sizeOperate.adjustPercent(SizeOperate.Reduce);
                         sizeOperate.update();
                         //抛出异常
                         try {
