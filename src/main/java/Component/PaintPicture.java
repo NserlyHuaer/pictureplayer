@@ -2,6 +2,7 @@ package Component;//导入包
 
 import Listener.ChangeFocusListener;
 import Runner.Main;
+import Runner.Main$$$;
 import Runner.SizeOperate$$$;
 import Size.OperatingCoordinate;
 import Size.SizeOperate;
@@ -25,20 +26,29 @@ public class PaintPicture extends JPanel {
     public JButton biggest;
     //图片缩小按钮
     public JButton smallest;
-    //缩放比例标签
-    PercentLabel percentLabel;
     //创建鼠标坐标管理对象
     OperatingCoordinate op = null;
+    //鼠标最小移动坐标位
+    Point MinPoint;
+    //鼠标最大移动坐标位
+    Point MaxPoint;
+    //图片显示器尺寸
+    Dimension ShowingSize;
+    //图片渲染器在屏幕上的坐标
+    Point LocationOnScreen;
+    //缩放比例标签
+    PercentLabel percentLabel;
     //图片比例管理
     public SizeOperate sizeOperate;
     //图片渲染管理
-    private MyCanvas myCanvas;
+    public MyCanvas myCanvas;
     //判断按钮是否被按下
     private static boolean IsDragging;
 
 
     //构造方法（函数）
     public PaintPicture(String path) {
+        paintPicture = this;
         //获取当前图片路径下所有图片
         ArrayList<String> CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(path);
         percentLabel = new PercentLabel();
@@ -69,46 +79,71 @@ public class PaintPicture extends JPanel {
         }
         biggest = new JButton("enlarge");
         Robot finalRobot = robot;
-        final boolean[] isNeedChange = {false};
         Image image = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(0, 0, new int[0], 0, 0));
+        final boolean[] EnableCursorDisplay = new boolean[1];
         myCanvas.addMouseListener(new MouseAdapter() {
             //鼠标一按下就触发
             @Override
             public void mousePressed(MouseEvent e) {
                 op = new OperatingCoordinate(e.getX(), e.getY());
+                EnableCursorDisplay[0] = SettingsGUI$$$.getBoolean("EnableCursorDisplay", Main.main.centre.CurrentData);
+                if (EnableCursorDisplay[0]) return;
                 setCursor(Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), null));
+                Point Local = myCanvas.getLocationOnScreen();
+                if (ShowingSize != null && LocationOnScreen != null && ShowingSize.equals(sizeOperate.getWindowSize()) && LocationOnScreen.equals(Local))
+                    return;
+                ShowingSize = sizeOperate.getWindowSize();
+                LocationOnScreen = Local;
+                Point ComponentPointOnDesktop = LocationOnScreen;
+
+                int minX = -ComponentPointOnDesktop.x, minY = -ComponentPointOnDesktop.y;
+                if (minX < 0) minX = 0;
+                if (minY < 0) minY = 0;
+                MinPoint = new Point(minX, minY);
+
+                ComponentPointOnDesktop = new Point(ShowingSize.width + ComponentPointOnDesktop.x, ShowingSize.height + ComponentPointOnDesktop.y);
+                int maxX = ShowingSize.width, maxY = ShowingSize.height;
+                if (ComponentPointOnDesktop.x > SizeOperate$$$.screenSize.width)
+                    maxX -= ComponentPointOnDesktop.x - SizeOperate$$$.screenSize.width;
+                if (ComponentPointOnDesktop.y > SizeOperate$$$.screenSize.height)
+                    maxY -= ComponentPointOnDesktop.y - SizeOperate$$$.screenSize.height;
+                MaxPoint = new Point(maxX, maxY);
             }
+
 
             //鼠标放出触发
             public void mouseReleased(MouseEvent e) {
-                setCursor(Cursor.getDefaultCursor());
-
+                if (!EnableCursorDisplay[0])
+                    setCursor(Cursor.getDefaultCursor());
             }
         });
         myCanvas.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                boolean NeedToMove = false;
-                Dimension di = sizeOperate.getWindowSize();
                 int x = e.getX(), y = e.getY();
-                if (x == 0) {
-                    x = (int) di.getWidth() - 2;
-                    NeedToMove = true;
-                } else if (x == di.getWidth() - 1) {
-                    x = 0;
-                    NeedToMove = true;
-                }
-                if (y == 0) {
-                    y = (int) (di.getHeight() - 2);
-                    NeedToMove = true;
-                } else if (x == di.getHeight() - 1) {
-                    y = 0;
-                    NeedToMove = true;
-                }
-                if (NeedToMove) {
-                    finalRobot.mouseMove(x, y);
-                    op = new OperatingCoordinate(x, y);
-                    return;
+                if (!EnableCursorDisplay[0]) {
+                    boolean NeedToMove = false;
+                    if (x <= MinPoint.x) {
+                        x = MaxPoint.x - 2;
+                        NeedToMove = true;
+                    } else if (x >= MaxPoint.x - 1) {
+                        x = MinPoint.x + 1;
+                        NeedToMove = true;
+                    }
+                    if (y <= MinPoint.y) {
+                        y = MaxPoint.y - 2;
+                        NeedToMove = true;
+                    } else if (y >= MaxPoint.y - 1) {
+                        y = MinPoint.y + 1;
+                        NeedToMove = true;
+                    }
+
+                    if (NeedToMove) {
+                        op = new OperatingCoordinate(x, y);
+                        Point point = myCanvas.getLocationOnScreen();
+                        finalRobot.mouseMove(x + point.x, y + point.y);
+                        return;
+                    }
                 }
                 //增加坐标值
                 myCanvas.setMouseCoordinate((int) ((1 + SettingsGUI$$$.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + SettingsGUI$$$.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (y - op.y())));
@@ -116,7 +151,6 @@ public class PaintPicture extends JPanel {
                 op = new OperatingCoordinate(x, y);
             }
         });
-
 
         myCanvas.addMouseWheelListener(new MouseAdapter() {
             //鼠标滚轮事件
@@ -151,7 +185,7 @@ public class PaintPicture extends JPanel {
                         try {
                             Thread.sleep(16);
                         } catch (InterruptedException ex) {
-                            throw new RuntimeException(ex);
+                            break;
                         }
                     } while (!isDown);
                     myCanvas.requestFocus();
@@ -190,7 +224,7 @@ public class PaintPicture extends JPanel {
                             //线程休眠
                             Thread.sleep(16);
                         } catch (InterruptedException ex) {
-                            throw new RuntimeException(ex);
+                            break;
                         }
                     } while (!isReleased);
                     myCanvas.requestFocus();
@@ -241,6 +275,7 @@ public class PaintPicture extends JPanel {
                 }
             }
         });
+        myCanvas.requestFocus();
     }
 
     private JPanel getjPanel(ChangeFocusListener changeFocusListener) {
@@ -298,6 +333,8 @@ public class PaintPicture extends JPanel {
         On.add(Reset);
         //将图片右转按钮添加到组件中
         On.add(TurnRight);
+        //将比例显示添加到组件中
+        On.add(percentLabel);
         return On;
     }
 
@@ -607,9 +644,11 @@ public class PaintPicture extends JPanel {
             //显示图像
             graphics2D.drawImage(image, FinalX, FinalY, width, height, null);
             //检查比例是否为最大值，如果为最大就把放大按钮禁用
-            PaintPicture.paintPicture.biggest.setEnabled(!PaintPicture.paintPicture.sizeOperate.isTheBiggestRatio());
+            if (PaintPicture.paintPicture.biggest != null)
+                PaintPicture.paintPicture.biggest.setEnabled(!PaintPicture.paintPicture.sizeOperate.isTheBiggestRatio());
             //检查比例是否为最小值，如果为最小就把放大按钮禁用
-            PaintPicture.paintPicture.smallest.setEnabled(!PaintPicture.paintPicture.sizeOperate.isTheSmallestRatio());
+            if (PaintPicture.paintPicture.smallest != null)
+                PaintPicture.paintPicture.smallest.setEnabled(!PaintPicture.paintPicture.sizeOperate.isTheSmallestRatio());
             //设置文本中显示的图片缩放比例
             percentLabel.set((int) sizeOperate.getPercent());
             this.X = FinalX;

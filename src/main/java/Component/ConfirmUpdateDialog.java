@@ -27,6 +27,7 @@ public class ConfirmUpdateDialog extends JDialog {
     public ConfirmUpdateDialog(DownloadUpdate update) {
         this.downloadUpdate = update;
         setContentPane(contentPane);
+        setTitle("更新提醒");
         setModal(true);
         getRootPane().setDefaultButton(buttonCancel);
 
@@ -162,4 +163,7 @@ public class ConfirmUpdateDialog extends JDialog {
         return contentPane;
     }
 
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
+    }
 }

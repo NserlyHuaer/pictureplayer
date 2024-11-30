@@ -24,7 +24,7 @@
             </properties>
             <border type="none"/>
             <children>
-              <grid id="9d01c" binding="FirstPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="9d01c" binding="FirstPanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <tabbedpane title="打开"/>
@@ -37,20 +37,12 @@
                 <children>
                   <component id="76f59" class="javax.swing.JLabel" binding="VersionView">
                     <constraints>
-                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="6" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="6" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <requestFocusEnabled value="false"/>
                       <text value="Version:"/>
                     </properties>
-                  </component>
-                  <component id="ee069" class="javax.swing.JTree" binding="tree1" default-binding="true">
-                    <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                        <preferred-size width="150" height="50"/>
-                      </grid>
-                    </constraints>
-                    <properties/>
                   </component>
                   <component id="c3fa8" class="javax.swing.JTextField" binding="textField1" default-binding="true">
                     <constraints>
@@ -68,6 +60,15 @@
                       <text value="跳转"/>
                     </properties>
                   </component>
+                  <grid id="da2ca" binding="FileChoosePane" custom-create="true" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children/>
+                  </grid>
                 </children>
               </grid>
               <grid id="be657" binding="SecondPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -79,7 +80,7 @@
                 <border type="none"/>
                 <children/>
               </grid>
-              <grid id="17b1a" binding="ThirdPanel" layout-manager="GridLayoutManager" row-count="11" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="17b1a" binding="ThirdPanel" layout-manager="GridLayoutManager" row-count="11" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <tabbedpane title="设置"/>
@@ -129,24 +130,7 @@
                     </constraints>
                     <properties>
                       <requestFocusEnabled value="false"/>
-                      <text value="鼠标移动补偿："/>
-                    </properties>
-                  </component>
-                  <component id="80d27" class="javax.swing.JSlider" binding="MouseMoveOffsetsSlider">
-                    <constraints>
-                      <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <requestFocusEnabled value="false"/>
-                    </properties>
-                  </component>
-                  <component id="1aaff" class="javax.swing.JButton" binding="ApplyTheMouseOffsetsButton">
-                    <constraints>
-                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <requestFocusEnabled value="false"/>
-                      <text value="应用"/>
+                      <text value="鼠标移动补偿:"/>
                     </properties>
                   </component>
                   <component id="d0f14" class="javax.swing.JCheckBox" binding="EnableProxyServerCheckBox">
@@ -169,7 +153,7 @@
                   </component>
                   <component id="4eb05" class="javax.swing.JButton" binding="ProxyServerButton">
                     <constraints>
-                      <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <requestFocusEnabled value="false"/>
@@ -185,19 +169,10 @@
                       <text value="启用安全连接模式"/>
                     </properties>
                   </component>
-                  <component id="36558" class="javax.swing.JCheckBox" binding="AutoCheckUpdateCheckBox">
-                    <constraints>
-                      <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <requestFocusEnabled value="false"/>
-                      <text value="启用自动检查更新"/>
-                    </properties>
-                  </component>
                   <grid id="e26e8" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
-                      <grid row="10" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <grid row="10" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties/>
                     <border type="none"/>
@@ -238,6 +213,30 @@
                       </component>
                     </children>
                   </grid>
+                  <hspacer id="fc6ec">
+                    <constraints>
+                      <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <component id="80d27" class="javax.swing.JSlider" binding="MouseMoveOffsetsSlider">
+                    <constraints>
+                      <grid row="5" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <maximum value="150"/>
+                      <minimum value="-65"/>
+                      <requestFocusEnabled value="false"/>
+                    </properties>
+                  </component>
+                  <component id="36558" class="javax.swing.JCheckBox" binding="AutoCheckUpdateCheckBox">
+                    <constraints>
+                      <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <requestFocusEnabled value="false"/>
+                      <text value="启用自动检查更新"/>
+                    </properties>
+                  </component>
                 </children>
               </grid>
               <grid id="e8896" binding="FourthPanel" layout-manager="GridLayoutManager" row-count="7" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

@@ -20,20 +20,16 @@ public class AdvancedDownloadSpeed {
     private JProgressBar totalProgress;
     private JProgressBar currentFileProgress;
     private JLabel speedLabel;
-    private JLabel TotalPercentOfHundred;
-    private JLabel CurrentPercentOfHundred;
     private JLabel DownloadCountings;
     public static String speedPrefix;
     public static String totalPrefix;
     private Formation formation;
     private DownloadUpdate downloadUpdate;
 
-    public AdvancedDownloadSpeed(DownloadUpdate downloadUpdate, JProgressBar totalProgress, JProgressBar currentFileProgress, JLabel speedLabel, JLabel TotalPercentOfHundred, JLabel CurrentPercentOfHundred, JLabel DownloadCountings) {
+    public AdvancedDownloadSpeed(DownloadUpdate downloadUpdate, JProgressBar totalProgress, JProgressBar currentFileProgress, JLabel speedLabel, JLabel DownloadCountings) {
         this.totalProgress = totalProgress;
         this.currentFileProgress = currentFileProgress;
         this.speedLabel = speedLabel;
-        this.TotalPercentOfHundred = TotalPercentOfHundred;
-        this.CurrentPercentOfHundred = CurrentPercentOfHundred;
         this.DownloadCountings = DownloadCountings;
         this.downloadUpdate = downloadUpdate;
         speedPrefix = speedLabel.getText();
@@ -78,13 +74,11 @@ public class AdvancedDownloadSpeed {
                 if (currentProgressFile < totalFile) {
                     // 更新总进度
                     totalProgress.setValue(currentProgressFile);
-                    TotalPercentOfHundred.setText(decimalFormat.format((double) currentProgressFile / (double) totalFile * 100) + "%");
                     formation = new Formation(totalPrefix);
                     formation.Change("current", String.valueOf(downloadUpdate.HaveDownloadedFile + 1));
                     DownloadCountings.setText(formation.getResult().toString());
                 } else {
                     totalProgress.setValue(totalFile);
-                    TotalPercentOfHundred.setText("100%");
                     formation = new Formation(totalPrefix);
                     formation.Change("current", String.valueOf(downloadUpdate.TotalDownloadingFile));
                     DownloadCountings.setText(formation.getResult().toString());
@@ -102,12 +96,10 @@ public class AdvancedDownloadSpeed {
                     currentFileProgress.setValue((int) downloadFile.progress);
                     String speed = formatSpeed(downloadFile.bps);
                     speedLabel.setText(speedPrefix + speed);
-                    CurrentPercentOfHundred.setText(decimalFormat.format(downloadFile.progress) + "%");
                 } else {
                     currentFileProgress.setValue(100);
                     String speed = formatSpeed(0);
                     speedLabel.setText(speedPrefix + speed);
-                    CurrentPercentOfHundred.setText("100%");
                     ((Timer) actionEvent.getSource()).stop(); // 停止计时器
                 }
             }
