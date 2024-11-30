@@ -1,0 +1,132 @@
+package Component;
+
+import Command.CommandCenter;
+import Runner.Main;
+import Tools.String.Formation;
+import Version.Download.DownloadFile;
+import Version.Download.DownloadUpdate;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.Map;
+
+public class AdvancedDownloadSpeed {
+
+    private DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    public Thread DaemonUpdate;
+    private JProgressBar totalProgress;
+    private JProgressBar currentFileProgress;
+    private JLabel speedLabel;
+    private JLabel TotalPercentOfHundred;
+    private JLabel CurrentPercentOfHundred;
+    private JLabel DownloadCountings;
+    public static String speedPrefix;
+    public static String totalPrefix;
+    private Formation formation;
+    private DownloadUpdate downloadUpdate;
+
+    public AdvancedDownloadSpeed(DownloadUpdate downloadUpdate, JProgressBar totalProgress, JProgressBar currentFileProgress, JLabel speedLabel, JLabel TotalPercentOfHundred, JLabel CurrentPercentOfHundred, JLabel DownloadCountings) {
+        this.totalProgress = totalProgress;
+        this.currentFileProgress = currentFileProgress;
+        this.speedLabel = speedLabel;
+        this.TotalPercentOfHundred = TotalPercentOfHundred;
+        this.CurrentPercentOfHundred = CurrentPercentOfHundred;
+        this.DownloadCountings = DownloadCountings;
+        this.downloadUpdate = downloadUpdate;
+        speedPrefix = speedLabel.getText();
+        // 初始进度条
+        totalProgress.setMaximum(downloadUpdate.getUpdateWebSide().size());
+        totalProgress.setValue(0);
+        totalProgress.setStringPainted(true);
+        Formation formation = new Formation(DownloadCountings.getText());
+        formation.Change("total", String.valueOf(downloadUpdate.getUpdateWebSide().size()));
+        totalPrefix = String.valueOf(formation.getResult());
+
+        // 初始另一个进度条，用于显示当前文件的进度
+        currentFileProgress.setMaximum(100);
+        currentFileProgress.setValue(0);
+        currentFileProgress.setStringPainted(true);
+
+        DaemonUpdate = new Thread(() -> {
+            Map<String, java.util.List> map = downloadUpdate.download();
+            try {
+                if (map.get(downloadUpdate.FilePath.getFirst()) == null) {
+                    return;
+                }
+                CommandCenter.moveFileToDirectory((String) map.get(downloadUpdate.FilePath.getFirst()).getFirst());
+                String osType = CommandCenter.detectOSType();
+                CommandCenter.executeOSSpecificCommands(osType, (String) map.get(downloadUpdate.FilePath.getFirst()).getFirst());
+            } catch (IOException e) {
+                System.out.println("Error:" + e);
+            }
+        });
+        DaemonUpdate.start();
+        new Thread(() -> {
+            simulateDownload(downloadUpdate.CurrentDownloadingFile, downloadUpdate.TotalDownloadingFile - downloadUpdate.HaveDownloadedFile, downloadUpdate.TotalDownloadingFile);
+        }).start();
+
+    }
+
+
+    private void simulateDownload(DownloadFile downloadFile, int currentProgressFile, int totalFile) {
+        final Timer totalTimer = new Timer(100, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (currentProgressFile < totalFile) {
+                    // 更新总进度
+                    totalProgress.setValue(currentProgressFile);
+                    TotalPercentOfHundred.setText(decimalFormat.format((double) currentProgressFile / (double) totalFile * 100) + "%");
+                    formation = new Formation(totalPrefix);
+                    formation.Change("current", String.valueOf(downloadUpdate.HaveDownloadedFile + 1));
+                    DownloadCountings.setText(formation.getResult().toString());
+                } else {
+                    totalProgress.setValue(totalFile);
+                    TotalPercentOfHundred.setText("100%");
+                    formation = new Formation(totalPrefix);
+                    formation.Change("current", String.valueOf(downloadUpdate.TotalDownloadingFile));
+                    DownloadCountings.setText(formation.getResult().toString());
+                    ((Timer) actionEvent.getSource()).stop(); // 停止计时器
+                }
+            }
+        });
+
+        final Timer fileTimer = new Timer(100, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (downloadFile == null) return;
+                if (downloadFile.progress < 100) {
+                    // 更新当前文件进度
+                    currentFileProgress.setValue((int) downloadFile.progress);
+                    String speed = formatSpeed(downloadFile.bps);
+                    speedLabel.setText(speedPrefix + speed);
+                    CurrentPercentOfHundred.setText(decimalFormat.format(downloadFile.progress) + "%");
+                } else {
+                    currentFileProgress.setValue(100);
+                    String speed = formatSpeed(0);
+                    speedLabel.setText(speedPrefix + speed);
+                    CurrentPercentOfHundred.setText("100%");
+                    ((Timer) actionEvent.getSource()).stop(); // 停止计时器
+                }
+            }
+        });
+
+        totalTimer.start();
+        fileTimer.start();
+    }
+
+
+    private String formatSpeed(double bytesPerSecond) {
+        if (bytesPerSecond >= 1024L * 1024 * 1024 * 8) {
+            return decimalFormat.format((double) bytesPerSecond / (1024L * 1024 * 1024 * 8)) + " GB/s";
+        } else if (bytesPerSecond >= 1024 * 1024 * 8) {
+            return decimalFormat.format((double) bytesPerSecond / (1024 * 1024 * 8)) + " MB/s";
+        } else if (bytesPerSecond >= 1024 * 8) {
+            return decimalFormat.format((double) bytesPerSecond / 1024 * 8) + " KB/s";
+        } else {
+            return decimalFormat.format(bytesPerSecond) + " B/s";
+        }
+    }
+}

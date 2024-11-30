@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="Runner.Settings">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="Runner.Main">
   <grid id="b9abd" binding="panel1" default-binding="true" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
       <xy x="20" y="20" width="812" height="522"/>
     </constraints>
     <properties>
-      <requestFocusEnabled value="false"/>
+      <requestFocusEnabled value="true"/>
     </properties>
     <border type="none"/>
     <children>
@@ -202,17 +202,6 @@
                     <properties/>
                     <border type="none"/>
                     <children>
-                      <component id="e013a" class="javax.swing.JButton" binding="SaveButton">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="2" fill="1" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <horizontalAlignment value="0"/>
-                          <requestFocusEnabled value="false"/>
-                          <text value="保存"/>
-                          <verticalTextPosition value="0"/>
-                        </properties>
-                      </component>
                       <vspacer id="f9802">
                         <constraints>
                           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
@@ -236,11 +225,22 @@
                           <text value="恢复"/>
                         </properties>
                       </component>
+                      <component id="e013a" class="javax.swing.JButton" binding="SaveButton">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="2" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <horizontalAlignment value="0"/>
+                          <requestFocusEnabled value="false"/>
+                          <text value="保存"/>
+                          <verticalTextPosition value="0"/>
+                        </properties>
+                      </component>
                     </children>
                   </grid>
                 </children>
               </grid>
-              <grid id="e8896" binding="FourthPanel" layout-manager="GridLayoutManager" row-count="4" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="e8896" binding="FourthPanel" layout-manager="GridLayoutManager" row-count="7" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <tabbedpane title="关于"/>
@@ -250,30 +250,30 @@
                 <children>
                   <component id="15242" class="javax.swing.JLabel" binding="JVMVersionLabel">
                     <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font size="16"/>
-                      <text value="Java Version:"/>
+                      <text value="JVM Version:"/>
                     </properties>
                   </component>
                   <vspacer id="1a1a8">
                     <constraints>
-                      <grid row="3" column="0" row-span="1" col-span="4" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="6" column="0" row-span="1" col-span="4" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
                   <component id="8a142" class="javax.swing.JLabel" binding="CurrentSoftwareVersionLabel">
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font size="16"/>
-                      <text value="当前软件版本"/>
+                      <text value="当前软件版本："/>
                     </properties>
                   </component>
                   <component id="639c7" class="javax.swing.JLabel" binding="CurrentSoftwareInteriorLabel">
                     <constraints>
-                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font size="16"/>
@@ -282,11 +282,39 @@
                   </component>
                   <component id="a2564" class="javax.swing.JButton" binding="CheckVersionButton">
                     <constraints>
-                      <grid row="2" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="0" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font size="16"/>
                       <text value="检查更新"/>
+                    </properties>
+                  </component>
+                  <component id="48b8a" class="javax.swing.JLabel" binding="OSLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text value="操作系统："/>
+                    </properties>
+                  </component>
+                  <component id="3835b" class="javax.swing.JLabel" binding="CurrentSoftwareLanguage">
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="true"/>
+                      <font size="16"/>
+                      <text value="当前软件语言："/>
+                    </properties>
+                  </component>
+                  <component id="ade46" class="javax.swing.JLabel" binding="MemUsed">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text value="JVM内存："/>
                     </properties>
                   </component>
                 </children>

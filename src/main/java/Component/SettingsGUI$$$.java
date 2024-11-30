@@ -2,7 +2,7 @@ package Component;
 
 import Listener.ChangeFocusListener;
 import Loading.DefaultArgs;
-import Runner.Main;
+import Runner.Main$$$;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 
 
-public class SettingsGUI extends JFrame {
+public class SettingsGUI$$$ extends JFrame {
     public static final Map<String, String> DefaultData = new HashMap<>();
     public final HashMap<String, String> CurrentData = new HashMap<String, String>();
     private final JPanel panel;
@@ -33,7 +33,7 @@ public class SettingsGUI extends JFrame {
     private final JButton exitButton;
     private final JButton ResetButton;
     private boolean isRevised;
-    private static SettingsGUI object;
+    private static SettingsGUI$$$ object;
 
     static {
         try {
@@ -54,7 +54,7 @@ public class SettingsGUI extends JFrame {
         }
     }
 
-    public SettingsGUI() {
+    public SettingsGUI$$$() {
         super("Settings");
         object = this;
         setBounds(570, 405, 320, 510);
@@ -77,20 +77,20 @@ public class SettingsGUI extends JFrame {
                 if (isRevised) {
                     int choose = JOptionPane.showConfirmDialog(object, "Settings Information will lose if you don't save it", "Save your changes?", JOptionPane.YES_NO_CANCEL_OPTION);
                     if (choose == 0) {
-                        Main.init.Writer(CurrentData);
-                        Main.jFrame.setVisible(true);
+                        Main$$$.init.Writer(CurrentData);
+                        Main$$$.jFrame.setVisible(true);
                         setVisible(false);
                         isRevised = false;
                         setTitle("Settings");
                         System.out.println("Saving Settings...");
                     } else if (choose == 1) {
-                        Main.jFrame.setVisible(true);
+                        Main$$$.jFrame.setVisible(true);
                         setVisible(false);
                         isRevised = false;
                         setTitle("Settings");
                     }
                 } else {
-                    Main.jFrame.setVisible(true);
+                    Main$$$.jFrame.setVisible(true);
                     setVisible(false);
                 }
             }
@@ -102,26 +102,26 @@ public class SettingsGUI extends JFrame {
                     if (isRevised) {
                         int choose = JOptionPane.showConfirmDialog(object, "Settings Information will lose if you don't save it", "Save your changes?", JOptionPane.YES_NO_CANCEL_OPTION);
                         if (choose == 0) {
-                            Main.init.Writer(CurrentData);
-                            Main.jFrame.setVisible(true);
+                            Main$$$.init.Writer(CurrentData);
+                            Main$$$.jFrame.setVisible(true);
                             setVisible(false);
                             isRevised = false;
                             setTitle("Settings");
                             System.out.println("Saving Settings...");
                         } else if (choose == 1) {
-                            Main.jFrame.setVisible(true);
+                            Main$$$.jFrame.setVisible(true);
                             setVisible(false);
                             isRevised = false;
                             setTitle("Settings");
                         }
                     } else {
-                        Main.jFrame.setVisible(true);
+                        Main$$$.jFrame.setVisible(true);
                         setVisible(false);
                     }
 
                 } else if (e.getKeyCode() == KeyEvent.VK_F10) {
-                    Main.init.Writer(CurrentData);
-                    Main.jFrame.setVisible(true);
+                    Main$$$.init.Writer(CurrentData);
+                    Main$$$.jFrame.setVisible(true);
                     setVisible(false);
                     isRevised = false;
                     setTitle("Settings");
@@ -250,8 +250,8 @@ public class SettingsGUI extends JFrame {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Main.init.Writer(CurrentData);
-                Main.jFrame.setVisible(true);
+                Main$$$.init.Writer(CurrentData);
+                Main$$$.jFrame.setVisible(true);
                 setVisible(false);
                 isRevised = false;
                 setTitle("Settings");
@@ -263,7 +263,7 @@ public class SettingsGUI extends JFrame {
         exitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Main.jFrame.setVisible(true);
+                Main$$$.jFrame.setVisible(true);
                 setVisible(false);
                 isRevised = false;
                 setTitle("Settings");
@@ -338,8 +338,8 @@ public class SettingsGUI extends JFrame {
     public void ReadFile() {
         CurrentData.putAll(DefaultData);
         try {
-            Main.init.Run();
-            Properties properties = Main.init.getProperties();
+            Main$$$.init.Run();
+            Properties properties = Main$$$.init.getProperties();
             for (Object obj : properties.keySet()) {
                 if (DefaultData.containsKey((String) obj)) {
                     CurrentData.replace((String) obj, (String) properties.get(obj));
@@ -398,7 +398,7 @@ public class SettingsGUI extends JFrame {
     }
 
 
-    private static boolean getBoolean(String Description, Map map) {
+    public static boolean getBoolean(String Description, Map map) {
         String cache = map.get(Description).toString().replace(" ", "").toLowerCase();
         if (cache.equals("true")) {
             return true;

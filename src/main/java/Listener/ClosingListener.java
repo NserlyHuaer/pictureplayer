@@ -1,6 +1,6 @@
 package Listener;
 
-import Runner.Main;
+import Runner.Main$$$;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -14,7 +14,7 @@ public class ClosingListener implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            Main.close();
+            Main$$$.close();
         }
     }
 

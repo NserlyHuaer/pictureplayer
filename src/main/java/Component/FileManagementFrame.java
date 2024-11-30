@@ -1,7 +1,6 @@
 package Component;
 
 import Listener.ClosingListener;
-import Runner.Main;
 
 import javax.swing.*;
 

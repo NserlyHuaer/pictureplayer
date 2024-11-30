@@ -1,7 +1,7 @@
 package Settings;
 
 import Loading.DefaultArgs;
-import Runner.Main;
+import Runner.Main$$$;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
@@ -13,7 +13,7 @@ import java.util.Properties;
 public class Centre {
     public static final Map<String, String> DefaultData = new HashMap<>();
     public final HashMap<String, String> CurrentData = new HashMap<String, String>();
-
+    //初始化
     static {
         try {
             Class<?> clazz = DefaultArgs.class;
@@ -37,17 +37,18 @@ public class Centre {
         reFresh();
     }
 
-
+    //重置默认设置
     public void setDefault() {
         CurrentData.clear();
         CurrentData.putAll(DefaultData);
     }
 
+    //恢复之前设置（保存时）
     public void reFresh() {
         setDefault();
         try {
-            Main.init.Run();
-            Properties properties = Main.init.getProperties();
+            Main$$$.init.Run();
+            Properties properties = Main$$$.init.getProperties();
             for (Object obj : properties.keySet()) {
                 if (DefaultData.containsKey((String) obj)) {
                     CurrentData.replace((String) obj, (String) properties.get(obj));
@@ -57,7 +58,7 @@ public class Centre {
             System.out.println("Error:" + e);
         }
     }
-
+    //获取某建的对应布尔值
     private static boolean getBoolean(String Description, Map map) {
         String cache = map.get(Description).toString().replace(" ", "").toLowerCase();
         if (cache.equals("true")) {
@@ -67,11 +68,11 @@ public class Centre {
         }
         return (boolean) map.get(Description);
     }
-
+    //获取某建的对应浮点值
     public static double getDouble(String Description, Map map) {
         return getDouble(Description, map, -65, 150);
     }
-
+    //获取某建的对应布尔值
     private static double getDouble(String Description, Map map, double min, double max) {
         if (min > max) {
             double temp = max;
@@ -92,6 +93,10 @@ public class Centre {
             result = min;
         }
         return result;
+    }
+    //保存设置
+    public void save(){
+        Main$$$.init.Writer(CurrentData);
     }
 
 }

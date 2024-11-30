@@ -1,13 +1,11 @@
 package Size;
 
-import Runner.Main;
-
 import java.awt.*;
 import java.io.IOException;
 
 import Component.PaintPicture;
 
-public class SizeOperate1 {
+public class SizeOperate {
     //默认缩放比例
     private final short Default;
     //设置放大时，引用
@@ -62,14 +60,14 @@ public class SizeOperate1 {
     }
 
 
-    public SizeOperate1(PaintPicture.MyCanvas myCanvas, Dimension Component) {
+    public SizeOperate(PaintPicture.MyCanvas myCanvas, Dimension Component) {
         this.Component = Component;
         this.myCanvas = myCanvas;
         FittestPercent = percent = Default = 100;
 
     }
 
-    public SizeOperate1(PaintPicture.MyCanvas myCanvas, short defaultPercent, Dimension Component) {
+    public SizeOperate(PaintPicture.MyCanvas myCanvas, short defaultPercent, Dimension Component) {
         this.myCanvas = myCanvas;
         FittestPercent = percent = Default = defaultPercent;
         this.Component = Component;

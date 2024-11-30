@@ -1,19 +1,11 @@
 package Command;
 
-import Runner.Main;
-
-import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Arrays;
-import java.util.List;
 
 public class CommandCenter {
     public static final int FOR_UPDATE = 0;
@@ -68,7 +60,7 @@ public class CommandCenter {
     }
 
     public static void createAndRunWindowsBatchFile(String DownloadFilePath) throws IOException {
-        String batchContent = "timeout /t 0.5\n"
+        String batchContent = "timeout /t 1\n"
                 + "del .\\" + CURRENT_JAR_NAME + "\r\n"
                 + "ren " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + " " + CURRENT_JAR_NAME + "\n"
                 + "java -jar " + CURRENT_JAR_NAME;
@@ -83,7 +75,7 @@ public class CommandCenter {
 
     public static void createAndRunLinuxShellScript(String DownloadFilePath) throws IOException {
         String shellContent =
-                "sleep 0.5\n"
+                "sleep 1\n"
                         + "rm " + CURRENT_JAR_NAME + "\n"
                         + "mv " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + " " + CURRENT_JAR_NAME + "\n"
                         + "java -jar " + CURRENT_JAR_NAME;

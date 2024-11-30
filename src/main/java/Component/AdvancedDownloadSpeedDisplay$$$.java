@@ -1,7 +1,7 @@
 package Component;
 
 import Command.CommandCenter;
-import Runner.Main;
+import Runner.Main$$$;
 import Version.Download.DownloadFile;
 import Version.Download.DownloadUpdate;
 
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Map;
 
-public class AdvancedDownloadSpeedDisplay {
+public class AdvancedDownloadSpeedDisplay$$$ {
 
     private JProgressBar totalProgress;
     private JProgressBar currentFileProgress;
@@ -59,8 +59,8 @@ public class AdvancedDownloadSpeedDisplay {
             frame.setLocationRelativeTo(null);
 
             frame.setVisible(true);
-            DownloadUpdate downloadUpdate = new DownloadUpdate(Main.UPDATE_WEBSITE);
-            Main.DaemonUpdate = new Thread(() -> {
+            DownloadUpdate downloadUpdate = new DownloadUpdate(Main$$$.UPDATE_WEBSITE);
+            Main$$$.DaemonUpdate = new Thread(() -> {
                 Map<String, java.util.List> map = downloadUpdate.download(downloadUpdate.getUpdateWebSide());
                 try {
                     CommandCenter.moveFileToDirectory((String) map.get(downloadUpdate.FilePath.getFirst()).getFirst());
@@ -77,7 +77,7 @@ public class AdvancedDownloadSpeedDisplay {
 
                 }
             });
-            Main.DaemonUpdate.start();
+            Main$$$.DaemonUpdate.start();
             new Thread(() -> {
                 simulateDownload(downloadUpdate.CurrentDownloadingFile, downloadUpdate.TotalDownloadingFile - downloadUpdate.HaveDownloadedFile, downloadUpdate.TotalDownloadingFile);
             }).start();
