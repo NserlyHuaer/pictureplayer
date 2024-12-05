@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Map;
 
 public class AdvancedDownloadSpeed {
@@ -47,14 +48,20 @@ public class AdvancedDownloadSpeed {
         currentFileProgress.setStringPainted(true);
 
         DaemonUpdate = new Thread(() -> {
-            Map<String, java.util.List> map = downloadUpdate.download();
+            Map<String, List> map = downloadUpdate.download();
+            String website = "";
             try {
-                if (map.get(downloadUpdate.FilePath.getFirst()) == null) {
-                    return;
+                boolean isFound = false;
+                for (String websites : downloadUpdate.FilePath) {
+                    if (map.get(websites) != null) {
+                        isFound = true;
+                        website = websites;
+                    }
                 }
-                CommandCenter.moveFileToDirectory((String) map.get(downloadUpdate.FilePath.getFirst()).getFirst());
+                if (!isFound) return;
+                CommandCenter.moveFileToDirectory((String) map.get(website).getFirst());
                 String osType = CommandCenter.detectOSType();
-                CommandCenter.executeOSSpecificCommands(osType, (String) map.get(downloadUpdate.FilePath.getFirst()).getFirst());
+                CommandCenter.executeOSSpecificCommands(osType, (String) map.get(website).getFirst());
             } catch (IOException e) {
                 System.out.println("Error:" + e);
             }

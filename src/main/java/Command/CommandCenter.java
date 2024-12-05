@@ -60,9 +60,11 @@ public class CommandCenter {
     }
 
     public static void createAndRunWindowsBatchFile(String DownloadFilePath) throws IOException {
-        String batchContent = "timeout /t 1\n"
+        String batchContent = "echo @off\n" +
+                "timeout /t 1\n"
                 + "del .\\" + CURRENT_JAR_NAME + "\r\n"
-                + "ren " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + " " + CURRENT_JAR_NAME + "\n"
+                + "ren " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + " " + CURRENT_JAR_NAME + "\n" +
+                "cls\n"
                 + "java -jar " + CURRENT_JAR_NAME;
         Path batchPath = Path.of("./replace.bat");
         Files.write(batchPath, batchContent.getBytes());
