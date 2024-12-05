@@ -170,41 +170,32 @@ public class SizeOperate {
         } else this.percent = percent;
     }
 
-    //调节比例
-    public void adjustPercent(int operate) {
+    //调节比例（如果返回值为true表示需要刷新，反之不需刷新）
+    public boolean adjustPercent(int operate) {
         switch (operate) {
             case Enlarge -> {
-//                if (percent >= MaxPercent) return;
-//                if (percent < FittestPercent) decide(4 + percent);
-//                else {
-//                    decide(11 + percent);
-//                }
-                if (percent >= MaxPercent) return;
+                if (percent >= MaxPercent) return false;
                 if (AdjustPercent <= 0) {
                     if (percent < FittestPercent) decide(4 + percent);
                     else {
                         decide(11 + percent);
                     }
-                    return;
+                    return true;
                 }
-                if (percent < FittestPercent) decide(AdjustPercent + percent);
-                else {
+                if (percent < FittestPercent) {
+                    decide(AdjustPercent + percent);
+                } else {
                     decide(2 * AdjustPercent + percent);
                 }
             }
             case Reduce -> {
-//                if (percent <= MinPercent) return;
-//                if (percent < FittestPercent) decide(-4 + percent);
-//                else {
-//                    decide(-11 + percent);
-//                }
-                if (percent <= MinPercent) return;
+                if (percent <= MinPercent) return false;
                 if (AdjustPercent <= 0) {
                     if (percent < FittestPercent) decide(-4 + percent);
                     else {
                         decide(-11 + percent);
                     }
-                    return;
+                    return true;
                 }
                 if (percent < FittestPercent) decide(-AdjustPercent + percent);
                 else {
@@ -212,6 +203,7 @@ public class SizeOperate {
                 }
             }
         }
+        return true;
     }
 
     //刷新图片

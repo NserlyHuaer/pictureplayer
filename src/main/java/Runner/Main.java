@@ -194,8 +194,10 @@ public class Main extends JFrame {
                     future.cancel(false);
             } else if (tabbedPane1.getSelectedIndex() == 2) {
                 //让窗体获取焦点
-                requestFocus();
+                tabbedPane1.requestFocus();
                 reFresh();
+                if (future != null)
+                    future.cancel(false);
             } else {
                 //让窗体获取焦点
                 requestFocus();
@@ -305,10 +307,13 @@ public class Main extends JFrame {
         DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
         CheckVersionButton.addActionListener(e -> {
             try {
-                if (!downloadUpdate.checkIfTheLatestVersion())
+                if (!downloadUpdate.checkIfTheLatestVersion()) {
+                    JOptionPane.showConfirmDialog(Main.main, "已是最新版本！", "You are up to date", JOptionPane.OK_OPTION);
                     return;
+                }
             } catch (IOException e1) {
                 System.out.println("Error:" + e1);
+                JOptionPane.showConfirmDialog(Main.main, "无法获取更新，请稍后重试~", "Error", JOptionPane.OK_OPTION);
                 return;
             }
             new Thread(() -> {
@@ -538,9 +543,9 @@ public class Main extends JFrame {
         //创建文字
         var jLabel1 = new JLabel("Are you sure you want to exit?");
         //设置文字字体、格式
-        jLabel1.setFont(new Font("隶书", 0, 15));
+        jLabel1.setFont(new Font("微软雅黑", 0, 15));
         //设置显示大小、坐标
-        jLabel1.setBounds(15, 3, 200, 50);
+        jLabel1.setBounds(15, 3, 290, 50);
         //创建按钮
         var yes = new JButton("exit");
         var no = new JButton("cancel");

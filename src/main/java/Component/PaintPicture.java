@@ -64,12 +64,12 @@ public class PaintPicture extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                super.componentResized(e);
+//                super.componentResized(e);
                 sizeOperate.incomeWindowDimension(myCanvas.getSize());
                 sizeOperate.update();
             }
         });
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(1, 1));
         Robot robot = null;
         try {
             robot = new Robot();
@@ -159,12 +159,14 @@ public class PaintPicture extends JPanel {
                 myCanvas.setMouseCoordinate(e.getX(), e.getY());
                 //滚轮向后
                 if (e.getWheelRotation() == 1) {
-                    sizeOperate.adjustPercent(SizeOperate.Reduce);
-                    sizeOperate.adjustPercent(SizeOperate.Reduce);
+                    if (sizeOperate.adjustPercent(SizeOperate.Reduce) || sizeOperate.adjustPercent(SizeOperate.Reduce)) {
+                        sizeOperate.update();
+                    }
                 }//滚轮向前
                 else if (e.getWheelRotation() == -1) {
-                    sizeOperate.adjustPercent(SizeOperate.Enlarge);
-                    sizeOperate.adjustPercent(SizeOperate.Enlarge);
+                    if (sizeOperate.adjustPercent(SizeOperate.Enlarge) || sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
+                        sizeOperate.update();
+                    }
                 }
             }
         });
@@ -179,8 +181,10 @@ public class PaintPicture extends JPanel {
                 IsDragging = true;
                 new Thread(() -> {
                     do {
-                        sizeOperate.adjustPercent(SizeOperate.Enlarge);
-                        sizeOperate.update();
+                        if (!biggest.isEnabled()) return;
+                        if (sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
+                            sizeOperate.update();
+                        }
                         try {
                             Thread.sleep(16);
                         } catch (InterruptedException ex) {
@@ -216,8 +220,11 @@ public class PaintPicture extends JPanel {
                 new Thread(() -> {
                     //循环
                     do {
-                        sizeOperate.adjustPercent(SizeOperate.Reduce);
-                        sizeOperate.update();
+                        if (!smallest.isEnabled()) return;
+                        if (sizeOperate.adjustPercent(SizeOperate.Reduce)) {
+                            sizeOperate.update();
+                        }
+
                         //抛出异常
                         try {
                             //线程休眠
@@ -348,19 +355,19 @@ public class PaintPicture extends JPanel {
         //图片路径
         String path;
         //当前图片X坐标
-        private int X;
+        private double X;
         //当前图片Y坐标
-        private int Y;
+        private double Y;
         //点击时，鼠标X坐标
-        private int mouseX;
+        private double mouseX;
         //点击时，鼠标Y坐标
-        private int mouseY;
+        private double mouseY;
         //上次图片缩放比
         private double LastPercent;
         //上次图片宽度
-        private int lastWidth;
+        private double lastWidth;
         //上次图片高度
-        private int lastHeight;
+        private double lastHeight;
         //当前图片
         private Image image;
         //渲染器
@@ -392,13 +399,13 @@ public class PaintPicture extends JPanel {
 
         //图片左转
         public void turnLeft() {
-            changeDegrees(1);
+            addDegrees(1);
         }
 
 
         //图片右转
         public void turnRight() {
-            changeDegrees(-1);
+            addDegrees(-1);
         }
 
         //重置旋转度数
@@ -409,7 +416,7 @@ public class PaintPicture extends JPanel {
 
 
         //改变度数
-        private void changeDegrees(int addDegrees) {
+        private void addDegrees(int addDegrees) {
             RotationDegrees += addDegrees;
             RotationDegrees = (byte) (RotationDegrees % 4);
             if (RotationDegrees < 0) RotationDegrees = (byte) (4 + RotationDegrees);
@@ -418,7 +425,9 @@ public class PaintPicture extends JPanel {
 
         //设置度数
         private void setDegrees(int Degrees) {
+
             RotationDegrees = (byte) (Degrees % 4);
+            if (RotationDegrees < 0) RotationDegrees = (byte) (4 + RotationDegrees);
             sizeOperate.changeCanvas(this);
         }
 
@@ -484,28 +493,27 @@ public class PaintPicture extends JPanel {
             this.g = g;
             var graphics2D = (Graphics2D) g;
             graphics2D.rotate(Math.toRadians(RotationDegrees * 90));
-            int tempHeight = 0, tempWidth = 0;
-            //算法实现图片居中
-
-            if (Math.abs(RotationDegrees) == 1) {
-                int temp = mouseX;
+            //如果转动角度为0或180度，请无使用此值，此值为旋转其他度数的设计
+            double tempHeight = 0, tempWidth = 0;
+            tempWidth = lastHeight;
+            tempHeight = lastWidth;
+            //如果旋转角度不为0度，则转换x,y值（因为坐标轴）
+            if (RotationDegrees == 1) {
+                double temp = mouseX;
                 mouseX = mouseY;
                 mouseY = -temp;
-                tempWidth = lastHeight;
-                tempHeight = lastWidth;
-            } else if (Math.abs(RotationDegrees) == 2) {
+            } else if (RotationDegrees == 2) {
                 mouseX = -mouseX;
                 mouseY = -mouseY;
-            } else if (Math.abs(RotationDegrees) == 3) {
-                int temp = mouseX;
+            } else if (RotationDegrees == 3) {
+                double temp = mouseX;
                 mouseX = -mouseY;
                 mouseY = temp;
-                tempWidth = lastHeight;
-                tempHeight = lastWidth;
             }
 
-            int width;
+            double width;
             double WindowHeight = 0, WindowWidth = 0, LastWindowHeight = 0, LastWindowWidth = 0;
+            //尝试获取之前和现在的组件大小信息
             if (NewWindow != null) {
                 WindowWidth = NewWindow.getWidth();
                 WindowHeight = NewWindow.getHeight();
@@ -515,58 +523,61 @@ public class PaintPicture extends JPanel {
                 LastWindowWidth = LastWindow.getWidth();
                 LastWindowHeight = LastWindow.getHeight();
             }
+            //判断窗体、图片缩放比例相比于之前是否存在改变（如果没有，则执行本代码）
             if (RotationDegrees == lastRotationDegrees && LastPercent == sizeOperate.getPercent() && LastWindow != null && LastWindow.equals(NewWindow)) {
                 X += mouseX;
                 Y += mouseY;
                 if (RotationDegrees == 0) {
-                    if (X > WindowWidth) X = (int) WindowWidth;
-                    if (Y > WindowHeight) Y = (int) WindowHeight;
+                    if (X > WindowWidth) X = WindowWidth;
+                    if (Y > WindowHeight) Y = WindowHeight;
                     if (X + lastWidth < 0) X = -lastWidth;
                     if (Y + lastWidth < 0) Y = -lastWidth;
                 } else if (RotationDegrees == 1) {
-                    if (X > WindowHeight) X = (int) WindowHeight;
+                    if (X > WindowHeight) X = WindowHeight;
                     if (Y > 0) Y = 0;
                     if (X + tempHeight < 0) X = -tempHeight;
-                    if (Y + tempWidth < -WindowWidth) Y = (int) (-WindowWidth - tempWidth);
+                    if (Y + tempWidth < -WindowWidth) Y = (-WindowWidth - tempWidth);
                 } else if (RotationDegrees == 2) {
-                    if (X + lastWidth < -WindowWidth) X = (int) (-WindowWidth - lastWidth);
+                    if (X + lastWidth < -WindowWidth) X = (-WindowWidth - lastWidth);
                     if (Y > 0) Y = 0;
                     if (X > 0) X = 0;
-                    if (Y + lastHeight < -WindowHeight) Y = (int) (-WindowHeight - lastHeight);
+                    if (Y + lastHeight < -WindowHeight) Y = (-WindowHeight - lastHeight);
                 } else if (RotationDegrees == 3) {
                     if (X > 0) X = 0;
-                    if (X + tempHeight < -WindowHeight) X = (int) (-WindowHeight - tempHeight);
-                    if (Y > WindowWidth) Y = (int) WindowWidth;
+                    if (X + tempHeight < -WindowHeight) X = (-WindowHeight - tempHeight);
+                    if (Y > WindowWidth) Y = WindowWidth;
                     if (Y + tempWidth < 0) Y = -tempWidth;
                 }
-                graphics2D.drawImage(image, X, Y, lastWidth, lastHeight, null);
+                graphics2D.drawImage(image, (int) X, (int) Y, (int) lastWidth, (int) lastHeight, null);
                 mouseX = mouseY = 0;
                 lastRotationDegrees = RotationDegrees;
                 return;
             }
+            //判断图片缩放比例是否与上次相同
             if (RotationDegrees != lastRotationDegrees) {
                 sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
-                Point point = ImageRotationHelper.getRotatedCoord(X, Y, 360 - 90 * RotationDegrees, lastWidth, lastHeight);
-                X = (int) point.getX();
-                Y = (int) point.getY();
+                Point point = ImageRotationHelper.getRotatedCoord((int) X, (int) Y, 360 - 90 * RotationDegrees, (int) lastWidth, (int) lastHeight);
+                X = point.getX();
+                Y = point.getY();
             }
 
-            if (NewWindow != null && NewWindow.getHeight() * NewWindow.getWidth() > lastHeight * lastWidth) {
-                sizeOperate.setPercent(sizeOperate.getPercent() + 1);//面板·放大图片比例会变小，没写好该校正代码，暂以+1来校对，以后优化！
-            }
-            if ((RotationDegrees - lastRotationDegrees == 0) && mouseX == 0 && mouseY == 0) {
+//            if (NewWindow != null && NewWindow.getHeight() * NewWindow.getWidth() > lastHeight * lastWidth) {
+//                sizeOperate.setPercent(sizeOperate.getPercent() + 1);//面板·放大图片比例会变小，没写好该校正代码，暂以+1来校对，以后优化！
+//            }
+
+            if (RotationDegrees == lastRotationDegrees && mouseX == 0 && mouseY == 0) {
                 if (RotationDegrees == 0) {
-                    mouseX = (int) (WindowWidth / 2);
-                    mouseY = (int) (WindowHeight / 2);
+                    mouseX = (WindowWidth / 2);
+                    mouseY = (WindowHeight / 2);
                 } else if (RotationDegrees == 1) {
-                    mouseX = (int) (WindowHeight / 2);
-                    mouseY = (int) -(WindowWidth / 2);
+                    mouseX = (WindowHeight / 2);
+                    mouseY = -(WindowWidth / 2);
                 } else if (RotationDegrees == 2) {
-                    mouseX = (int) -(WindowWidth / 2);
-                    mouseY = (int) -(WindowHeight / 2);
+                    mouseX = -(WindowWidth / 2);
+                    mouseY = -(WindowHeight / 2);
                 } else if (RotationDegrees == 3) {
-                    mouseX = (int) -(WindowHeight / 2);
-                    mouseY = (int) (WindowWidth / 2);
+                    mouseX = -(WindowHeight / 2);
+                    mouseY = (WindowWidth / 2);
                 }
             }
             double WidthRatio = 0;
@@ -578,15 +589,10 @@ public class PaintPicture extends JPanel {
                 if (WidthRatio != 1 && HeightRatio != 1) PictureChangeRatio = (HeightRatio + WidthRatio) / 2;
             }
 
-            PictureChangeRatio = 1 / PictureChangeRatio;
-
-            width = (int) (getImageWidth() * sizeOperate.getPercent() / 100 * PictureChangeRatio);
-            int height = (int) EqualsProportion.Start(0, width, getImageHeight(), getImageWidth());
+            width = (getImageWidth() * sizeOperate.getPercent() / 100 * (1 / PictureChangeRatio));
+            double height = EqualsProportion.Start(0, width, getImageHeight(), getImageWidth());
             sizeOperate.setPercent(width * 100.0 / getImageWidth());
-
-
-            int FinalX = X, FinalY = Y;
-
+            double FinalX = X, FinalY = Y;
 
             if (RotationDegrees % 2 == 0 && NewWindow != null && NewWindow.equals(LastWindow) && lastWidth != 0 && lastHeight != 0) {
                 FinalX = width * (FinalX - mouseX) / lastWidth + mouseX;
@@ -599,49 +605,49 @@ public class PaintPicture extends JPanel {
             if (RotationDegrees == 0) {
                 if (WindowWidth <= width) {
                     if (FinalX > 0) FinalX = 0;
-                    if (FinalX + width < WindowWidth) FinalX = (int) (WindowWidth - width);
-                } else FinalX = (int) ((WindowWidth - width) / 2);
+                    if (FinalX + width < WindowWidth) FinalX = (WindowWidth - width);
+                } else FinalX = ((WindowWidth - width) / 2);
 
                 if (WindowHeight <= height) {
                     if (FinalY > 0) FinalY = 0;
-                    if (FinalY + height < WindowHeight) FinalY = (int) (WindowHeight - height);
-                } else FinalY = (int) ((WindowHeight - height) / 2);
+                    if (FinalY + height < WindowHeight) FinalY = (WindowHeight - height);
+                } else FinalY = ((WindowHeight - height) / 2);
             } else if (RotationDegrees == 1) {
                 if (WindowHeight <= width) {
                     if (FinalX > 0) FinalX = 0;
-                    if (FinalX + width < WindowHeight) FinalX = (int) (WindowHeight - width);
-                } else FinalX = (int) ((WindowHeight - width) / 2);
+                    if (FinalX + width < WindowHeight) FinalX = (WindowHeight - width);
+                } else FinalX = ((WindowHeight - width) / 2);
 
                 if (WindowWidth <= height) {
-                    if (FinalY > -WindowWidth) FinalY = (int) -WindowWidth;
+                    if (FinalY > -WindowWidth) FinalY = -WindowWidth;
                     if (FinalY < -height) FinalY = -height;
-                } else FinalY = (int) ((-height - WindowWidth) / 2);
+                } else FinalY = ((-height - WindowWidth) / 2);
             } else if (RotationDegrees == 2) {
                 if (WindowWidth <= width) {
-                    if (FinalX > -WindowWidth) FinalX = (int) -WindowWidth;
+                    if (FinalX > -WindowWidth) FinalX = -WindowWidth;
                     if (FinalX < -width) FinalX = -width;
-                } else FinalX = (int) ((-width - WindowWidth) / 2);
+                } else FinalX = ((-width - WindowWidth) / 2);
 
                 if (WindowHeight <= height) {
-                    if (FinalY > -WindowHeight) FinalY = (int) -WindowHeight;
+                    if (FinalY > -WindowHeight) FinalY = -WindowHeight;
                     if (FinalY < -height) FinalY = -height;
-                } else FinalY = (int) ((-height - WindowHeight) / 2);
+                } else FinalY = ((-height - WindowHeight) / 2);
             } else if (RotationDegrees == 3) {
                 if (WindowHeight <= width) {
-                    if (FinalX > -WindowHeight) FinalX = (int) -WindowHeight;
+                    if (FinalX > -WindowHeight) FinalX = -WindowHeight;
                     if (FinalX < -width) FinalX = -width;
-                } else FinalX = (int) ((-width - WindowHeight) / 2);
+                } else FinalX = ((-width - WindowHeight) / 2);
 
                 if (WindowWidth <= height) {
                     if (FinalY > 0) FinalY = 0;
-                    if (FinalY + height < WindowWidth) FinalY = (int) (WindowWidth - height);
-                } else FinalY = (int) ((WindowWidth - height) / 2);
+                    if (FinalY + height < WindowWidth) FinalY = (WindowWidth - height);
+                } else FinalY = ((WindowWidth - height) / 2);
 
             }
 
 
             //显示图像
-            graphics2D.drawImage(image, FinalX, FinalY, width, height, null);
+            graphics2D.drawImage(image, (int) FinalX, (int) FinalY, (int) width, (int) height, null);
             //检查比例是否为最大值，如果为最大就把放大按钮禁用
             if (PaintPicture.paintPicture.biggest != null)
                 PaintPicture.paintPicture.biggest.setEnabled(!PaintPicture.paintPicture.sizeOperate.isTheBiggestRatio());
@@ -661,8 +667,7 @@ public class PaintPicture extends JPanel {
         }
 
         protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-
+            System.out.println(1);
         }
 
         public void repaint() {
