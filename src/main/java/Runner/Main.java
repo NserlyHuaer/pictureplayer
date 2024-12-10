@@ -70,8 +70,6 @@ public class Main extends JFrame {
     private static boolean IsDragging;
     //最新版本下载地址（如果当前是最新版本，则返回null值）
     private static List<String> NewVersionDownloadingWebSide;
-    //更新界面窗口
-    public static AdvancedDownloadSpeedDisplay$$$ advancedDownloadSpeedDisplay;
     //更新维护线程
     public static Thread DaemonUpdate;
     //更新网站（必须指定VersionID.sum下载地址）
