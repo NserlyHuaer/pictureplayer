@@ -22,7 +22,7 @@ public class DownloadUpdateFrame extends JFrame {
     private JProgressBar CurrentProgress;
     private JPanel Main;
     private JLabel SpeedLabel;
-    private JLabel DownloadCountings;
+    private JLabel DownloadCounting;
     private DownloadUpdate downloadUpdate;
 
 
@@ -33,7 +33,7 @@ public class DownloadUpdateFrame extends JFrame {
         formation.Change("VersionID", String.valueOf(update.NewVersionID));
         Title.setText(formation.getResult().toString());
         downloadUpdate = update;
-        DownloadCountings.setText(DownloadCountings.getText() + "\n{current}/{total}");
+        DownloadCounting.setText(DownloadCounting.getText() + "\n{current}/{total}");
         pack();
         setSize(getWidth(), 200);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -58,7 +58,7 @@ public class DownloadUpdateFrame extends JFrame {
 
     public void setVisible(boolean b) {
         if (b && !isVisible()) {
-            AdvancedDownloadSpeed advancedDownloadSpeed = new AdvancedDownloadSpeed(downloadUpdate, TotalProgress, CurrentProgress, SpeedLabel, DownloadCountings);
+            AdvancedDownloadSpeed advancedDownloadSpeed = new AdvancedDownloadSpeed(downloadUpdate, TotalProgress, CurrentProgress, SpeedLabel, DownloadCounting);
             Point location = WindowLocation.ParentCenter(Runner.Main.main, getWidth(), getHeight());
             setLocation(location);
         }
@@ -112,10 +112,10 @@ public class DownloadUpdateFrame extends JFrame {
         Main.add(CurrentDownloadProgress, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CurrentProgress = new JProgressBar();
         Main.add(CurrentProgress, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(463, 4), null, 0, false));
-        DownloadCountings = new JLabel();
-        DownloadCountings.setHorizontalAlignment(2);
-        DownloadCountings.setText("下载数：");
-        Main.add(DownloadCountings, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(463, 17), null, 0, false));
+        DownloadCounting = new JLabel();
+        DownloadCounting.setHorizontalAlignment(2);
+        DownloadCounting.setText("下载数：");
+        Main.add(DownloadCounting, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(463, 17), null, 0, false));
     }
 
     /**

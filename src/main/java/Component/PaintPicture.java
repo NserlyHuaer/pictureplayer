@@ -43,6 +43,8 @@ public class PaintPicture extends JPanel {
     public MyCanvas myCanvas;
     //判断按钮是否被按下
     private static boolean IsDragging;
+    //移动图片时，鼠标最开始的坐标（对于桌面）
+    Point mouseLocation;
 
 
     //构造方法（函数）
@@ -56,8 +58,6 @@ public class PaintPicture extends JPanel {
         //创建画布
         myCanvas = new MyCanvas(path);
         sizeOperate = new SizeOperate(myCanvas, myCanvas.getSize());
-        //设置面板大小、坐标
-        setBounds(GetImageInformation.getBestSize(path));
         //设置文本中显示的图片缩放比例
         percentLabel.set((int) sizeOperate.getPercent());
         //添加面板大小改变监听器
@@ -84,11 +84,13 @@ public class PaintPicture extends JPanel {
             //鼠标一按下就触发
             @Override
             public void mousePressed(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1) return;
                 op = new OperatingCoordinate(e.getX(), e.getY());
                 EnableCursorDisplay[0] = Centre.getBoolean("EnableCursorDisplay", Main.main.centre.CurrentData);
                 if (EnableCursorDisplay[0]) return;
                 setCursor(Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), null));
                 Point Local = myCanvas.getLocationOnScreen();
+                mouseLocation = MouseInfo.getPointerInfo().getLocation();
                 if (ShowingSize != null && LocationOnScreen != null && ShowingSize.equals(sizeOperate.getWindowSize()) && LocationOnScreen.equals(Local))
                     return;
                 ShowingSize = sizeOperate.getWindowSize();
@@ -107,49 +109,59 @@ public class PaintPicture extends JPanel {
                 if (ComponentPointOnDesktop.y > SizeOperate.screenSize.height)
                     maxY -= ComponentPointOnDesktop.y - SizeOperate.screenSize.height;
                 MaxPoint = new Point(maxX, maxY);
+
             }
 
 
             //鼠标放出触发
             public void mouseReleased(MouseEvent e) {
-                if (!EnableCursorDisplay[0])
-                    setCursor(Cursor.getDefaultCursor());
-            }
-        });
-        myCanvas.addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                int x = e.getX(), y = e.getY();
+                if (e.getButton() != MouseEvent.BUTTON1) return;
                 if (!EnableCursorDisplay[0]) {
-                    boolean NeedToMove = false;
-                    if (x <= MinPoint.x) {
-                        x = MaxPoint.x - 2;
-                        NeedToMove = true;
-                    } else if (x >= MaxPoint.x - 1) {
-                        x = MinPoint.x + 1;
-                        NeedToMove = true;
-                    }
-                    if (y <= MinPoint.y) {
-                        y = MaxPoint.y - 2;
-                        NeedToMove = true;
-                    } else if (y >= MaxPoint.y - 1) {
-                        y = MinPoint.y + 1;
-                        NeedToMove = true;
-                    }
-
-                    if (NeedToMove) {
-                        op = new OperatingCoordinate(x, y);
-                        Point point = myCanvas.getLocationOnScreen();
-                        finalRobot.mouseMove(x + point.x, y + point.y);
-                        return;
-                    }
+                    setCursor(Cursor.getDefaultCursor());
+                    if (finalRobot != null)
+                        finalRobot.mouseMove(mouseLocation.x, mouseLocation.y);
                 }
-                //增加坐标值
-                myCanvas.setMouseCoordinate((int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (y - op.y())));
-                sizeOperate.update();
-                op = new OperatingCoordinate(x, y);
             }
         });
+        myCanvas.addMouseMotionListener(
+                new MouseAdapter() {
+                    @Override
+                    public void mouseDragged(MouseEvent e) {
+                        if (!SwingUtilities.isLeftMouseButton(e))
+                            return;
+                        int x = e.getX(), y = e.getY();
+                        if (!EnableCursorDisplay[0]) {
+                            boolean NeedToMove = false;
+                            if (x <= MinPoint.x) {
+                                x = MaxPoint.x - 2;
+                                NeedToMove = true;
+                            } else if (x >= MaxPoint.x - 1) {
+                                x = MinPoint.x + 1;
+                                NeedToMove = true;
+                            }
+                            if (y <= MinPoint.y) {
+                                y = MaxPoint.y - 2;
+                                NeedToMove = true;
+                            } else if (y >= MaxPoint.y - 1) {
+                                y = MinPoint.y + 1;
+                                NeedToMove = true;
+                            }
+
+                            if (NeedToMove) {
+                                op = new OperatingCoordinate(x, y);
+                                Point point = myCanvas.getLocationOnScreen();
+                                if (finalRobot != null) {
+                                    finalRobot.mouseMove(x + point.x, y + point.y);
+                                }
+                                return;
+                            }
+                        }
+                        //增加坐标值
+                        myCanvas.setMouseCoordinate((int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (y - op.y())));
+                        sizeOperate.update();
+                        op = new OperatingCoordinate(x, y);
+                    }
+                });
 
         myCanvas.addMouseWheelListener(new MouseAdapter() {
             //鼠标滚轮事件
@@ -328,7 +340,6 @@ public class PaintPicture extends JPanel {
                 times.set(1);
             }
             ClickedTime.set(System.currentTimeMillis());
-            sizeOperate.update();
         });
         Reset.addMouseListener(changeFocusListener);
         JButton FlipHorizontally = new JButton("FlipHorizontally");
@@ -490,6 +501,9 @@ public class PaintPicture extends JPanel {
 
         @Override
         public synchronized void paint(Graphics g) {
+            if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0) {
+                return;
+            }
             this.g = g;
             var graphics2D = (Graphics2D) g;
             graphics2D.rotate(Math.toRadians(RotationDegrees * 90));
@@ -517,7 +531,7 @@ public class PaintPicture extends JPanel {
             if (NewWindow != null) {
                 WindowWidth = NewWindow.getWidth();
                 WindowHeight = NewWindow.getHeight();
-                if (LastWindow == null) {
+                if (LastWindow == null || LastWindow.width == 0 || LastWindow.height == 0) {
                     LastWindow = NewWindow;
                 }
                 LastWindowWidth = LastWindow.getWidth();
@@ -588,7 +602,7 @@ public class PaintPicture extends JPanel {
                 HeightRatio = LastWindowHeight / WindowHeight;
                 if (WidthRatio != 1 && HeightRatio != 1) PictureChangeRatio = (HeightRatio + WidthRatio) / 2;
             }
-
+            if (PictureChangeRatio == 0) return;
             width = (getImageWidth() * sizeOperate.getPercent() / 100 * (1 / PictureChangeRatio));
             double height = EqualsProportion.Start(0, width, getImageHeight(), getImageWidth());
             sizeOperate.setPercent(width * 100.0 / getImageWidth());

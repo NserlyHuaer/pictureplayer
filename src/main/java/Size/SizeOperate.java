@@ -125,6 +125,10 @@ public class SizeOperate {
 
     //获取图片最佳比例
     public double getPictureOptimalSize() {
+        if (Component == null || Component.width == 0 || Component.height == 0) {
+            System.out.println("Error:Could not get window optimal size");
+            return Default;
+        }
         int PictureWidth = myCanvas.getImageWidth();
         int PictureHeight = myCanvas.getImageHeight();
         if (myCanvas.getDegrees() / 90 % 2 == 1) {

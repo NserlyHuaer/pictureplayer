@@ -88,40 +88,4 @@ public class CommandCenter {
         System.exit(0);
     }
 
-
-    /*public static void replace(String DownloadFilePath) throws IOException {
-        // 假设updateFile()是一个自定义方法，负责从网络或其他来源获取新版jar文件
-        System.out.println(DownloadFilePath);
-        Path newJarPath = Paths.get(DownloadFilePath);
-        Path oldJarPath = Paths.get(CURRENT_JAR_PATH);
-        Files.move(newJarPath, oldJarPath, StandardCopyOption.REPLACE_EXISTING);
-        System.out.println("Updated to new version.");
-    }*/
-
-
-    /*private static void restart() {
-        RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
-        String name = runtimeMXBean.getName();
-        int pid = Integer.parseInt(name.split("@")[0]);
-
-        try {
-            String javaCmd = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-            String classPath = System.getProperty("java.class.path");
-            List<String> cmd = Arrays.asList(javaCmd, "-classpath", classPath, CommandCenter.class.getCanonicalName(), Integer.toString(pid));
-
-            ProcessBuilder pb = new ProcessBuilder(cmd);
-            pb.redirectErrorStream(true); // 合并标准输出和错误输出
-            pb.inheritIO(); // 输入输出流继承自父进程
-
-            Process process = pb.start();
-            process.waitFor();
-
-            System.out.println("Restarted successfully.");
-            System.exit(0);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Failed to restart.");
-            System.exit(1);
-        }
-    }*/
 }
