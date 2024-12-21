@@ -72,18 +72,26 @@ public class CheckFileIsRightPictureType {
 
     public String FilePathToString(String separator, File... files) {
         StringBuffer sb = new StringBuffer();
+        boolean isFist = true;
         for (File file : files) {
+            if (!isFist) {
+                sb.append(separator);
+            }
             sb.append(file.getAbsolutePath());
-            sb.append(separator);
+            isFist = false;
         }
         return sb.toString();
     }
 
     public String FilePathToString(String separator, ArrayList<File> files) {
         StringBuffer sb = new StringBuffer();
+        boolean isFist = true;
         for (File file : files) {
+            if (!isFist) {
+                sb.append(separator);
+            }
             sb.append(file.getAbsolutePath());
-            sb.append(separator);
+            isFist = false;
         }
         return sb.toString();
     }
