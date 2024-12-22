@@ -187,7 +187,7 @@ public class Main extends JFrame {
                                 return;
                             }
                         } else {
-                            choose = OpenImageChooser.openImageWithChoice(Main.main, files);
+                            choose = OpenImageChooser.openImageWithChoice(Main.main, checkFileIsRightPictureType.getImageList());
                             if (choose == null) return;
                         }
                         if (paintPicture != null && paintPicture.myCanvas != null && choose.equals(new File(paintPicture.myCanvas.getPath())))
