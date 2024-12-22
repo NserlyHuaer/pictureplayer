@@ -7,8 +7,13 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -20,9 +25,10 @@ public class GetImageInformation {
         }
         return new File(path).isFile() && new File(path).exists();
     }
+
     //算法实现：获取文件是否为受Java支持的图片格式
     public static boolean isImageFile(File file) {
-        if (file == null) return false;
+        if (file == null || file.isDirectory()) return false;
         try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(file)) {
             Iterator<ImageReader> imageReaderIterator = ImageIO.getImageReaders(imageInputStream);
             return imageReaderIterator.hasNext();
@@ -30,6 +36,62 @@ public class GetImageInformation {
             return false;
         }
     }
+
+    //算法实现：获取图片大小
+    public static Dimension getImageSize(File file) throws IOException {
+        if (file == null) return null;
+        Image image = ImageIO.read(file);
+        if (image == null) return null;
+        return new Dimension(image.getWidth(null), image.getHeight(null));
+    }
+
+    //算法实现：获取图片hashcode值
+    public static String getHashcode(File file) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            FileInputStream fis = new FileInputStream(file);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                md.update(buffer, 0, bytesRead);
+            }
+            fis.close();
+            byte[] hashBytes = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException | IOException e) {
+            System.out.println("Error:" + e.getMessage());
+        }
+        return null;
+    }
+
+    //算法实现：获取图片格式
+    public static String getPictureType(File file) throws IOException {
+        try {
+            ImageInputStream iis = ImageIO.createImageInputStream(file);
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (readers.hasNext()) {
+                ImageReader reader = readers.next();
+                reader.setInput(iis);
+                return reader.getFormatName();
+            }
+        } catch (IOException e) {
+            System.out.println("Error:" + e);
+        }
+        return null;
+    }
+
+    // 获取位深度的方法
+    public static int getBitDepth(String imagePath) throws IOException {
+        File file = new File(imagePath);
+        BufferedImage image = ImageIO.read(file);
+        return image.getColorModel().getPixelSize();
+    }
+
+
     //算法实现：获取最佳大小、坐标
     public static Rectangle getBestSize(String path) {
         //如果字符串前缀与后缀包含"，则去除其中的"
@@ -63,6 +125,7 @@ public class GetImageInformation {
         //返回结果
         return new Rectangle(X, Y, Width, Height);
     }
+
     //获取当前图片路径下所有图片
     public static ArrayList<String> getCurrentPathOfPicture(String path) {
         File[] files = new File(new File(path).getParent()).listFiles();

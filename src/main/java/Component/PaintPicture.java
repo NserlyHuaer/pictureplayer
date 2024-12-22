@@ -21,6 +21,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public class PaintPicture extends JPanel {
     //图片打开面板
     public static PaintPicture paintPicture;
+    //上部
+    public JPanel On;
+    //下部
+    public JPanel Under;
     //图片放大按钮
     public JButton biggest;
     //图片缩小按钮
@@ -109,7 +113,7 @@ public class PaintPicture extends JPanel {
                 if (ComponentPointOnDesktop.y > SizeOperate.screenSize.height)
                     maxY -= ComponentPointOnDesktop.y - SizeOperate.screenSize.height;
                 MaxPoint = new Point(maxX, maxY);
-
+                setLayout(new BorderLayout());
             }
 
 
@@ -260,14 +264,14 @@ public class PaintPicture extends JPanel {
         });
         ChangeFocusListener changeFocusListener = new ChangeFocusListener(myCanvas);
         //初始化面板
-        var Enum = new JPanel();
-        var On = getjPanel(changeFocusListener);
-        Enum.setLayout(new GridLayout(1, 2));
+        Under = new JPanel();
+        On = getjPanel(changeFocusListener);
+        Under.setLayout(new GridLayout(1, 2));
         //添加组件
-        Enum.add(smallest);
-        Enum.add(biggest);
+        Under.add(smallest);
+        Under.add(biggest);
         //设置菜单为面板下方并添加至组件中
-        add(Enum, BorderLayout.SOUTH);
+        add(Under, BorderLayout.SOUTH);
         //设置为面板上方并添加至组件中
         add(On, BorderLayout.NORTH);
         //添加画布至组件中
@@ -663,11 +667,11 @@ public class PaintPicture extends JPanel {
             //显示图像
             graphics2D.drawImage(image, (int) FinalX, (int) FinalY, (int) width, (int) height, null);
             //检查比例是否为最大值，如果为最大就把放大按钮禁用
-            if (PaintPicture.paintPicture.biggest != null)
-                PaintPicture.paintPicture.biggest.setEnabled(!PaintPicture.paintPicture.sizeOperate.isTheBiggestRatio());
+            if (paintPicture.biggest != null)
+                paintPicture.biggest.setEnabled(!paintPicture.sizeOperate.isTheBiggestRatio());
             //检查比例是否为最小值，如果为最小就把放大按钮禁用
-            if (PaintPicture.paintPicture.smallest != null)
-                PaintPicture.paintPicture.smallest.setEnabled(!PaintPicture.paintPicture.sizeOperate.isTheSmallestRatio());
+            if (paintPicture.smallest != null)
+                paintPicture.smallest.setEnabled(!paintPicture.sizeOperate.isTheSmallestRatio());
             //设置文本中显示的图片缩放比例
             percentLabel.set((int) sizeOperate.getPercent());
             this.X = FinalX;

@@ -3,6 +3,7 @@ package Runner;
 import Listener.ChangeFocusListener;
 import Loading.Init;
 import Tools.Component.WindowLocation;
+import Tools.File.ImageThumbnailManage.Center;
 import Tools.ImageManager.CheckFileIsRightPictureType;
 import Tools.ImageManager.GetImageInformation;
 import Tools.OSInformation.MemoryUtil;
@@ -76,6 +77,8 @@ public class Main extends JFrame {
     private static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
     private final ChangeFocusListener changeFocusListener;
+    //图片缩略图
+    public Center center;
     //判断按钮是否被按下
     private static boolean IsDragging;
     //最新版本下载地址（如果当前是最新版本，则返回null值）
@@ -139,6 +142,7 @@ public class Main extends JFrame {
 
     public Main(String title) {
         super(title);
+        center = new Center();
         changeFocusListener = new ChangeFocusListener(this);
         centre = new Centre();
         $$$setupUI$$$();
@@ -173,10 +177,22 @@ public class Main extends JFrame {
                         checkFileIsRightPictureType.statistics();
 
                         if (checkFileIsRightPictureType.getNotImageCount() != 0) {
-                            JOptionPane.showConfirmDialog(Main.main, "尚未支持打开此文件:\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(Main.main, "尚未支持打开此文件:\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", "Error", JOptionPane.ERROR_MESSAGE);
                             if (checkFileIsRightPictureType.getImageCount() == 0) return;
                         }
-                        openPicture(String.valueOf(checkFileIsRightPictureType.getImageList().getFirst()));
+                        File choose;
+                        if (checkFileIsRightPictureType.getImageCount() == 1) {
+                            choose = checkFileIsRightPictureType.getImageList().getFirst();
+                            if (JOptionPane.showConfirmDialog(Main.main, "是否打开文件:\n\"" + choose.getPath() + "\"", "打开", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+                                return;
+                            }
+                        } else {
+                            choose = OpenImageChooser.openImageWithChoice(Main.main, files);
+                            if (choose == null) return;
+                        }
+                        if (paintPicture != null && paintPicture.myCanvas != null && choose.equals(new File(paintPicture.myCanvas.getPath())))
+                            return;
+                        openPicture(String.valueOf(choose));
                     }
                 } catch (IOException | UnsupportedFlavorException e) {
                     System.out.println("Error:" + e);
@@ -664,6 +680,9 @@ public class Main extends JFrame {
                 init.ChangeValue("EnableConfirmExit", "false");
                 init.Update();
             }
+            if (Main.main != null) {
+                Main.main.center.save();
+            }
             System.exit(0);
         });
         yes.addMouseListener(changeFocusListener);
@@ -688,6 +707,9 @@ public class Main extends JFrame {
                     if (jCheckBox.isSelected()) {
                         init.ChangeValue("EnableConfirmExit", "false");
                         init.Update();
+                    }
+                    if (Main.main != null) {
+                        Main.main.center.save();
                     }
                     System.exit(0);
                 }
@@ -729,7 +751,7 @@ public class Main extends JFrame {
                     if (returnValue == JFileChooser.APPROVE_OPTION) {
                         String picturePath = fileChooser.getSelectedFile().getAbsolutePath();
                         if (!GetImageInformation.isImageFile(new File(picturePath))) {
-                            JOptionPane.showConfirmDialog(Main.main, "尚未支持打开此文件:\n\"" + picturePath + "\"", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(Main.main, "尚未支持打开此文件:\n\"" + picturePath + "\"", "Error", JOptionPane.ERROR_MESSAGE);
                             continue;
                         } else {
                             break;

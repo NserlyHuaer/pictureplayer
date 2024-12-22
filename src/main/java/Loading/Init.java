@@ -10,7 +10,7 @@ public class Init<KEY, VALUE> {
     private final File f = new File("data/Properties.prpt");
     private final Properties properties = new Properties();
     private boolean EnableAutoUpdate;
-    private final String[] createDirectory = {"data", "cache", "download"};
+    private final String[] createDirectory = {"data", "cache","cache/thum", "download"};
 
     public Init() {
         File dire;
@@ -20,7 +20,6 @@ public class Init<KEY, VALUE> {
                 dire.mkdir();
             }
         }
-        clearDirectory(new File("./cache/"));
         clearDirectory(new File("./download/"));
         clearDirectory(new File("replace.sh"));
         clearDirectory(new File("replace.bat"));
@@ -44,7 +43,6 @@ public class Init<KEY, VALUE> {
                     continue;
                 }
                 file.delete();
-
             }
         }
     }
