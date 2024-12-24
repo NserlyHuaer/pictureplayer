@@ -59,7 +59,7 @@ public class DownloadUpdateFrame extends JFrame {
     public void setVisible(boolean b) {
         if (b && !isVisible()) {
             AdvancedDownloadSpeed advancedDownloadSpeed = new AdvancedDownloadSpeed(downloadUpdate, TotalProgress, CurrentProgress, SpeedLabel, DownloadCounting);
-            Point location = WindowLocation.ParentCenter(Runner.Main.main, getWidth(), getHeight());
+            Point location = WindowLocation.ComponentCenter(Runner.Main.main, getWidth(), getHeight());
             setLocation(location);
         }
         Runner.Main.main.setVisible(!b);

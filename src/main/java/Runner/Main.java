@@ -74,6 +74,7 @@ public class Main extends JFrame {
     private JLabel CurrentSoftwareLanguage;
     private JLabel MemUsed;
     private JPanel FileChoosePane;
+    private JScrollPane jscrollPane;
     private static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
     private final ChangeFocusListener changeFocusListener;
@@ -183,7 +184,7 @@ public class Main extends JFrame {
                         File choose;
                         if (checkFileIsRightPictureType.getImageCount() == 1) {
                             choose = checkFileIsRightPictureType.getImageList().getFirst();
-                            if (JOptionPane.showConfirmDialog(Main.main, "是否打开文件:\n\"" + choose.getPath() + "\"", "打开", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+                            if (Main.main.paintPicture != null && !new File(Main.main.paintPicture.myCanvas.getPath()).equals(choose) && JOptionPane.showConfirmDialog(Main.main, "是否打开文件:\n\"" + choose.getPath() + "\"", "打开", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
                                 return;
                             }
                         } else {
@@ -242,21 +243,15 @@ public class Main extends JFrame {
             if (tabbedPane1.getSelectedIndex() == 0) {
                 //让路径输入框获取焦点
                 textField1.requestFocus();
-                if (future != null)
-                    future.cancel(false);
             } else if (tabbedPane1.getSelectedIndex() == 1) {
                 //让图片渲染器获取焦点
                 if (paintPicture != null) {
                     paintPicture.myCanvas.requestFocus();
                 }
-                if (future != null)
-                    future.cancel(false);
             } else if (tabbedPane1.getSelectedIndex() == 2) {
                 //让窗体获取焦点
                 tabbedPane1.requestFocus();
                 reFresh();
-                if (future != null)
-                    future.cancel(false);
             } else {
                 //让窗体获取焦点
                 requestFocus();
@@ -292,7 +287,6 @@ public class Main extends JFrame {
                 close();
             }
         });
-
     }
 
     //打开图片
@@ -426,11 +420,11 @@ public class Main extends JFrame {
         panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.setRequestFocusEnabled(true);
-        final JScrollPane scrollPane1 = new JScrollPane();
-        panel1.add(scrollPane1, new GridConstraints(1, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        jscrollPane = new JScrollPane();
+        panel1.add(jscrollPane, new GridConstraints(1, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         tabbedPane1 = new JTabbedPane();
         tabbedPane1.setRequestFocusEnabled(false);
-        scrollPane1.setViewportView(tabbedPane1);
+        jscrollPane.setViewportView(tabbedPane1);
         FirstPanel = new JPanel();
         FirstPanel.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
         FirstPanel.setName("");
@@ -643,7 +637,7 @@ public class Main extends JFrame {
         jDialog.setTitle("Confirm Exit");
         //设置面板大小（获取父面板坐标）
         jDialog.setSize(260, 170);
-        jDialog.setLocation(WindowLocation.ParentCenter(main, jDialog.getWidth(), jDialog.getHeight()));
+        jDialog.setLocation(WindowLocation.ComponentCenter(main, jDialog.getWidth(), jDialog.getHeight()));
         //创建文字
         var jLabel1 = new JLabel("Are you sure you want to exit?");
         //设置文字字体、格式
@@ -754,6 +748,10 @@ public class Main extends JFrame {
                             JOptionPane.showMessageDialog(Main.main, "尚未支持打开此文件:\n\"" + picturePath + "\"", "Error", JOptionPane.ERROR_MESSAGE);
                             continue;
                         } else {
+                            if (Main.main.paintPicture != null && new File(Main.main.paintPicture.myCanvas.getPath()).equals(fileChooser.getSelectedFile())) {
+                                tabbedPane1.setSelectedIndex(1);
+                                return;
+                            }
                             break;
                         }
                     }

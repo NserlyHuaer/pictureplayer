@@ -93,25 +93,24 @@ public class PaintPicture extends JPanel {
                 EnableCursorDisplay[0] = Centre.getBoolean("EnableCursorDisplay", Main.main.centre.CurrentData);
                 if (EnableCursorDisplay[0]) return;
                 setCursor(Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), null));
-                Point Local = myCanvas.getLocationOnScreen();
                 mouseLocation = MouseInfo.getPointerInfo().getLocation();
-                if (ShowingSize != null && LocationOnScreen != null && ShowingSize.equals(sizeOperate.getWindowSize()) && LocationOnScreen.equals(Local))
+                if (ShowingSize != null && LocationOnScreen != null && ShowingSize.equals(sizeOperate.getWindowSize()) && LocationOnScreen.equals(myCanvas.getLocationOnScreen()))
                     return;
+                LocationOnScreen = myCanvas.getLocationOnScreen();
                 ShowingSize = sizeOperate.getWindowSize();
-                LocationOnScreen = Local;
-                Point ComponentPointOnDesktop = LocationOnScreen;
 
-                int minX = -ComponentPointOnDesktop.x, minY = -ComponentPointOnDesktop.y;
+                int minX = -LocationOnScreen.x, minY = -LocationOnScreen.y;
                 if (minX < 0) minX = 0;
                 if (minY < 0) minY = 0;
                 MinPoint = new Point(minX, minY);
 
-                ComponentPointOnDesktop = new Point(ShowingSize.width + ComponentPointOnDesktop.x, ShowingSize.height + ComponentPointOnDesktop.y);
                 int maxX = ShowingSize.width, maxY = ShowingSize.height;
-                if (ComponentPointOnDesktop.x > SizeOperate.screenSize.width)
-                    maxX -= ComponentPointOnDesktop.x - SizeOperate.screenSize.width;
-                if (ComponentPointOnDesktop.y > SizeOperate.screenSize.height)
-                    maxY -= ComponentPointOnDesktop.y - SizeOperate.screenSize.height;
+                int x = ShowingSize.width + LocationOnScreen.x;
+                int y = ShowingSize.height + LocationOnScreen.y;
+                if (x > SizeOperate.FreeOfScreenSize.width)
+                    maxX = SizeOperate.FreeOfScreenSize.width + LocationOnScreen.x;
+                if (y > SizeOperate.FreeOfScreenSize.height)
+                    maxY = SizeOperate.FreeOfScreenSize.height + LocationOnScreen.y;
                 MaxPoint = new Point(maxX, maxY);
                 setLayout(new BorderLayout());
             }

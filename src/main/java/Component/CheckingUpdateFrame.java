@@ -1,6 +1,5 @@
 package Component;
 
-import Runner.Main;
 import Tools.Component.WindowLocation;
 
 import javax.swing.*;
@@ -27,7 +26,7 @@ public class CheckingUpdateFrame extends JFrame {
         });
         setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
         setSize(300, 120);
-        setLocation(WindowLocation.ParentCenter(window, getWidth(), getHeight()));
+        setLocation(WindowLocation.ComponentCenter(window, getWidth(), getHeight()));
         setVisible(true);
         revalidate();
         repaint();

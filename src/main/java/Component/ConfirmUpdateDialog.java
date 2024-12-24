@@ -71,7 +71,7 @@ public class ConfirmUpdateDialog extends JDialog {
     public void setVisible(boolean b) {
         if (b) {
             pack();
-            Point location = WindowLocation.ParentCenter(Main.main, getWidth(), getHeight());
+            Point location = WindowLocation.ComponentCenter(Main.main, getWidth(), getHeight());
             setLocation(location);
         }
         super.setVisible(b);

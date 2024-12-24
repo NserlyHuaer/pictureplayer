@@ -30,14 +30,24 @@ public class SizeOperate {
     public int DefaultAdjustPercent;
     //图片信息类
     private GetPictureSize getPictureSize;
-    //屏幕尺寸
-    public static final Dimension screenSize;
+    //屏幕分辨率
+    public static final Dimension ScreenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    //可用屏幕尺寸
+    public static final Dimension FreeOfScreenSize;
 
     static {
-        // 获取默认的Toolkit实例
-        Toolkit toolkit = Toolkit.getDefaultToolkit();
-        // 使用Toolkit实例获取屏幕的尺寸
-        screenSize = toolkit.getScreenSize();
+        //获取可用屏幕分辨率
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+
+        int width = gd.getDisplayMode().getWidth();
+        int height = gd.getDisplayMode().getHeight();
+        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+            height -= 45;
+        }
+
+        FreeOfScreenSize = new Dimension(width, height);
+
     }
 
     //改变图片渲染器
