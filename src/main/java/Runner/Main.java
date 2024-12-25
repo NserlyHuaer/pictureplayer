@@ -301,6 +301,7 @@ public class Main extends JFrame {
         paintPicture.sizeOperate.incomeWindowDimension(SecondPanel.getSize());
         paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
         paintPicture.sizeOperate.update();
+        SecondPanel.revalidate();
     }
 
 
