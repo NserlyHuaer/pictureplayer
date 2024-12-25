@@ -108,9 +108,9 @@ public class PaintPicture extends JPanel {
                 int x = ShowingSize.width + LocationOnScreen.x;
                 int y = ShowingSize.height + LocationOnScreen.y;
                 if (x > SizeOperate.FreeOfScreenSize.width)
-                    maxX = SizeOperate.FreeOfScreenSize.width + LocationOnScreen.x;
+                    maxX = SizeOperate.FreeOfScreenSize.width - LocationOnScreen.x;
                 if (y > SizeOperate.FreeOfScreenSize.height)
-                    maxY = SizeOperate.FreeOfScreenSize.height + LocationOnScreen.y;
+                    maxY = SizeOperate.FreeOfScreenSize.height - LocationOnScreen.y;
                 MaxPoint = new Point(maxX, maxY);
                 setLayout(new BorderLayout());
             }
@@ -121,50 +121,47 @@ public class PaintPicture extends JPanel {
                 if (e.getButton() != MouseEvent.BUTTON1) return;
                 if (!EnableCursorDisplay[0]) {
                     setCursor(Cursor.getDefaultCursor());
-                    if (finalRobot != null)
-                        finalRobot.mouseMove(mouseLocation.x, mouseLocation.y);
+                    if (finalRobot != null) finalRobot.mouseMove(mouseLocation.x, mouseLocation.y);
                 }
             }
         });
-        myCanvas.addMouseMotionListener(
-                new MouseAdapter() {
-                    @Override
-                    public void mouseDragged(MouseEvent e) {
-                        if (!SwingUtilities.isLeftMouseButton(e))
-                            return;
-                        int x = e.getX(), y = e.getY();
-                        if (!EnableCursorDisplay[0]) {
-                            boolean NeedToMove = false;
-                            if (x <= MinPoint.x) {
-                                x = MaxPoint.x - 2;
-                                NeedToMove = true;
-                            } else if (x >= MaxPoint.x - 1) {
-                                x = MinPoint.x + 1;
-                                NeedToMove = true;
-                            }
-                            if (y <= MinPoint.y) {
-                                y = MaxPoint.y - 2;
-                                NeedToMove = true;
-                            } else if (y >= MaxPoint.y - 1) {
-                                y = MinPoint.y + 1;
-                                NeedToMove = true;
-                            }
-
-                            if (NeedToMove) {
-                                op = new OperatingCoordinate(x, y);
-                                Point point = myCanvas.getLocationOnScreen();
-                                if (finalRobot != null) {
-                                    finalRobot.mouseMove(x + point.x, y + point.y);
-                                }
-                                return;
-                            }
-                        }
-                        //增加坐标值
-                        myCanvas.setMouseCoordinate((int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (y - op.y())));
-                        sizeOperate.update();
-                        op = new OperatingCoordinate(x, y);
+        myCanvas.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (!SwingUtilities.isLeftMouseButton(e)) return;
+                int x = e.getX(), y = e.getY();
+                if (!EnableCursorDisplay[0]) {
+                    boolean NeedToMove = false;
+                    if (x <= MinPoint.x) {
+                        x = MaxPoint.x - 2;
+                        NeedToMove = true;
+                    } else if (x >= MaxPoint.x - 1) {
+                        x = MinPoint.x + 1;
+                        NeedToMove = true;
                     }
-                });
+                    if (y <= MinPoint.y) {
+                        y = MaxPoint.y - 2;
+                        NeedToMove = true;
+                    } else if (y >= MaxPoint.y - 1) {
+                        y = MinPoint.y + 1;
+                        NeedToMove = true;
+                    }
+
+                    if (NeedToMove) {
+                        op = new OperatingCoordinate(x, y);
+                        Point point = myCanvas.getLocationOnScreen();
+                        if (finalRobot != null) {
+                            finalRobot.mouseMove(x + point.x, y + point.y);
+                        }
+                        return;
+                    }
+                }
+                //增加坐标值
+                myCanvas.setMouseCoordinate((int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (y - op.y())));
+                sizeOperate.update();
+                op = new OperatingCoordinate(x, y);
+            }
+        });
 
         myCanvas.addMouseWheelListener(new MouseAdapter() {
             //鼠标滚轮事件
