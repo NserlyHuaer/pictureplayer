@@ -291,12 +291,11 @@ public class Main extends JFrame {
 
     //打开图片
     private void openPicture(String path) {
-        SecondPanel.setLayout(new BorderLayout());
         SecondPanel.removeAll();
+        SecondPanel.setLayout(new BorderLayout());
         SecondPanel.removeMouseListener(mouseAdapter);
         paintPicture = new PaintPicture(path);
         SecondPanel.add(paintPicture);
-        SecondPanel.revalidate();
         tabbedPane1.setSelectedIndex(1);
         paintPicture.myCanvas.requestFocus();
         paintPicture.sizeOperate.incomeWindowDimension(SecondPanel.getSize());
