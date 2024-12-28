@@ -18,6 +18,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
@@ -299,21 +300,15 @@ public class Main extends JFrame {
     }
 
     //打开图片
-    private void openPicture(String path) {
+    public void openPicture(String path) {
         if (paintPicture == null) {
             paintPicture = new PaintPicture(path);
-            new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
         } else {
             paintPicture.changePicturePath(path);
         }
+        new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
         tabbedPane1.setComponentAt(1, paintPicture);
         tabbedPane1.setSelectedIndex(1);
-        paintPicture.myCanvas.requestFocus();
-        if (paintPicture.myCanvas == null) {
-            paintPicture.sizeOperate.incomeWindowDimension(SecondPanel.getSize());
-        }
-        paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
-        paintPicture.sizeOperate.update();
     }
 
 
@@ -437,18 +432,18 @@ public class Main extends JFrame {
         tabbedPane1.setRequestFocusEnabled(false);
         panel1.add(tabbedPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         FirstPanel = new JPanel();
-        FirstPanel.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
+        FirstPanel.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
         FirstPanel.setName("");
         FirstPanel.setToolTipText("");
         tabbedPane1.addTab("打开", FirstPanel);
         VersionView = new JLabel();
         VersionView.setRequestFocusEnabled(false);
         VersionView.setText("Version:");
-        FirstPanel.add(VersionView, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FirstPanel.add(VersionView, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         textField1 = new JTextField();
         FirstPanel.add(textField1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         TurnButton = new JButton();
-        TurnButton.setText("跳转");
+        TurnButton.setText("打开");
         FirstPanel.add(TurnButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         FirstPanel.add(FileChoosePane, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         SecondPanel = new JPanel();

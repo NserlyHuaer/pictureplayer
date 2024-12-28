@@ -69,119 +69,12 @@ public class PaintPicture extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-//                super.componentResized(e);
                 sizeOperate.incomeWindowDimension(myCanvas.getSize());
                 sizeOperate.update();
             }
         });
-        Robot robot = null;
-        try {
-            robot = new Robot();
-        } catch (AWTException e) {
-            System.out.println("Couldn't get Mouse Information");
-        }
+
         biggest = new JButton("enlarge");
-        Robot finalRobot = robot;
-        Image image = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(0, 0, new int[0], 0, 0));
-        final boolean[] EnableCursorDisplay = new boolean[1];
-        myCanvas.addMouseListener(new MouseAdapter() {
-            //鼠标一按下就触发
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() != MouseEvent.BUTTON1) return;
-                op = new OperatingCoordinate(e.getX(), e.getY());
-                EnableCursorDisplay[0] = Centre.getBoolean("EnableCursorDisplay", Main.main.centre.CurrentData);
-                if (EnableCursorDisplay[0]) return;
-                setCursor(Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), null));
-                mouseLocation = MouseInfo.getPointerInfo().getLocation();
-                if (ShowingSize != null && LocationOnScreen != null && ShowingSize.equals(sizeOperate.getWindowSize()) && LocationOnScreen.equals(myCanvas.getLocationOnScreen()))
-                    return;
-                LocationOnScreen = myCanvas.getLocationOnScreen();
-                ShowingSize = sizeOperate.getWindowSize();
-
-                int minX = -LocationOnScreen.x, minY = -LocationOnScreen.y;
-                if (minX < 0) minX = 0;
-                if (minY < 0) minY = 0;
-                MinPoint = new Point(minX, minY);
-
-                int maxX = ShowingSize.width, maxY = ShowingSize.height;
-                int x = ShowingSize.width + LocationOnScreen.x;
-                int y = ShowingSize.height + LocationOnScreen.y;
-                if (x > SizeOperate.FreeOfScreenSize.width)
-                    maxX = SizeOperate.FreeOfScreenSize.width - LocationOnScreen.x;
-                if (y > SizeOperate.FreeOfScreenSize.height)
-                    maxY = SizeOperate.FreeOfScreenSize.height - LocationOnScreen.y;
-                MaxPoint = new Point(maxX, maxY);
-            }
-
-
-            //鼠标放出触发
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() != MouseEvent.BUTTON1) return;
-                if (!EnableCursorDisplay[0]) {
-                    setCursor(Cursor.getDefaultCursor());
-                    if (finalRobot != null) finalRobot.mouseMove(mouseLocation.x, mouseLocation.y);
-                }
-            }
-        });
-        myCanvas.addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                if (!SwingUtilities.isLeftMouseButton(e)) return;
-                int x = e.getX(), y = e.getY();
-                if (!EnableCursorDisplay[0]) {
-                    boolean NeedToMove = false;
-                    if (x <= MinPoint.x) {
-                        x = MaxPoint.x - 2;
-                        NeedToMove = true;
-                    } else if (x >= MaxPoint.x - 1) {
-                        x = MinPoint.x + 1;
-                        NeedToMove = true;
-                    }
-                    if (y <= MinPoint.y) {
-                        y = MaxPoint.y - 2;
-                        NeedToMove = true;
-                    } else if (y >= MaxPoint.y - 1) {
-                        y = MinPoint.y + 1;
-                        NeedToMove = true;
-                    }
-
-                    if (NeedToMove) {
-                        op = new OperatingCoordinate(x, y);
-                        Point point = myCanvas.getLocationOnScreen();
-                        if (finalRobot != null) {
-                            finalRobot.mouseMove(x + point.x, y + point.y);
-                        }
-                        return;
-                    }
-                }
-                //增加坐标值
-                myCanvas.setMouseCoordinate((int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (y - op.y())));
-                sizeOperate.update();
-                op = new OperatingCoordinate(x, y);
-            }
-        });
-
-        myCanvas.addMouseWheelListener(new MouseAdapter() {
-            //鼠标滚轮事件
-            @Override
-            public void mouseWheelMoved(MouseWheelEvent e) {
-                if (IsDragging) return;
-                myCanvas.setMouseCoordinate(e.getX(), e.getY());
-                //滚轮向后
-                if (e.getWheelRotation() == 1) {
-                    if (sizeOperate.adjustPercent(SizeOperate.Reduce) || sizeOperate.adjustPercent(SizeOperate.Reduce)) {
-                        sizeOperate.update();
-                    }
-                }//滚轮向前
-                else if (e.getWheelRotation() == -1) {
-                    if (sizeOperate.adjustPercent(SizeOperate.Enlarge) || sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
-                        sizeOperate.update();
-                    }
-                }
-            }
-        });
-
         biggest.addMouseListener(new MouseAdapter() {
             boolean isDown = false;
 
@@ -292,7 +185,6 @@ public class PaintPicture extends JPanel {
                 }
             }
         });
-        myCanvas.requestFocus();
     }
 
     private JPanel getjPanel(ChangeFocusListener changeFocusListener) {
@@ -356,9 +248,8 @@ public class PaintPicture extends JPanel {
 
     //改变图片路径
     public void changePicturePath(String path) {
-        myCanvas = new MyCanvas(path);
-        sizeOperate = new SizeOperate(myCanvas, myCanvas.getSize());
-        add(myCanvas, BorderLayout.CENTER);
+        myCanvas.changeOriginalPicturePath(path);
+        sizeOperate.update();
     }
 
     public class MyCanvas extends JComponent {
@@ -400,6 +291,112 @@ public class PaintPicture extends JPanel {
             }
             this.path = path;
             image = new ImageIcon(path).getImage();
+            Robot robot = null;
+            try {
+                robot = new Robot();
+            } catch (AWTException e) {
+                System.out.println("Couldn't get Mouse Information");
+            }
+            Robot finalRobot = robot;
+            Image image = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(0, 0, new int[0], 0, 0));
+            final boolean[] EnableCursorDisplay = new boolean[1];
+            addMouseListener(new MouseAdapter() {
+                //鼠标一按下就触发
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (e.getButton() != MouseEvent.BUTTON1) return;
+                    op = new OperatingCoordinate(e.getX(), e.getY());
+                    EnableCursorDisplay[0] = Centre.getBoolean("EnableCursorDisplay", Main.main.centre.CurrentData);
+                    if (EnableCursorDisplay[0]) return;
+                    setCursor(Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), null));
+                    mouseLocation = MouseInfo.getPointerInfo().getLocation();
+                    if (ShowingSize != null && LocationOnScreen != null && ShowingSize.equals(sizeOperate.getWindowSize()) && LocationOnScreen.equals(myCanvas.getLocationOnScreen()))
+                        return;
+                    LocationOnScreen = myCanvas.getLocationOnScreen();
+                    ShowingSize = sizeOperate.getWindowSize();
+
+                    int minX = -LocationOnScreen.x, minY = -LocationOnScreen.y;
+                    if (minX < 0) minX = 0;
+                    if (minY < 0) minY = 0;
+                    MinPoint = new Point(minX, minY);
+
+                    int maxX = ShowingSize.width, maxY = ShowingSize.height;
+                    int x = ShowingSize.width + LocationOnScreen.x;
+                    int y = ShowingSize.height + LocationOnScreen.y;
+                    if (x > SizeOperate.FreeOfScreenSize.width)
+                        maxX = SizeOperate.FreeOfScreenSize.width - LocationOnScreen.x;
+                    if (y > SizeOperate.FreeOfScreenSize.height)
+                        maxY = SizeOperate.FreeOfScreenSize.height - LocationOnScreen.y;
+                    MaxPoint = new Point(maxX, maxY);
+                }
+
+
+                //鼠标放出触发
+                public void mouseReleased(MouseEvent e) {
+                    if (e.getButton() != MouseEvent.BUTTON1) return;
+                    if (!EnableCursorDisplay[0]) {
+                        setCursor(Cursor.getDefaultCursor());
+                        if (finalRobot != null) finalRobot.mouseMove(mouseLocation.x, mouseLocation.y);
+                    }
+                }
+            });
+            addMouseMotionListener(new MouseAdapter() {
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    if (!SwingUtilities.isLeftMouseButton(e)) return;
+                    int x = e.getX(), y = e.getY();
+                    if (!EnableCursorDisplay[0]) {
+                        boolean NeedToMove = false;
+                        if (x <= MinPoint.x) {
+                            x = MaxPoint.x - 2;
+                            NeedToMove = true;
+                        } else if (x >= MaxPoint.x - 1) {
+                            x = MinPoint.x + 1;
+                            NeedToMove = true;
+                        }
+                        if (y <= MinPoint.y) {
+                            y = MaxPoint.y - 2;
+                            NeedToMove = true;
+                        } else if (y >= MaxPoint.y - 1) {
+                            y = MinPoint.y + 1;
+                            NeedToMove = true;
+                        }
+
+                        if (NeedToMove) {
+                            op = new OperatingCoordinate(x, y);
+                            Point point = myCanvas.getLocationOnScreen();
+                            if (finalRobot != null) {
+                                finalRobot.mouseMove(x + point.x, y + point.y);
+                            }
+                            return;
+                        }
+                    }
+                    //增加坐标值
+                    myCanvas.setMouseCoordinate((int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + Centre.getDouble("MouseMoveOffsets", Main.main.centre.CurrentData) / 100.0) * (y - op.y())));
+                    sizeOperate.update();
+                    op = new OperatingCoordinate(x, y);
+                }
+            });
+
+            addMouseWheelListener(new MouseAdapter() {
+                //鼠标滚轮事件
+                @Override
+                public void mouseWheelMoved(MouseWheelEvent e) {
+                    if (IsDragging) return;
+                    myCanvas.setMouseCoordinate(e.getX(), e.getY());
+                    //滚轮向后
+                    if (e.getWheelRotation() == 1) {
+                        if (sizeOperate.adjustPercent(SizeOperate.Reduce) || sizeOperate.adjustPercent(SizeOperate.Reduce)) {
+                            sizeOperate.update();
+                        }
+                    }//滚轮向前
+                    else if (e.getWheelRotation() == -1) {
+                        if (sizeOperate.adjustPercent(SizeOperate.Enlarge) || sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
+                            sizeOperate.update();
+                        }
+                    }
+                }
+            });
         }
 
         //获取图片路径
