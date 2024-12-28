@@ -101,6 +101,40 @@ public class Main extends JFrame {
             }
         }
     };
+    private DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
+        public void drop(DropTargetDropEvent dtde) {
+            try {
+                dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                Transferable transferable = dtde.getTransferable();
+                if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    List<File> files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                    CheckFileIsRightPictureType checkFileIsRightPictureType = new CheckFileIsRightPictureType();
+                    checkFileIsRightPictureType.add(files);
+                    checkFileIsRightPictureType.statistics();
+
+                    if (checkFileIsRightPictureType.getNotImageCount() != 0) {
+                        JOptionPane.showMessageDialog(Main.main, "尚未支持打开此文件:\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", "Error", JOptionPane.ERROR_MESSAGE);
+                        if (checkFileIsRightPictureType.getImageCount() == 0) return;
+                    }
+                    File choose;
+                    if (checkFileIsRightPictureType.getImageCount() == 1) {
+                        choose = checkFileIsRightPictureType.getImageList().getFirst();
+                        if (Main.main.paintPicture != null && !new File(Main.main.paintPicture.myCanvas.getPath()).equals(choose) && JOptionPane.showConfirmDialog(Main.main, "是否打开文件:\n\"" + choose.getPath() + "\"", "打开", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+                            return;
+                        }
+                    } else {
+                        choose = OpenImageChooser.openImageWithChoice(Main.main, checkFileIsRightPictureType.getImageList());
+                        if (choose == null) return;
+                    }
+                    if (paintPicture != null && paintPicture.myCanvas != null && choose.equals(new File(paintPicture.myCanvas.getPath())))
+                        return;
+                    openPicture(String.valueOf(choose));
+                }
+            } catch (IOException | UnsupportedFlavorException e) {
+                System.out.println("Error:" + e);
+            }
+        }
+    };
 
     //静态代码块
     static {
@@ -169,47 +203,9 @@ public class Main extends JFrame {
         TurnButton.addActionListener(e -> {
 
         });
-
-
         SecondPanel.addMouseListener(mouseAdapter);
-        // 设置JPanel为可接受拖放
-        new DropTarget(SecondPanel, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
-            @Override
-            public void drop(DropTargetDropEvent dtde) {
-                try {
-                    dtde.acceptDrop(DnDConstants.ACTION_COPY);
-                    Transferable transferable = dtde.getTransferable();
-                    if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                        List<File> files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                        CheckFileIsRightPictureType checkFileIsRightPictureType = new CheckFileIsRightPictureType();
-                        checkFileIsRightPictureType.add(files);
-                        checkFileIsRightPictureType.statistics();
-
-                        if (checkFileIsRightPictureType.getNotImageCount() != 0) {
-                            JOptionPane.showMessageDialog(Main.main, "尚未支持打开此文件:\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", "Error", JOptionPane.ERROR_MESSAGE);
-                            if (checkFileIsRightPictureType.getImageCount() == 0) return;
-                        }
-                        File choose;
-                        if (checkFileIsRightPictureType.getImageCount() == 1) {
-                            choose = checkFileIsRightPictureType.getImageList().getFirst();
-                            if (Main.main.paintPicture != null && !new File(Main.main.paintPicture.myCanvas.getPath()).equals(choose) && JOptionPane.showConfirmDialog(Main.main, "是否打开文件:\n\"" + choose.getPath() + "\"", "打开", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
-                                return;
-                            }
-                        } else {
-                            choose = OpenImageChooser.openImageWithChoice(Main.main, checkFileIsRightPictureType.getImageList());
-                            if (choose == null) return;
-                        }
-                        if (paintPicture != null && paintPicture.myCanvas != null && choose.equals(new File(paintPicture.myCanvas.getPath())))
-                            return;
-                        openPicture(String.valueOf(choose));
-                    }
-                } catch (IOException | UnsupportedFlavorException e) {
-                    System.out.println("Error:" + e);
-                }
-            }
-        }, true);
-
-
+        // 设置SecondPanel为可接受拖放
+        new DropTarget(SecondPanel, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
         Settings();
         SaveButton.addActionListener(e -> {
             System.out.println("Saving Settings...");
@@ -304,8 +300,13 @@ public class Main extends JFrame {
 
     //打开图片
     private void openPicture(String path) {
-        tabbedPane1.setComponentAt(1, new PaintPicture(path));
-        paintPicture = (PaintPicture) tabbedPane1.getComponentAt(1);
+        if (paintPicture == null) {
+            paintPicture = new PaintPicture(path);
+            new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
+        } else {
+            paintPicture.changePicturePath(path);
+        }
+        tabbedPane1.setComponentAt(1, paintPicture);
         tabbedPane1.setSelectedIndex(1);
         paintPicture.myCanvas.requestFocus();
         if (paintPicture.myCanvas == null) {
@@ -452,7 +453,7 @@ public class Main extends JFrame {
         FirstPanel.add(FileChoosePane, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         SecondPanel = new JPanel();
         SecondPanel.setLayout(new GridBagLayout());
-        SecondPanel.setBackground(new Color(-4605511));
+        SecondPanel.setBackground(new Color(-1643536));
         SecondPanel.setEnabled(true);
         SecondPanel.setForeground(new Color(-1));
         tabbedPane1.addTab("显示", SecondPanel);
@@ -478,23 +479,54 @@ public class Main extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         SecondPanel.add(label2, gbc);
         final JLabel label3 = new JLabel();
+        label3.setBackground(new Color(-2104859));
         Font label3Font = this.$$$getFont$$$(null, -1, 15, label3.getFont());
         if (label3Font != null) label3.setFont(label3Font);
         label3.setHorizontalAlignment(0);
         label3.setHorizontalTextPosition(0);
-        label3.setText("点击此处导入图片");
+        label3.setText("点击此处导入图片或将图片拖拽到此处");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 5;
+        SecondPanel.add(label3, gbc);
+        final JPanel spacer1 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 9;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        SecondPanel.add(spacer1, gbc);
+        final JPanel spacer2 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 8;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        SecondPanel.add(spacer2, gbc);
+        final JPanel spacer3 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 7;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        SecondPanel.add(spacer3, gbc);
+        final JPanel spacer4 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 6;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        SecondPanel.add(spacer4, gbc);
+        final JPanel spacer5 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
         gbc.gridy = 4;
-        SecondPanel.add(label3, gbc);
+        gbc.fill = GridBagConstraints.VERTICAL;
+        SecondPanel.add(spacer5, gbc);
         ThirdPanel = new JPanel();
         ThirdPanel.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane1.addTab("设置", ThirdPanel);
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
         ThirdPanel.add(panel2, new GridConstraints(2, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final Spacer spacer1 = new Spacer();
-        panel2.add(spacer1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer6 = new Spacer();
+        panel2.add(spacer6, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         ResetButton = new JButton();
         ResetButton.setRequestFocusEnabled(false);
         ResetButton.setText("重置所有设置");
@@ -509,15 +541,15 @@ public class Main extends JFrame {
         SaveButton.setText("保存");
         SaveButton.setVerticalTextPosition(0);
         panel2.add(SaveButton, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        ThirdPanel.add(spacer2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer7 = new Spacer();
+        ThirdPanel.add(spacer7, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         ThirdPanel.add(panel3, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
         panel3.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(502, 372), null, 0, false));
         final JPanel panel4 = new JPanel();
-        panel4.setLayout(new FormLayout("fill:max(d;4px):noGrow,left:4dlu:noGrow,fill:d:grow,left:4dlu:noGrow,fill:max(d;4px):noGrow", "center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow"));
+        panel4.setLayout(new FormLayout("fill:max(d;4px):noGrow,left:4dlu:noGrow,fill:d:grow,left:4dlu:noGrow,fill:max(d;4px):noGrow", "center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow"));
         scrollPane1.setViewportView(panel4);
         DoNotThingOnCloseCheckBox = new JCheckBox();
         DoNotThingOnCloseCheckBox.setRequestFocusEnabled(false);
@@ -539,32 +571,32 @@ public class Main extends JFrame {
         MouseMoveOffsetsLabel = new JLabel();
         MouseMoveOffsetsLabel.setRequestFocusEnabled(false);
         MouseMoveOffsetsLabel.setText("鼠标移动补偿:");
-        panel4.add(MouseMoveOffsetsLabel, cc.xy(1, 9));
+        panel4.add(MouseMoveOffsetsLabel, cc.xyw(1, 9, 3));
+        ProxyServerLabel = new JLabel();
+        ProxyServerLabel.setRequestFocusEnabled(false);
+        ProxyServerLabel.setText("代理服务器：");
+        panel4.add(ProxyServerLabel, cc.xy(1, 15));
+        ProxyServerButton = new JButton();
+        ProxyServerButton.setRequestFocusEnabled(false);
+        ProxyServerButton.setText("设置代理服务器");
+        panel4.add(ProxyServerButton, cc.xy(5, 15));
+        EnableSecureConnectionCheckBox = new JCheckBox();
+        EnableSecureConnectionCheckBox.setRequestFocusEnabled(false);
+        EnableSecureConnectionCheckBox.setText("启用安全连接模式");
+        panel4.add(EnableSecureConnectionCheckBox, cc.xyw(1, 17, 3));
+        AutoCheckUpdateCheckBox = new JCheckBox();
+        AutoCheckUpdateCheckBox.setRequestFocusEnabled(false);
+        AutoCheckUpdateCheckBox.setText("启用自动检查更新");
+        panel4.add(AutoCheckUpdateCheckBox, cc.xyw(1, 19, 3));
         MouseMoveOffsetsSlider = new JSlider();
         MouseMoveOffsetsSlider.setMaximum(150);
         MouseMoveOffsetsSlider.setMinimum(-65);
         MouseMoveOffsetsSlider.setRequestFocusEnabled(false);
-        panel4.add(MouseMoveOffsetsSlider, cc.xyw(3, 9, 2, CellConstraints.FILL, CellConstraints.DEFAULT));
+        panel4.add(MouseMoveOffsetsSlider, cc.xyw(1, 11, 5, CellConstraints.FILL, CellConstraints.DEFAULT));
         EnableProxyServerCheckBox = new JCheckBox();
         EnableProxyServerCheckBox.setRequestFocusEnabled(false);
         EnableProxyServerCheckBox.setText("启用代理服务器");
-        panel4.add(EnableProxyServerCheckBox, cc.xyw(1, 11, 3));
-        ProxyServerLabel = new JLabel();
-        ProxyServerLabel.setRequestFocusEnabled(false);
-        ProxyServerLabel.setText("代理服务器：");
-        panel4.add(ProxyServerLabel, cc.xy(1, 13));
-        ProxyServerButton = new JButton();
-        ProxyServerButton.setRequestFocusEnabled(false);
-        ProxyServerButton.setText("设置代理服务器");
-        panel4.add(ProxyServerButton, cc.xy(5, 13));
-        EnableSecureConnectionCheckBox = new JCheckBox();
-        EnableSecureConnectionCheckBox.setRequestFocusEnabled(false);
-        EnableSecureConnectionCheckBox.setText("启用安全连接模式");
-        panel4.add(EnableSecureConnectionCheckBox, cc.xyw(1, 15, 3));
-        AutoCheckUpdateCheckBox = new JCheckBox();
-        AutoCheckUpdateCheckBox.setRequestFocusEnabled(false);
-        AutoCheckUpdateCheckBox.setText("启用自动检查更新");
-        panel4.add(AutoCheckUpdateCheckBox, cc.xyw(1, 17, 3));
+        panel4.add(EnableProxyServerCheckBox, cc.xy(1, 13));
         FourthPanel = new JPanel();
         FourthPanel.setLayout(new GridLayoutManager(7, 4, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane1.addTab("关于", FourthPanel);
@@ -573,8 +605,8 @@ public class Main extends JFrame {
         if (JVMVersionLabelFont != null) JVMVersionLabel.setFont(JVMVersionLabelFont);
         JVMVersionLabel.setText("JVM Version:");
         FourthPanel.add(JVMVersionLabel, new GridConstraints(1, 0, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        FourthPanel.add(spacer3, new GridConstraints(6, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer8 = new Spacer();
+        FourthPanel.add(spacer8, new GridConstraints(6, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         CurrentSoftwareVersionLabel = new JLabel();
         Font CurrentSoftwareVersionLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareVersionLabel.getFont());
         if (CurrentSoftwareVersionLabelFont != null)
