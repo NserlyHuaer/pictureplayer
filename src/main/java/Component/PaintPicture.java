@@ -53,6 +53,7 @@ public class PaintPicture extends JPanel {
 
     //构造方法（函数）
     public PaintPicture(String path) {
+        setLayout(new BorderLayout());
         paintPicture = this;
         //获取当前图片路径下所有图片
         ArrayList<String> CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(path);
@@ -73,7 +74,6 @@ public class PaintPicture extends JPanel {
                 sizeOperate.update();
             }
         });
-        setLayout(new BorderLayout(1, 1));
         Robot robot = null;
         try {
             robot = new Robot();
@@ -112,7 +112,6 @@ public class PaintPicture extends JPanel {
                 if (y > SizeOperate.FreeOfScreenSize.height)
                     maxY = SizeOperate.FreeOfScreenSize.height - LocationOnScreen.y;
                 MaxPoint = new Point(maxX, maxY);
-                setLayout(new BorderLayout());
             }
 
 
@@ -678,14 +677,6 @@ public class PaintPicture extends JPanel {
             this.lastHeight = height;
             this.lastRotationDegrees = RotationDegrees;
             mouseX = mouseY = 0;
-        }
-
-        protected void paintComponent(Graphics g) {
-            System.out.println(1);
-        }
-
-        public void repaint() {
-            super.repaint();
         }
 
         //添加坐标值

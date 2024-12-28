@@ -63,10 +63,7 @@ public class Main extends JFrame {
     private JButton CheckVersionButton;
     private JTextField textField1;
     private JButton TurnButton;
-    private JPanel FirstPanel;
     private JPanel SecondPanel;
-    private JPanel ThirdPanel;
-    private JPanel FourthPanel;
     private JLabel TopLabel;
     private JLabel VersionView;
     private JLabel CurrentSoftwareInteriorLabel;
@@ -74,7 +71,9 @@ public class Main extends JFrame {
     private JLabel CurrentSoftwareLanguage;
     private JLabel MemUsed;
     private JPanel FileChoosePane;
-    private JScrollPane jscrollPane;
+    private JPanel FirstPanel;
+    private JPanel ThirdPanel;
+    private JPanel FourthPanel;
     private static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
     private final ChangeFocusListener changeFocusListener;
@@ -303,17 +302,15 @@ public class Main extends JFrame {
 
     //打开图片
     private void openPicture(String path) {
-        SecondPanel.removeAll();
-        SecondPanel.setLayout(new BorderLayout());
-        SecondPanel.removeMouseListener(mouseAdapter);
-        paintPicture = new PaintPicture(path);
-        SecondPanel.add(paintPicture);
+        tabbedPane1.setComponentAt(1, new PaintPicture(path));
+        paintPicture = (PaintPicture) tabbedPane1.getComponentAt(1);
         tabbedPane1.setSelectedIndex(1);
         paintPicture.myCanvas.requestFocus();
-        paintPicture.sizeOperate.incomeWindowDimension(SecondPanel.getSize());
+        if (paintPicture.myCanvas == null) {
+            paintPicture.sizeOperate.incomeWindowDimension(SecondPanel.getSize());
+        }
         paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
         paintPicture.sizeOperate.update();
-        SecondPanel.revalidate();
     }
 
 
@@ -426,13 +423,16 @@ public class Main extends JFrame {
     private void $$$setupUI$$$() {
         createUIComponents();
         panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.setRequestFocusEnabled(true);
-        jscrollPane = new JScrollPane();
-        panel1.add(jscrollPane, new GridConstraints(1, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        TopLabel = new JLabel();
+        Font TopLabelFont = this.$$$getFont$$$(null, -1, 20, TopLabel.getFont());
+        if (TopLabelFont != null) TopLabel.setFont(TopLabelFont);
+        TopLabel.setText("Picture Player");
+        panel1.add(TopLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         tabbedPane1 = new JTabbedPane();
         tabbedPane1.setRequestFocusEnabled(false);
-        jscrollPane.setViewportView(tabbedPane1);
+        panel1.add(tabbedPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         FirstPanel = new JPanel();
         FirstPanel.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
         FirstPanel.setName("");
@@ -449,38 +449,63 @@ public class Main extends JFrame {
         FirstPanel.add(TurnButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         FirstPanel.add(FileChoosePane, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         SecondPanel = new JPanel();
-        SecondPanel.setLayout(new GridLayoutManager(8, 4, new Insets(0, 0, 0, 0), -1, -1));
+        SecondPanel.setLayout(new GridBagLayout());
         tabbedPane1.addTab("显示", SecondPanel);
         final JLabel label1 = new JLabel();
         Font label1Font = this.$$$getFont$$$(null, -1, 35, label1.getFont());
         if (label1Font != null) label1.setFont(label1Font);
         label1.setHorizontalTextPosition(11);
         label1.setText("开始使用照片查看器");
-        SecondPanel.add(label1, new GridConstraints(2, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer1 = new Spacer();
-        SecondPanel.add(spacer1, new GridConstraints(0, 0, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        SecondPanel.add(spacer2, new GridConstraints(0, 3, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        GridBagConstraints gbc;
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        SecondPanel.add(label1, gbc);
         final JLabel label2 = new JLabel();
         Font label2Font = this.$$$getFont$$$(null, -1, 20, label2.getFont());
         if (label2Font != null) label2.setFont(label2Font);
         label2.setText("选择图片后，你将能够在此处查看照片");
-        SecondPanel.add(label2, new GridConstraints(3, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        SecondPanel.add(spacer3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer4 = new Spacer();
-        SecondPanel.add(spacer4, new GridConstraints(6, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer5 = new Spacer();
-        SecondPanel.add(spacer5, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer6 = new Spacer();
-        SecondPanel.add(spacer6, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer7 = new Spacer();
-        SecondPanel.add(spacer7, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        SecondPanel.add(label2, gbc);
         final JLabel label3 = new JLabel();
         Font label3Font = this.$$$getFont$$$(null, -1, 15, label3.getFont());
         if (label3Font != null) label3.setFont(label3Font);
+        label3.setHorizontalAlignment(0);
+        label3.setHorizontalTextPosition(0);
         label3.setText("点击此处导入图片");
-        SecondPanel.add(label3, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 4;
+        SecondPanel.add(label3, gbc);
+        final JPanel spacer1 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 5;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        SecondPanel.add(spacer1, gbc);
+        final JPanel spacer2 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 6;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        SecondPanel.add(spacer2, gbc);
+        final JPanel spacer3 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 7;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        SecondPanel.add(spacer3, gbc);
+        final JPanel spacer4 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 8;
+        gbc.fill = GridBagConstraints.VERTICAL;
+        SecondPanel.add(spacer4, gbc);
         ThirdPanel = new JPanel();
         ThirdPanel.setLayout(new GridLayoutManager(11, 3, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane1.addTab("设置", ThirdPanel);
@@ -523,8 +548,8 @@ public class Main extends JFrame {
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
         ThirdPanel.add(panel2, new GridConstraints(10, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final Spacer spacer8 = new Spacer();
-        panel2.add(spacer8, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer5 = new Spacer();
+        panel2.add(spacer5, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         ResetButton = new JButton();
         ResetButton.setRequestFocusEnabled(false);
         ResetButton.setText("重置所有设置");
@@ -539,8 +564,8 @@ public class Main extends JFrame {
         SaveButton.setText("保存");
         SaveButton.setVerticalTextPosition(0);
         panel2.add(SaveButton, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer9 = new Spacer();
-        ThirdPanel.add(spacer9, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer6 = new Spacer();
+        ThirdPanel.add(spacer6, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         MouseMoveOffsetsSlider = new JSlider();
         MouseMoveOffsetsSlider.setMaximum(150);
         MouseMoveOffsetsSlider.setMinimum(-65);
@@ -558,8 +583,8 @@ public class Main extends JFrame {
         if (JVMVersionLabelFont != null) JVMVersionLabel.setFont(JVMVersionLabelFont);
         JVMVersionLabel.setText("JVM Version:");
         FourthPanel.add(JVMVersionLabel, new GridConstraints(1, 0, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer10 = new Spacer();
-        FourthPanel.add(spacer10, new GridConstraints(6, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer7 = new Spacer();
+        FourthPanel.add(spacer7, new GridConstraints(6, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         CurrentSoftwareVersionLabel = new JLabel();
         Font CurrentSoftwareVersionLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareVersionLabel.getFont());
         if (CurrentSoftwareVersionLabelFont != null)
@@ -593,11 +618,6 @@ public class Main extends JFrame {
         if (MemUsedFont != null) MemUsed.setFont(MemUsedFont);
         MemUsed.setText("JVM内存：");
         FourthPanel.add(MemUsed, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        TopLabel = new JLabel();
-        Font TopLabelFont = this.$$$getFont$$$(null, -1, 20, TopLabel.getFont());
-        if (TopLabelFont != null) TopLabel.setFont(TopLabelFont);
-        TopLabel.setText("Picture Player");
-        panel1.add(TopLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
