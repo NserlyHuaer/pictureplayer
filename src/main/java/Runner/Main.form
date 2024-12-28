@@ -79,7 +79,11 @@
             <constraints>
               <tabbedpane title="显示"/>
             </constraints>
-            <properties/>
+            <properties>
+              <background color="-4605511"/>
+              <enabled value="true"/>
+              <foreground color="-1"/>
+            </properties>
             <border type="none"/>
             <children>
               <component id="1a97e" class="javax.swing.JLabel">
@@ -115,33 +119,9 @@
                   <text value="点击此处导入图片"/>
                 </properties>
               </component>
-              <vspacer id="17794">
-                <constraints>
-                  <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="0.0" weighty="0.0"/>
-                </constraints>
-              </vspacer>
-              <vspacer id="45a31">
-                <constraints>
-                  <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="0.0" weighty="0.0"/>
-                </constraints>
-              </vspacer>
-              <vspacer id="c27c">
-                <constraints>
-                  <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="0.0" weighty="0.0"/>
-                </constraints>
-              </vspacer>
-              <vspacer id="95e63">
-                <constraints>
-                  <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                  <gridbag weightx="0.0" weighty="0.0"/>
-                </constraints>
-              </vspacer>
             </children>
           </grid>
-          <grid id="9ef36" binding="ThirdPanel" layout-manager="GridLayoutManager" row-count="11" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="9ef36" binding="ThirdPanel" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="设置"/>
@@ -149,91 +129,10 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="9cd24" class="javax.swing.JCheckBox" binding="DoNotThingOnCloseCheckBox">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="退出时，隐藏至系统托盘"/>
-                </properties>
-              </component>
-              <component id="9c2dd" class="javax.swing.JCheckBox" binding="EnableConfirmExitCheckBox">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="启用退出提示"/>
-                </properties>
-              </component>
-              <component id="69fe2" class="javax.swing.JCheckBox" binding="EnableCursorDisplayCheckBox">
-                <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="启用鼠标光标显示"/>
-                </properties>
-              </component>
-              <component id="801b5" class="javax.swing.JCheckBox" binding="EnableHistoryLoaderCheckBox">
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="启用历史路径加载"/>
-                </properties>
-              </component>
-              <component id="cbde1" class="javax.swing.JLabel" binding="MouseMoveOffsetsLabel">
-                <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="鼠标移动补偿:"/>
-                </properties>
-              </component>
-              <component id="2876a" class="javax.swing.JCheckBox" binding="EnableProxyServerCheckBox">
-                <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="启用代理服务器"/>
-                </properties>
-              </component>
-              <component id="1c230" class="javax.swing.JLabel" binding="ProxyServerLabel">
-                <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="代理服务器："/>
-                </properties>
-              </component>
-              <component id="f0f0c" class="javax.swing.JButton" binding="ProxyServerButton">
-                <constraints>
-                  <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="设置代理服务器"/>
-                </properties>
-              </component>
-              <component id="9a4c5" class="javax.swing.JCheckBox" binding="EnableSecureConnectionCheckBox">
-                <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="启用安全连接模式"/>
-                </properties>
-              </component>
               <grid id="b48d2" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
-                  <grid row="10" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
@@ -274,30 +173,172 @@
                   </component>
                 </children>
               </grid>
-              <hspacer id="cf38">
+              <vspacer id="a025e">
                 <constraints>
-                  <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                 </constraints>
-              </hspacer>
-              <component id="fc8e5" class="javax.swing.JSlider" binding="MouseMoveOffsetsSlider">
+              </vspacer>
+              <grid id="43a9f" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
-                <properties>
-                  <maximum value="150"/>
-                  <minimum value="-65"/>
-                  <requestFocusEnabled value="false"/>
-                </properties>
-              </component>
-              <component id="74555" class="javax.swing.JCheckBox" binding="AutoCheckUpdateCheckBox">
-                <constraints>
-                  <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <requestFocusEnabled value="false"/>
-                  <text value="启用自动检查更新"/>
-                </properties>
-              </component>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <scrollpane id="3db93">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                        <preferred-size width="502" height="372"/>
+                      </grid>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <grid id="44319" layout-manager="FormLayout">
+                        <rowspec value="center:d:grow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:d:grow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:d:grow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:d:grow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:d:grow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:d:grow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:d:grow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:d:grow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:d:grow"/>
+                        <colspec value="fill:max(d;4px):noGrow"/>
+                        <colspec value="left:4dlu:noGrow"/>
+                        <colspec value="fill:d:grow"/>
+                        <colspec value="left:4dlu:noGrow"/>
+                        <colspec value="fill:max(d;4px):noGrow"/>
+                        <constraints/>
+                        <properties/>
+                        <border type="none"/>
+                        <children>
+                          <component id="9cd24" class="javax.swing.JCheckBox" binding="DoNotThingOnCloseCheckBox">
+                            <constraints>
+                              <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="退出时，隐藏至系统托盘"/>
+                            </properties>
+                          </component>
+                          <component id="9c2dd" class="javax.swing.JCheckBox" binding="EnableConfirmExitCheckBox">
+                            <constraints>
+                              <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用退出提示"/>
+                            </properties>
+                          </component>
+                          <component id="801b5" class="javax.swing.JCheckBox" binding="EnableHistoryLoaderCheckBox">
+                            <constraints>
+                              <grid row="4" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用历史路径加载"/>
+                            </properties>
+                          </component>
+                          <component id="69fe2" class="javax.swing.JCheckBox" binding="EnableCursorDisplayCheckBox">
+                            <constraints>
+                              <grid row="6" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用鼠标光标显示"/>
+                            </properties>
+                          </component>
+                          <component id="cbde1" class="javax.swing.JLabel" binding="MouseMoveOffsetsLabel">
+                            <constraints>
+                              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="鼠标移动补偿:"/>
+                            </properties>
+                          </component>
+                          <component id="fc8e5" class="javax.swing.JSlider" binding="MouseMoveOffsetsSlider">
+                            <constraints>
+                              <grid row="8" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                              <forms defaultalign-horz="false"/>
+                            </constraints>
+                            <properties>
+                              <maximum value="150"/>
+                              <minimum value="-65"/>
+                              <requestFocusEnabled value="false"/>
+                            </properties>
+                          </component>
+                          <component id="2876a" class="javax.swing.JCheckBox" binding="EnableProxyServerCheckBox">
+                            <constraints>
+                              <grid row="10" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用代理服务器"/>
+                            </properties>
+                          </component>
+                          <component id="1c230" class="javax.swing.JLabel" binding="ProxyServerLabel">
+                            <constraints>
+                              <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="代理服务器："/>
+                            </properties>
+                          </component>
+                          <component id="f0f0c" class="javax.swing.JButton" binding="ProxyServerButton">
+                            <constraints>
+                              <grid row="12" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="设置代理服务器"/>
+                            </properties>
+                          </component>
+                          <component id="9a4c5" class="javax.swing.JCheckBox" binding="EnableSecureConnectionCheckBox">
+                            <constraints>
+                              <grid row="14" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用安全连接模式"/>
+                            </properties>
+                          </component>
+                          <component id="74555" class="javax.swing.JCheckBox" binding="AutoCheckUpdateCheckBox">
+                            <constraints>
+                              <grid row="16" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用自动检查更新"/>
+                            </properties>
+                          </component>
+                        </children>
+                      </grid>
+                    </children>
+                  </scrollpane>
+                </children>
+              </grid>
             </children>
           </grid>
           <grid id="6ed20" binding="FourthPanel" layout-manager="GridLayoutManager" row-count="7" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
