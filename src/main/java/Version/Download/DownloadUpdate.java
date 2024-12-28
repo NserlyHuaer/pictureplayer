@@ -1,11 +1,13 @@
 package Version.Download;
 
 
+import Runner.Main;
 import Tools.File.ReverseSearch;
 import Tools.String.Formation;
 import Version.Version;
 
 import javax.net.ssl.*;
+import javax.swing.*;
 import java.io.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -117,6 +119,8 @@ public class DownloadUpdate {
                 }
             } catch (IOException e) {
                 System.out.println("Error:" + e);
+                JOptionPane.showMessageDialog(Main.main, "在下载过程中出现了错误：\n" + e, "下载失败", JOptionPane.ERROR_MESSAGE);
+                return null;
             }
             index++;
         }

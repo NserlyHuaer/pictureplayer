@@ -24,9 +24,11 @@ public class DownloadUpdateFrame extends JFrame {
     private JLabel SpeedLabel;
     private JLabel DownloadCounting;
     private DownloadUpdate downloadUpdate;
+    public static DownloadUpdateFrame downloadUpdateFrame;
 
 
     public DownloadUpdateFrame(DownloadUpdate update) {
+        downloadUpdateFrame = this;
         setContentPane(Main);
         Formation formation = new Formation(Title.getText());
         formation.Change("Version", update.NewVersionName);
@@ -105,7 +107,7 @@ public class DownloadUpdateFrame extends JFrame {
         panel2.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         Main.add(panel2, new GridConstraints(4, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         SpeedLabel = new JLabel();
-        SpeedLabel.setText("下载速率：");
+        SpeedLabel.setText("");
         panel2.add(SpeedLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CurrentDownloadProgress = new JLabel();
         CurrentDownloadProgress.setText("当前下载进度:");

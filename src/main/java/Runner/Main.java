@@ -82,6 +82,8 @@ public class Main extends JFrame {
     public Center center;
     //判断按钮是否被按下
     private static boolean IsDragging;
+    //是否启用代理服务器
+    private static boolean EnableProxyServer;
     //最新版本下载地址（如果当前是最新版本，则返回null值）
     private static List<String> NewVersionDownloadingWebSide;
     //更新维护线程
@@ -117,6 +119,7 @@ public class Main extends JFrame {
                     UPDATE_WEBSITE += "/VersionID.sum";
                 }
             }
+            EnableProxyServer = true;
         }
     }
 
@@ -160,10 +163,14 @@ public class Main extends JFrame {
 
     //初始化所有组件设置
     private void Init() {
-        SecondPanel.addMouseListener(mouseAdapter);
+        VersionView.setText(VersionView.getText() + Version.getVersion());
+        TurnButton.addMouseListener(changeFocusListener);
         TurnButton.addActionListener(e -> {
 
         });
+
+
+        SecondPanel.addMouseListener(mouseAdapter);
         // 设置JPanel为可接受拖放
         new DropTarget(SecondPanel, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
             @Override
@@ -201,7 +208,7 @@ public class Main extends JFrame {
             }
         }, true);
 
-        VersionView.setText(VersionView.getText() + Version.getVersion());
+
         Settings();
         SaveButton.addActionListener(e -> {
             System.out.println("Saving Settings...");
@@ -221,22 +228,27 @@ public class Main extends JFrame {
         ProxyServerButton.addActionListener(e -> {
             String newProxyServer = null;
             if (!centre.CurrentData.get("ProxyServer").toString().trim().isEmpty())
-                newProxyServer = JOptionPane.showInputDialog("Please type here for Proxy Server", centre.CurrentData.get("ProxyServer"));
+                newProxyServer = JOptionPane.showInputDialog(Main.main, "Please type here for Proxy Server", centre.CurrentData.get("ProxyServer"));
             else
-                newProxyServer = JOptionPane.showInputDialog("Please type here for Proxy Server", "代理服务器地址");
-            if (newProxyServer != null && !newProxyServer.equals("代理服务器地址") && !newProxyServer.isEmpty()) {
+                newProxyServer = JOptionPane.showInputDialog(Main.main, "Please type here for Proxy Server", "代理服务器地址");
+            newProxyServer = newProxyServer.replace(" ", "");
+            if (newProxyServer.equals(centre.CurrentData.get("ProxyServer"))) return;
+            if (!newProxyServer.equals("代理服务器地址") && !newProxyServer.isEmpty()) {
                 centre.CurrentData.replace("ProxyServer", newProxyServer);
                 ProxyServerLabel.setText("代理服务器: " + centre.CurrentData.get("ProxyServer"));
+                JOptionPane.showConfirmDialog(Main.main, "代理服务器设置成功，重启生效~", "Proxy Server have Done", JOptionPane.YES_NO_OPTION);
                 SettingRevised(true);
             }
         });
-        TurnButton.addMouseListener(changeFocusListener);
+
+
         JVMVersionLabel.setText(JVMVersionLabel.getText() + System.getProperty("java.runtime.version"));
         CurrentSoftwareVersionLabel.setText(CurrentSoftwareVersionLabel.getText() + Version.getVersion());
         CurrentSoftwareInteriorLabel.setText(CurrentSoftwareInteriorLabel.getText() + Version.getVersionID());
         CheckVersionButton.addMouseListener(changeFocusListener);
         OSLabel.setText(OSLabel.getText() + System.getProperty("os.name") + " " + System.getProperty("os.arch") + " " + System.getProperty("os.version"));
         CurrentSoftwareLanguage.setText(CurrentSoftwareLanguage.getText() + System.getProperty("user.language"));
+        if (EnableProxyServer) CheckVersionButton.setText(CheckVersionButton.getText() + "（已启用代理服务器）");
         final String memI = MemUsed.getText();
         tabbedPane1.addChangeListener(e -> {
             //当选项界面切换时
@@ -381,14 +393,10 @@ public class Main extends JFrame {
                 }
             } catch (IOException e1) {
                 System.out.println("Error:" + e1);
-                JOptionPane.showConfirmDialog(Main.main, "无法获取更新，请稍后重试~", "Error", JOptionPane.OK_OPTION);
+                JOptionPane.showMessageDialog(Main.main, "Error: " + e1 + "\n无法获取更新，请稍后重试~", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             new Thread(() -> {
-//                NewVersionDownloadingWebSide = downloadUpdate.downloadFileWebSide;
-//                if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
-//                    UpdateForm();
-//                }
                 ConfirmUpdateDialog confirmUpdateDialog = new ConfirmUpdateDialog(downloadUpdate);
                 confirmUpdateDialog.pack();
                 confirmUpdateDialog.setVisible(true);
@@ -621,14 +629,35 @@ public class Main extends JFrame {
         return panel1;
     }
 
+    private static void CloseInformation() {
+        if (PaintPicture.paintPicture != null && PaintPicture.paintPicture.sizeOperate != null)
+            PaintPicture.paintPicture.sizeOperate.close();
+        if (main != null) main.dispose();
+        if (Main.main != null) Main.main.center.save();
+    }
+
     //关闭
     public static void close() {
+        if (Main.main.getTitle().contains("*")) {
+            int choose = JOptionPane.showConfirmDialog(Main.main, "是否保存设置？", "关闭提示", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (choose == JOptionPane.YES_OPTION) {
+                Main.main.centre.save();
+                if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().toLowerCase().equals("false")) {
+                    CloseInformation();
+                    System.exit(0);
+                }
+            } else if (choose == JOptionPane.NO_OPTION) {
+                CloseInformation();
+                System.exit(0);
+            } else if (choose == JOptionPane.CANCEL_OPTION || choose == JOptionPane.CLOSED_OPTION) {
+                return;
+            }
+        }
+
         //加载配置文件
         Main.main.init.Loading();
         if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().toLowerCase().equals("false")) {
-            if (PaintPicture.paintPicture != null && PaintPicture.paintPicture.sizeOperate != null)
-                PaintPicture.paintPicture.sizeOperate.close();
-            if (main != null) main.dispose();
+            CloseInformation();
             System.exit(0);
         }
         //设置消息对话框面板
@@ -666,16 +695,10 @@ public class Main extends JFrame {
         yes.addActionListener(e1 -> {
             //关闭面板
             main.dispose();
-            //判断paintPicture是否为null值（以防止出现空指针异常）
-            if (PaintPicture.paintPicture != null && PaintPicture.paintPicture.sizeOperate != null)
-                PaintPicture.paintPicture.sizeOperate.close();
-            if (main != null) main.dispose();
+            CloseInformation();
             if (jCheckBox.isSelected()) {
                 init.ChangeValue("EnableConfirmExit", "false");
                 init.Update();
-            }
-            if (Main.main != null) {
-                Main.main.center.save();
             }
             System.exit(0);
         });

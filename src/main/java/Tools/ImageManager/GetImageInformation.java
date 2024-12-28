@@ -28,7 +28,7 @@ public class GetImageInformation {
 
     //算法实现：获取文件是否为受Java支持的图片格式
     public static boolean isImageFile(File file) {
-        if (file == null || file.isDirectory()) return false;
+        if (file == null || !file.exists() || file.isDirectory()) return false;
         try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(file)) {
             Iterator<ImageReader> imageReaderIterator = ImageIO.getImageReaders(imageInputStream);
             return imageReaderIterator.hasNext();

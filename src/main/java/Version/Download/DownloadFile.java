@@ -2,6 +2,7 @@ package Version.Download;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
@@ -13,16 +14,21 @@ public class DownloadFile {
     String saveDir;
     Thread download;
     //当前下载文件总大小
-    public long totalBytesRead;
+    public long CurrentCompletedBytesRead;
     //文件总大小
     public long fileSize;
     //下载进度
     public double progress;
     //每秒传输比特量（bits/s）
-    public double bps;
+    public double BytesPerSecond;
+    //文件还需要多少分钟才能下完(s)
+    public long NeedDownloadTime;
     private long lastUpdate;
+    private long lastReceivedBytes;
     //下载是否完成
     public boolean isCompleted;
+    //判断是否获取到文件大小
+    public boolean isGettingFileSize;
 
     public DownloadFile(String fileURL, String saveDir) throws IOException {
         this.fileURL = fileURL;
@@ -45,98 +51,99 @@ public class DownloadFile {
     }
 
     public long getCurrentFinishedDownloadBytesRead() {
-        return totalBytesRead;
+        return CurrentCompletedBytesRead;
     }
 
     public double getDownloadProgress() {
         return progress;
     }
 
-    public void startToDownload() {
-        try {
-            URL url = new URL(fileURL);
-            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-            //设置读取超时
-            httpURLConnection.setReadTimeout(10000);
-            httpURLConnection.setConnectTimeout(10000);
-            int responseCode = 0;
-            String disposition = httpURLConnection.getHeaderField("Content-Disposition");
-            String fileName = null;
-            if (disposition != null && disposition.startsWith("attachment")) {
-                String tokens[] = disposition.split(";");
-                for (String token : tokens) {
-                    if (token.trim().startsWith("filename")) {
-                        String fileName1 = token.substring(10);
-                        fileName = new String(fileName1.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-                        break;
-                    }
+    public void startToDownload() throws IOException {
+        URL url = new URL(fileURL);
+        HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+        //设置读取超时
+        httpURLConnection.setReadTimeout(10000);
+        httpURLConnection.setConnectTimeout(10000);
+        int responseCode = 0;
+        String disposition = httpURLConnection.getHeaderField("Content-Disposition");
+        String fileName = null;
+        if (disposition != null && disposition.startsWith("attachment")) {
+            String tokens[] = disposition.split(";");
+            for (String token : tokens) {
+                if (token.trim().startsWith("filename")) {
+                    String fileName1 = token.substring(10);
+                    fileName = new String(fileName1.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+                    break;
                 }
             }
-            if (fileName != null) {
-                //如果Content-Disposition中有文件名，则使用它
-                saveDir = saveDir + "/" + fileName;
-            } else {
-                saveDir = saveDir + "/" + fileURL.substring(fileURL.lastIndexOf("/") + 1);
-            }
-
-            ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-            responseCode = httpURLConnection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                InputStream inputStream = new BufferedInputStream(httpURLConnection.getInputStream(), BUFFER_SIZE);
-                FileOutputStream outputStream = new FileOutputStream(saveDir);
-                byte[] dataBuffer = new byte[BUFFER_SIZE];
-                int bytesRead;
-                long startTime = System.currentTimeMillis();
-                totalBytesRead = 0;
-                for (int i = 0; i < 5; i++) {
-                    fileSize = httpURLConnection.getContentLengthLong();//获取文件总大小
-                    if (fileSize != -1) {
-                        break;
-                    }
-                    Thread.sleep(50);
-                }
-                if (fileSize == -1)
-                    System.out.println("Error:Failed to get file size");
-
-
-                while ((bytesRead = inputStream.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
-                    outputStream.write(dataBuffer, 0, bytesRead);
-                    totalBytesRead += bytesRead;
-                    processThroughput(totalBytesRead, startTime);
-                    //计算下载进度
-                    progress = (double) totalBytesRead / fileSize * 100;
-                }
-                bps = 0;
-                isCompleted = true;
-                progress = 100;
-                outputStream.flush();
-                outputStream.close();
-                inputStream.close();
-            } else {
-                System.out.println("Error:Invalid HTTP response code:" + responseCode);
-            }
-            httpURLConnection.disconnect();
-        } catch (IOException e) {
-            System.out.println("Error:Request failed");
-        } catch (InterruptedException e) {
-            System.out.println("Error:Thread interrupted");
         }
+        if (fileName != null) {
+            //如果Content-Disposition中有文件名，则使用它
+            saveDir = saveDir + "/" + fileName;
+        } else {
+            saveDir = saveDir + "/" + fileURL.substring(fileURL.lastIndexOf("/") + 1);
+        }
+
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        responseCode = httpURLConnection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            InputStream inputStream = new BufferedInputStream(httpURLConnection.getInputStream(), BUFFER_SIZE);
+            FileOutputStream outputStream = new FileOutputStream(saveDir);
+            byte[] dataBuffer = new byte[BUFFER_SIZE];
+            int bytesRead;
+            long startTime = System.currentTimeMillis();
+            CurrentCompletedBytesRead = 0;
+            fileSize = httpURLConnection.getContentLengthLong();//获取文件总大小
+            if (fileSize == -1)
+                System.out.println("Error:Failed to get file size");
+            else
+                isGettingFileSize = true;
+
+
+            while ((bytesRead = inputStream.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
+                outputStream.write(dataBuffer, 0, bytesRead);
+                CurrentCompletedBytesRead += bytesRead;
+                processThroughput();
+                //计算下载进度
+                progress = (double) CurrentCompletedBytesRead / fileSize * 100;
+            }
+            BytesPerSecond = 0;
+            isCompleted = true;
+            progress = 100;
+            outputStream.flush();
+            outputStream.close();
+            inputStream.close();
+        } else {
+            System.out.println("Error:Invalid HTTP response code:" + responseCode);
+        }
+        httpURLConnection.disconnect();
+
     }
 
     public void startToDownloadOnNewThread() {
         download = new Thread(() -> {
-            startToDownload();
+            try {
+                startToDownload();
+            } catch (IOException e) {
+                System.out.println("Error:Request failed");
+            }
         });
         download.start();
 
     }
 
-    private void processThroughput(long byteReceived, long startTime) {
+    private void processThroughput() {
         long currentTime = System.currentTimeMillis();
-        if (currentTime - lastUpdate >= 1000) {
-            long elapsed = currentTime - startTime;
-            bps = (double) byteReceived * 8 / (elapsed / 1000.0);
+        if (currentTime - lastUpdate >= 300) {
+            //计算下载速度
+            long elapsed = currentTime - lastUpdate;
+            BytesPerSecond = (CurrentCompletedBytesRead - lastReceivedBytes) * 1000.0 / elapsed;
             lastUpdate = currentTime;
+            lastReceivedBytes = CurrentCompletedBytesRead;
+            if (!isGettingFileSize) return;
+            //计算预计下载完的时间
+            NeedDownloadTime = (long) ((fileSize - CurrentCompletedBytesRead) / BytesPerSecond);
         }
     }
+
 }

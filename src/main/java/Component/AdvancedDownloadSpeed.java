@@ -1,7 +1,6 @@
 package Component;
 
 import Command.CommandCenter;
-import Runner.Main;
 import Tools.String.Formation;
 import Version.Download.DownloadFile;
 import Version.Download.DownloadUpdate;
@@ -15,16 +14,16 @@ import java.util.List;
 import java.util.Map;
 
 public class AdvancedDownloadSpeed {
-
     private DecimalFormat decimalFormat = new DecimalFormat("#.##");
     public Thread DaemonUpdate;
     private JProgressBar totalProgress;
     private JProgressBar currentFileProgress;
     private JLabel speedLabel;
     private JLabel DownloadCountings;
-    public static String speedPrefix;
+    public static String speedPrefix = "{Speed} - {FinishedSize}/{TotalSize},{NeedTime}";
     public static String totalPrefix;
-    private Formation formation;
+    private Formation Totalformation;
+    private Formation currentFormation;
     private DownloadUpdate downloadUpdate;
 
     public AdvancedDownloadSpeed(DownloadUpdate downloadUpdate, JProgressBar totalProgress, JProgressBar currentFileProgress, JLabel speedLabel, JLabel DownloadCountings) {
@@ -33,7 +32,6 @@ public class AdvancedDownloadSpeed {
         this.speedLabel = speedLabel;
         this.DownloadCountings = DownloadCountings;
         this.downloadUpdate = downloadUpdate;
-        speedPrefix = speedLabel.getText();
         // 初始进度条
         totalProgress.setMaximum(downloadUpdate.getUpdateWebSide().size());
         totalProgress.setValue(0);
@@ -49,6 +47,10 @@ public class AdvancedDownloadSpeed {
 
         DaemonUpdate = new Thread(() -> {
             Map<String, List> map = downloadUpdate.download();
+            if (map == null) {
+                DownloadUpdateFrame.downloadUpdateFrame.dispose();
+                return;
+            }
             String website = "";
             try {
                 boolean isFound = false;
@@ -68,45 +70,53 @@ public class AdvancedDownloadSpeed {
         });
         DaemonUpdate.start();
         new Thread(() -> {
-            simulateDownload(downloadUpdate.CurrentDownloadingFile, downloadUpdate.TotalDownloadingFile - downloadUpdate.HaveDownloadedFile, downloadUpdate.TotalDownloadingFile);
+            simulateDownload(downloadUpdate.TotalDownloadingFile - downloadUpdate.HaveDownloadedFile, downloadUpdate.TotalDownloadingFile);
         }).start();
-
     }
 
 
-    private void simulateDownload(DownloadFile downloadFile, int currentProgressFile, int totalFile) {
-        final Timer totalTimer = new Timer(100, new ActionListener() {
+    private void simulateDownload(int currentProgressFile, int totalFile) {
+        final Timer totalTimer = new Timer(350, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                if (downloadUpdate.CurrentDownloadingFile.isGettingFileSize)
+                    speedPrefix = "{Speed} - {FinishedSize}/{TotalSize},{NeedTime}";
+                else
+                    speedPrefix = "{Speed} - {FinishedSize}/0B";
                 if (currentProgressFile < totalFile) {
                     // 更新总进度
                     totalProgress.setValue(currentProgressFile);
-                    formation = new Formation(totalPrefix);
-                    formation.Change("current", String.valueOf(downloadUpdate.HaveDownloadedFile + 1));
-                    DownloadCountings.setText(formation.getResult().toString());
+                    Totalformation = new Formation(totalPrefix);
+                    Totalformation.Change("current", String.valueOf(downloadUpdate.HaveDownloadedFile + 1));
+                    DownloadCountings.setText(Totalformation.getResult().toString());
                 } else {
                     totalProgress.setValue(totalFile);
-                    formation = new Formation(totalPrefix);
-                    formation.Change("current", String.valueOf(downloadUpdate.TotalDownloadingFile));
-                    DownloadCountings.setText(formation.getResult().toString());
+                    Totalformation = new Formation(totalPrefix);
+                    Totalformation.Change("current", String.valueOf(downloadUpdate.TotalDownloadingFile));
+                    DownloadCountings.setText(Totalformation.getResult().toString());
                     ((Timer) actionEvent.getSource()).stop(); // 停止计时器
                 }
             }
         });
 
-        final Timer fileTimer = new Timer(100, new ActionListener() {
+        final Timer fileTimer = new Timer(350, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (downloadFile == null) return;
-                if (downloadFile.progress < 100) {
+                if (downloadUpdate.CurrentDownloadingFile == null) return;
+                if (downloadUpdate.CurrentDownloadingFile.progress < 100) {
                     // 更新当前文件进度
-                    currentFileProgress.setValue((int) downloadFile.progress);
-                    String speed = formatSpeed(downloadFile.bps);
-                    speedLabel.setText(speedPrefix + speed);
+                    currentFileProgress.setValue((int) downloadUpdate.CurrentDownloadingFile.progress);
+                    currentFormation = new Formation(speedPrefix);
+                    currentFormation.Change("Speed", formatSpeed(downloadUpdate.CurrentDownloadingFile.BytesPerSecond));
+                    currentFormation.Change("FinishedSize", formatBytes(downloadUpdate.CurrentDownloadingFile.CurrentCompletedBytesRead));
+                    if (downloadUpdate.CurrentDownloadingFile.isGettingFileSize) {
+                        currentFormation.Change("TotalSize", formatBytes(downloadUpdate.CurrentDownloadingFile.fileSize));
+                        currentFormation.Change("NeedTime", formatTimes(downloadUpdate.CurrentDownloadingFile.NeedDownloadTime));
+                    }
+                    speedLabel.setText(currentFormation.getResult().toString());
                 } else {
                     currentFileProgress.setValue(100);
-                    String speed = formatSpeed(0);
-                    speedLabel.setText(speedPrefix + speed);
+                    speedLabel.setText("0B/s - " + formatBytes(downloadUpdate.CurrentDownloadingFile.CurrentCompletedBytesRead));
                     ((Timer) actionEvent.getSource()).stop(); // 停止计时器
                 }
             }
@@ -118,14 +128,34 @@ public class AdvancedDownloadSpeed {
 
 
     private String formatSpeed(double bytesPerSecond) {
-        if (bytesPerSecond >= 1024L * 1024 * 1024 * 8) {
-            return decimalFormat.format((double) bytesPerSecond / (1024L * 1024 * 1024 * 8)) + " GB/s";
-        } else if (bytesPerSecond >= 1024 * 1024 * 8) {
-            return decimalFormat.format((double) bytesPerSecond / (1024 * 1024 * 8)) + " MB/s";
-        } else if (bytesPerSecond >= 1024 * 8) {
-            return decimalFormat.format((double) bytesPerSecond / 1024 * 8) + " KB/s";
+        return formatBytes(bytesPerSecond) + "/s";
+    }
+
+    private String formatBytes(double bytes) {
+        if (bytes >= 1099511627776L) {
+            return decimalFormat.format(bytes / 1099511627776L) + "TB";
+        } else if (bytes >= 1073741824) {
+            return decimalFormat.format(bytes / (1073741824)) + "GB";
+        } else if (bytes >= 1048576) {
+            return decimalFormat.format(bytes / (1048576)) + "MB";
+        } else if (bytes >= 1024) {
+            return decimalFormat.format(bytes / 1024) + "KB";
         } else {
-            return decimalFormat.format(bytesPerSecond) + " B/s";
+            return decimalFormat.format(bytes);
+        }
+    }
+
+    private String formatTimes(long seconds) {
+        if (seconds >= 2592000) {
+            return decimalFormat.format(seconds / 2592000) + "months" + formatTimes(seconds % 2592000);
+        } else if (seconds >= 86400) {
+            return decimalFormat.format(seconds / (86400)) + "days" + formatTimes(seconds % 86400);
+        } else if (seconds >= 3600) {
+            return decimalFormat.format(seconds / (3600)) + "h" + formatTimes(seconds % 3600);
+        } else if (seconds >= 60) {
+            return decimalFormat.format(seconds / 60) + "min" + formatTimes(seconds % 60);
+        } else {
+            return seconds + "s";
         }
     }
 }
