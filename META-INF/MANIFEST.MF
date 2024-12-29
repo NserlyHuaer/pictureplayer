@@ -1,3 +1,6 @@
 Manifest-Version: 1.0
-Main-Class: Runner.Main$$$
+Main-Class: Runner.Main
+Class-Path: asm-tree-3.0.jar joal-2.3.2.jar asm-commons-3.0.jar asm-3.0.
+ jar jna-platform-5.16.0.jar jdom-1.0.jar jna-5.16.0.jar forms_rt-7.0.3.
+ jar forms-1.1-preview.jar jogl-all-2.3.2.jar gluegen-rt-2.3.2.jar
 

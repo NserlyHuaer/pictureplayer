@@ -97,9 +97,7 @@ public class PaintPicture extends JPanel {
                     } while (!isDown);
                     myCanvas.requestFocus();
                 }).start();
-
             }
-
 
             @Override
             public void mouseReleased(MouseEvent e) {//鼠标放出触发
@@ -659,11 +657,16 @@ public class PaintPicture extends JPanel {
             //显示图像
             graphics2D.drawImage(image, (int) FinalX, (int) FinalY, (int) width, (int) height, null);
             //检查比例是否为最大值，如果为最大就把放大按钮禁用
-            if (paintPicture.biggest != null)
+            if (paintPicture.biggest != null) {
                 paintPicture.biggest.setEnabled(!paintPicture.sizeOperate.isTheBiggestRatio());
+                if (!paintPicture.biggest.isEnabled()) myCanvas.requestFocus();
+            }
             //检查比例是否为最小值，如果为最小就把放大按钮禁用
-            if (paintPicture.smallest != null)
+            if (paintPicture.smallest != null) {
                 paintPicture.smallest.setEnabled(!paintPicture.sizeOperate.isTheSmallestRatio());
+                if (!paintPicture.smallest.isEnabled()) myCanvas.requestFocus();
+            }
+
             //设置文本中显示的图片缩放比例
             percentLabel.set((int) sizeOperate.getPercent());
             this.X = FinalX;

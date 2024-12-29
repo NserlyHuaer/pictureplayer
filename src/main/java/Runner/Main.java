@@ -7,7 +7,7 @@ import Tools.File.ImageThumbnailManage.Center;
 import Tools.ImageManager.CheckFileIsRightPictureType;
 import Tools.ImageManager.GetImageInformation;
 import Tools.OSInformation.MemoryUtil;
-import Version.Download.DownloadUpdate;
+import Tools.DownloadFile.DownloadUpdate;
 import Version.Version;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -18,7 +18,6 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
@@ -95,6 +94,7 @@ public class Main extends JFrame {
     final String MouseMoveLabelPrefix;
     final String ProxyServerPrefix;
     public PaintPicture paintPicture;
+    private boolean IsFreshed;
     private MouseAdapter mouseAdapter = new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
@@ -249,22 +249,8 @@ public class Main extends JFrame {
         if (EnableProxyServer) CheckVersionButton.setText(CheckVersionButton.getText() + "（已启用代理服务器）");
         final String memI = MemUsed.getText();
         tabbedPane1.addChangeListener(e -> {
-            //当选项界面切换时
-            if (tabbedPane1.getSelectedIndex() == 0) {
-                //让路径输入框获取焦点
-                textField1.requestFocus();
-            } else if (tabbedPane1.getSelectedIndex() == 1) {
-                //让图片渲染器获取焦点
-                if (paintPicture != null) {
-                    paintPicture.myCanvas.requestFocus();
-                }
-            } else if (tabbedPane1.getSelectedIndex() == 2) {
-                //让窗体获取焦点
-                tabbedPane1.requestFocus();
-                reFresh();
-            } else {
-                //让窗体获取焦点
-                requestFocus();
+            request();
+            if (tabbedPane1.getSelectedIndex() == 3) {
                 future = executor.scheduleAtFixedRate(new Runnable() {
                     @Override
                     public void run() {
@@ -272,24 +258,21 @@ public class Main extends JFrame {
                         MemUsed.setText(memI + map.get("heapMemoryUsed") + "/" + map.get("heapMemoryMax") + "(" + map.get("heapUsage") + ")");
                     }
                 }, 0, 2, TimeUnit.SECONDS);
-            }
-            if (tabbedPane1.getSelectedIndex() != 3) {
+            } else {
                 if (future != null)
                     future.cancel(false);
+            }
+            if (tabbedPane1.getSelectedIndex() == 2 && !IsFreshed) {
+                IsFreshed = true;
+                reFresh();
             }
         });
         //设置窗体在显示时自动获取焦点
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowActivated(WindowEvent e) {
-                //当前窗体成为活动窗体时
-                if (tabbedPane1.getSelectedIndex() == 0) {
-                    //让路径输入框获取焦点
-                    textField1.requestFocus();
-                } else {
-                    //让窗体获取焦点
-                    requestFocus();
-                }
+                //当前窗体成为活动窗体时，获取焦点
+                request();
             }
 
             @Override
@@ -297,6 +280,26 @@ public class Main extends JFrame {
                 close();
             }
         });
+    }
+
+    //获取焦点
+    private void request() {
+        //当选项界面切换时
+        if (tabbedPane1.getSelectedIndex() == 0) {
+            //让路径输入框获取焦点
+            textField1.requestFocus();
+        } else if (tabbedPane1.getSelectedIndex() == 1) {
+            //让图片渲染器获取焦点
+            if (paintPicture != null) {
+                paintPicture.myCanvas.requestFocus();
+            }
+        } else if (tabbedPane1.getSelectedIndex() == 2) {
+            //让窗体获取焦点
+            tabbedPane1.requestFocus();
+        } else {
+            //让窗体获取焦点
+            requestFocus();
+        }
     }
 
     //打开图片

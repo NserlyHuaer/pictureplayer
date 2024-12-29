@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
+import java.awt.datatransfer.MimeTypeParseException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,13 +29,43 @@ public class GetImageInformation {
 
     //算法实现：获取文件是否为受Java支持的图片格式
     public static boolean isImageFile(File file) {
-        if (file == null || !file.exists() || file.isDirectory()) return false;
-        try (ImageInputStream imageInputStream = ImageIO.createImageInputStream(file)) {
-            Iterator<ImageReader> imageReaderIterator = ImageIO.getImageReaders(imageInputStream);
-            return imageReaderIterator.hasNext();
-        } catch (IOException e) {
+        if (file == null || !file.exists() || file.isDirectory()) {
             return false;
         }
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            byte[] buffer = new byte[8];
+            fileInputStream.read(buffer);
+            String hexString = bytesToHex(buffer);
+            // 常见图片格式的文件头十六进制标识
+            if (hexString.startsWith("FFD8FF")) {
+                // JPEG格式
+                return true;
+            } else if (hexString.startsWith("89504E47")) {
+                // PNG格式
+                return true;
+            } else if (hexString.startsWith("47494638")) {
+                // GIF格式
+                return true;
+            } else if (hexString.startsWith("49492A00")) {
+                // TIFF格式
+                return true;
+            } else if (hexString.startsWith("424D")) {
+                // BMP格式
+                return true;
+            }
+            return false;
+        } catch (IOException e) {
+            System.out.println("Error: " + e);
+            return false;
+        }
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02X", b));
+        }
+        return sb.toString();
     }
 
     //算法实现：获取图片大小
@@ -131,7 +162,7 @@ public class GetImageInformation {
         File[] files = new File(new File(path).getParent()).listFiles();
         ArrayList<String> arrayList = new ArrayList<>();
         if (files != null) for (File file : files) {
-            if (file.isFile() && GetImageInformation.isImageFile(file)) arrayList.add(file.getPath());
+            if (GetImageInformation.isImageFile(file)) arrayList.add(file.getPath());
         }
         return arrayList;
     }

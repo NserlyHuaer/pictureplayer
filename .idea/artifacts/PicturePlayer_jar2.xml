@@ -1,0 +1,24 @@
+<component name="ArtifactManager">
+  <artifact name="PicturePlayer:jar2">
+    <output-path>$PROJECT_DIR$/out/artifacts/PicturePlayer_jar2</output-path>
+    <root id="root">
+      <element id="archive" name="PicturePlayer.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="PicturePlayer" />
+      </element>
+      <element id="library" level="project" name="Maven: asm:asm-tree:3.0" />
+      <element id="library" level="project" name="Maven: org.jogamp.joal:joal:2.3.2" />
+      <element id="library" level="project" name="Maven: asm:asm-commons:3.0" />
+      <element id="library" level="project" name="Maven: asm:asm:3.0" />
+      <element id="library" level="project" name="Maven: net.java.dev.jna:jna-platform:5.16.0" />
+      <element id="library" level="project" name="Maven: jdom:jdom:1.0" />
+      <element id="library" level="project" name="Maven: net.java.dev.jna:jna:5.16.0" />
+      <element id="library" level="project" name="Maven: com.intellij:forms_rt:7.0.3" />
+      <element id="library" level="project" name="Maven: com.jgoodies:forms:1.1-preview" />
+      <element id="library" level="project" name="Maven: org.jogamp.jogl:jogl-all:2.3.2" />
+      <element id="library" level="project" name="Maven: org.jogamp.gluegen:gluegen-rt:2.3.2" />
+    </root>
+  </artifact>
+</component>

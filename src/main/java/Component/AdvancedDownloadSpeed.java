@@ -2,8 +2,7 @@ package Component;
 
 import Command.CommandCenter;
 import Tools.String.Formation;
-import Version.Download.DownloadFile;
-import Version.Download.DownloadUpdate;
+import Tools.DownloadFile.DownloadUpdate;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

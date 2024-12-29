@@ -4,7 +4,7 @@ import Runner.Main;
 import Tools.Component.WindowLocation;
 import Tools.File.FileContents;
 import Tools.String.Formation;
-import Version.Download.DownloadUpdate;
+import Tools.DownloadFile.DownloadUpdate;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
