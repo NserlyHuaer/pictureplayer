@@ -172,6 +172,7 @@ public class Main extends JFrame {
         System.out.println("Java Runtime:" + System.getProperty("java.vm.name") + " " + System.getProperty("java.runtime.version") + " (" + System.getProperty("sun.boot.library.path") + ")");
         //获取软件版本
         System.out.println("Software Version:" + Version.getVersion());
+        main = new Main("Picture Player");
         if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
             DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
             new Thread(() -> {
@@ -181,7 +182,6 @@ public class Main extends JFrame {
                 }
             }).start();
         }
-        main = new Main("Picture Player");
     }
 
     public Main(String title) {
@@ -193,7 +193,8 @@ public class Main extends JFrame {
         setContentPane(this.panel1);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 //        pack();
-        setBounds(500, 350, 800, 580);
+        setSize(800, 580);
+        setLocation(WindowLocation.ComponentCenter(null, 800, 580));
         ProxyServerPrefix = ProxyServerLabel.getText();
         MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
         Init();
