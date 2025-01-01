@@ -6,12 +6,13 @@ import java.awt.*;
 
 public class WindowLocation {
     public static Point ComponentCenter(Window parent, int sonWidth, int sonHeight) {
+        int windowWidth = SizeOperate.FreeOfScreenSize.width;
+        int windowHeight = SizeOperate.FreeOfScreenSize.height;
+        if (parent == null) return new Point((windowWidth + sonWidth) / 2, (windowHeight + sonHeight) / 2);
         int parentWidth = parent.getSize().width;
         int parentHeight = parent.getSize().height;
         int resultX = (parentWidth - sonWidth) / 2 + parent.getLocation().x;
         int resultY = (parentHeight - sonHeight) / 2 + parent.getLocation().y;
-        int windowWidth = SizeOperate.FreeOfScreenSize.width;
-        int windowHeight = SizeOperate.FreeOfScreenSize.height;
 
         int cacheWidth = windowWidth - sonWidth;
         int cacheHeight = windowHeight - sonHeight;
