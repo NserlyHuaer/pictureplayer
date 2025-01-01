@@ -93,7 +93,7 @@ public class DownloadUpdateFrame extends JFrame {
         Title = new JLabel();
         Font TitleFont = this.$$$getFont$$$(null, -1, 18, Title.getFont());
         if (TitleFont != null) Title.setFont(TitleFont);
-        Title.setText("下载{Version}({VersionID}}中...");
+        Title.setText("下载{Version}({VersionID})中...");
         Main.add(Title, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
