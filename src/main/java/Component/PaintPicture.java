@@ -9,10 +9,13 @@ import Tools.EqualsProportion;
 import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.ImageRotationHelper;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.MemoryImageSource;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -288,7 +291,11 @@ public class PaintPicture extends JPanel {
                 path = path.substring(1, path.length() - 1);
             }
             this.path = path;
-            image = new ImageIcon(path).getImage();
+            try {
+                image = ImageIO.read(new File(path));
+            } catch (IOException e) {
+                System.out.println("Error:" + e);
+            }
             Robot robot = null;
             try {
                 robot = new Robot();
@@ -451,7 +458,11 @@ public class PaintPicture extends JPanel {
             this.path = path;
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
             NewWindow = LastWindow = null;
-            image = new ImageIcon(path).getImage();
+            try {
+                image = ImageIO.read(new File(path));
+            } catch (IOException e) {
+                System.out.println("Error:" + e);
+            }
             sizeOperate.changeCanvas(this);
         }
 

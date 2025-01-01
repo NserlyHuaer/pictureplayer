@@ -6,8 +6,8 @@ import Tools.Component.WindowLocation;
 import Tools.File.ImageThumbnailManage.Center;
 import Tools.ImageManager.CheckFileIsRightPictureType;
 import Tools.ImageManager.GetImageInformation;
-import Tools.OSInformation.MemoryUtil;
 import Tools.DownloadFile.DownloadUpdate;
+import Tools.OSInformation.SystemMonitor;
 import Version.Version;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -41,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Main extends JFrame {
     //初始化
-    public static final Init init;
+    public static final Init<String, String> init;
     public Centre centre;
     public static Main main;
     private JPanel panel1;
@@ -76,7 +75,12 @@ public class Main extends JFrame {
     private JPanel FirstPanel;
     private JPanel ThirdPanel;
     private JPanel FourthPanel;
-    private static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private JLabel PhysicalUsedMemory;
+    private JLabel TotalThread;
+    private JLabel DefaultJVMMem;
+    private JLabel ProgramStartTime;
+    private JLabel CPUName;
+    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
     private final ChangeFocusListener changeFocusListener;
     //图片缩略图
@@ -94,15 +98,15 @@ public class Main extends JFrame {
     final String MouseMoveLabelPrefix;
     final String ProxyServerPrefix;
     public PaintPicture paintPicture;
-    private boolean IsFreshed;
-    private MouseAdapter mouseAdapter = new MouseAdapter() {
+    private boolean IsFreshen;
+    private final MouseAdapter mouseAdapter = new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 tabbedPane1.setSelectedIndex(0);
             }
         }
     };
-    private DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
+    private final DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
         public void drop(DropTargetDropEvent dtde) {
             try {
                 dtde.acceptDrop(DnDConstants.ACTION_COPY);
@@ -161,7 +165,7 @@ public class Main extends JFrame {
 
     public static void main(String[] args) {
         //获取操作系统版本
-        System.out.println("OS:" + System.getProperty("os.name") + " " + System.getProperty("os.arch") + " " + System.getProperty("os.version"));
+        System.out.println("OS:" + SystemMonitor.OS_NAME);
         //获取系统语言
         System.out.println("System Language:" + System.getProperty("user.language"));
         //获取java版本
@@ -225,10 +229,11 @@ public class Main extends JFrame {
         });
         ProxyServerButton.addActionListener(e -> {
             String newProxyServer = null;
-            if (!centre.CurrentData.get("ProxyServer").toString().trim().isEmpty())
+            if (!centre.CurrentData.get("ProxyServer").trim().isEmpty())
                 newProxyServer = JOptionPane.showInputDialog(Main.main, "Please type here for Proxy Server", centre.CurrentData.get("ProxyServer"));
             else
                 newProxyServer = JOptionPane.showInputDialog(Main.main, "Please type here for Proxy Server", "代理服务器地址");
+            if (newProxyServer == null) return;
             newProxyServer = newProxyServer.replace(" ", "");
             if (newProxyServer.equals(centre.CurrentData.get("ProxyServer"))) return;
             if (!newProxyServer.equals("代理服务器地址") && !newProxyServer.isEmpty()) {
@@ -239,31 +244,35 @@ public class Main extends JFrame {
             }
         });
 
-
+        DefaultJVMMem.setText(DefaultJVMMem.getText() + SystemMonitor.convertSize(SystemMonitor.JVM_Initialize_Memory));
         JVMVersionLabel.setText(JVMVersionLabel.getText() + System.getProperty("java.runtime.version"));
+        ProgramStartTime.setText(ProgramStartTime.getText() + SystemMonitor.PROGRAM_START_TIME);
         CurrentSoftwareVersionLabel.setText(CurrentSoftwareVersionLabel.getText() + Version.getVersion());
         CurrentSoftwareInteriorLabel.setText(CurrentSoftwareInteriorLabel.getText() + Version.getVersionID());
         CheckVersionButton.addMouseListener(changeFocusListener);
-        OSLabel.setText(OSLabel.getText() + System.getProperty("os.name") + " " + System.getProperty("os.arch") + " " + System.getProperty("os.version"));
+        OSLabel.setText(OSLabel.getText() + SystemMonitor.OS_NAME);
+        CPUName.setText(CPUName.getText() + SystemMonitor.CPU_NAME);
         CurrentSoftwareLanguage.setText(CurrentSoftwareLanguage.getText() + System.getProperty("user.language"));
         if (EnableProxyServer) CheckVersionButton.setText(CheckVersionButton.getText() + "（已启用代理服务器）");
-        final String memI = MemUsed.getText();
+        final String JmemI = MemUsed.getText();
+        final String TTI = TotalThread.getText();
         tabbedPane1.addChangeListener(e -> {
             request();
             if (tabbedPane1.getSelectedIndex() == 3) {
                 future = executor.scheduleAtFixedRate(new Runnable() {
                     @Override
                     public void run() {
-                        Map<String, Object> map = MemoryUtil.getMemoryInfo();
-                        MemUsed.setText(memI + map.get("heapMemoryUsed") + "/" + map.get("heapMemoryMax") + "(" + map.get("heapUsage") + ")");
+                        SystemMonitor.GetInformation();
+                        MemUsed.setText(JmemI + SystemMonitor.convertSize(SystemMonitor.JVM_Used_Memory) + "/" + SystemMonitor.convertSize(SystemMonitor.JVM_Maximum_Free_Memory) + "(" + SystemMonitor.JVM_Memory_Usage + "%" + ")");
+                        TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
                     }
                 }, 0, 2, TimeUnit.SECONDS);
             } else {
                 if (future != null)
                     future.cancel(false);
             }
-            if (tabbedPane1.getSelectedIndex() == 2 && !IsFreshed) {
-                IsFreshed = true;
+            if (tabbedPane1.getSelectedIndex() == 2 && !IsFreshen) {
+                IsFreshen = true;
                 reFresh();
             }
         });
@@ -336,7 +345,7 @@ public class Main extends JFrame {
         });
         MouseMoveOffsetsSlider.addChangeListener(e -> {
             centre.CurrentData.replace("MouseMoveOffsets", String.valueOf(MouseMoveOffsetsSlider.getValue()));
-            StringBuffer stringBuffer1 = new StringBuffer(MouseMoveLabelPrefix);
+            StringBuilder stringBuffer1 = new StringBuilder(MouseMoveLabelPrefix);
             stringBuffer1.insert(MouseMoveLabelPrefix.indexOf(":"), MouseMoveOffsetsSlider.getValue() + "% ");
             MouseMoveOffsetsLabel.setText(stringBuffer1.toString());
             SettingRevised(true);
@@ -370,7 +379,7 @@ public class Main extends JFrame {
         EnableHistoryLoaderCheckBox.setSelected(Centre.getBoolean("EnableHistoryLoader", centre.CurrentData));
         EnableCursorDisplayCheckBox.setSelected(Centre.getBoolean("EnableCursorDisplay", centre.CurrentData));
         MouseMoveOffsetsSlider.setValue((int) Centre.getDouble("MouseMoveOffsets", centre.CurrentData));
-        StringBuffer stringBuffer = new StringBuffer(MouseMoveLabelPrefix);
+        StringBuilder stringBuffer = new StringBuilder(MouseMoveLabelPrefix);
         stringBuffer.insert(MouseMoveLabelPrefix.indexOf(":"), MouseMoveOffsetsSlider.getValue() + "% ");
         MouseMoveOffsetsLabel.setText(stringBuffer.toString());
         EnableProxyServerCheckBox.setSelected(Centre.getBoolean("EnableProxyServer", centre.CurrentData));
@@ -386,7 +395,7 @@ public class Main extends JFrame {
         CheckVersionButton.addActionListener(e -> {
             try {
                 if (!downloadUpdate.checkIfTheLatestVersion()) {
-                    JOptionPane.showConfirmDialog(Main.main, "已是最新版本！", "You are up to date", JOptionPane.OK_OPTION);
+                    JOptionPane.showConfirmDialog(Main.main, "已是最新版本！", "You are up to date", JOptionPane.YES_NO_OPTION);
                     return;
                 }
             } catch (IOException e1) {
@@ -596,48 +605,76 @@ public class Main extends JFrame {
         EnableProxyServerCheckBox.setText("启用代理服务器");
         panel4.add(EnableProxyServerCheckBox, cc.xy(1, 13));
         FourthPanel = new JPanel();
-        FourthPanel.setLayout(new GridLayoutManager(7, 4, new Insets(0, 0, 0, 0), -1, -1));
+        FourthPanel.setLayout(new GridLayoutManager(9, 7, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane1.addTab("关于", FourthPanel);
         JVMVersionLabel = new JLabel();
         Font JVMVersionLabelFont = this.$$$getFont$$$(null, -1, 16, JVMVersionLabel.getFont());
         if (JVMVersionLabelFont != null) JVMVersionLabel.setFont(JVMVersionLabelFont);
-        JVMVersionLabel.setText("JVM Version:");
-        FourthPanel.add(JVMVersionLabel, new GridConstraints(1, 0, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        JVMVersionLabel.setText("JVM版本:");
+        FourthPanel.add(JVMVersionLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer8 = new Spacer();
-        FourthPanel.add(spacer8, new GridConstraints(6, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        FourthPanel.add(spacer8, new GridConstraints(8, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         CurrentSoftwareVersionLabel = new JLabel();
         Font CurrentSoftwareVersionLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareVersionLabel.getFont());
         if (CurrentSoftwareVersionLabelFont != null)
             CurrentSoftwareVersionLabel.setFont(CurrentSoftwareVersionLabelFont);
-        CurrentSoftwareVersionLabel.setText("当前软件版本：");
-        FourthPanel.add(CurrentSoftwareVersionLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        CurrentSoftwareVersionLabel.setText("软件版本：");
+        FourthPanel.add(CurrentSoftwareVersionLabel, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CurrentSoftwareInteriorLabel = new JLabel();
         Font CurrentSoftwareInteriorLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareInteriorLabel.getFont());
         if (CurrentSoftwareInteriorLabelFont != null)
             CurrentSoftwareInteriorLabel.setFont(CurrentSoftwareInteriorLabelFont);
-        CurrentSoftwareInteriorLabel.setText("内部版本：");
-        FourthPanel.add(CurrentSoftwareInteriorLabel, new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        CurrentSoftwareInteriorLabel.setText("软件内部版本：");
+        FourthPanel.add(CurrentSoftwareInteriorLabel, new GridConstraints(6, 2, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CheckVersionButton = new JButton();
         Font CheckVersionButtonFont = this.$$$getFont$$$(null, -1, 16, CheckVersionButton.getFont());
         if (CheckVersionButtonFont != null) CheckVersionButton.setFont(CheckVersionButtonFont);
         CheckVersionButton.setText("检查更新");
-        FourthPanel.add(CheckVersionButton, new GridConstraints(5, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FourthPanel.add(CheckVersionButton, new GridConstraints(7, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         OSLabel = new JLabel();
         Font OSLabelFont = this.$$$getFont$$$(null, -1, 16, OSLabel.getFont());
         if (OSLabelFont != null) OSLabel.setFont(OSLabelFont);
         OSLabel.setText("操作系统：");
         FourthPanel.add(OSLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        ProgramStartTime = new JLabel();
+        Font ProgramStartTimeFont = this.$$$getFont$$$(null, -1, 16, ProgramStartTime.getFont());
+        if (ProgramStartTimeFont != null) ProgramStartTime.setFont(ProgramStartTimeFont);
+        ProgramStartTime.setText("软件启动时间：");
+        FourthPanel.add(ProgramStartTime, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CurrentSoftwareLanguage = new JLabel();
         CurrentSoftwareLanguage.setEnabled(true);
         Font CurrentSoftwareLanguageFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareLanguage.getFont());
         if (CurrentSoftwareLanguageFont != null) CurrentSoftwareLanguage.setFont(CurrentSoftwareLanguageFont);
-        CurrentSoftwareLanguage.setText("当前软件语言：");
-        FourthPanel.add(CurrentSoftwareLanguage, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        CurrentSoftwareLanguage.setText("系统语言：");
+        FourthPanel.add(CurrentSoftwareLanguage, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        CPUName = new JLabel();
+        Font CPUNameFont = this.$$$getFont$$$(null, -1, 16, CPUName.getFont());
+        if (CPUNameFont != null) CPUName.setFont(CPUNameFont);
+        CPUName.setText("CPU：");
+        FourthPanel.add(CPUName, new GridConstraints(1, 0, 1, 7, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        TotalThread = new JLabel();
+        Font TotalThreadFont = this.$$$getFont$$$(null, -1, 16, TotalThread.getFont());
+        if (TotalThreadFont != null) TotalThread.setFont(TotalThreadFont);
+        TotalThread.setText("总线程数：");
+        FourthPanel.add(TotalThread, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         MemUsed = new JLabel();
         Font MemUsedFont = this.$$$getFont$$$(null, -1, 16, MemUsed.getFont());
         if (MemUsedFont != null) MemUsed.setFont(MemUsedFont);
         MemUsed.setText("JVM内存：");
-        FourthPanel.add(MemUsed, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FourthPanel.add(MemUsed, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        DefaultJVMMem = new JLabel();
+        Font DefaultJVMMemFont = this.$$$getFont$$$(null, -1, 16, DefaultJVMMem.getFont());
+        if (DefaultJVMMemFont != null) DefaultJVMMem.setFont(DefaultJVMMemFont);
+        DefaultJVMMem.setText("JVM初始默认内存：");
+        FourthPanel.add(DefaultJVMMem, new GridConstraints(4, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer9 = new Spacer();
+        FourthPanel.add(spacer9, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer10 = new Spacer();
+        FourthPanel.add(spacer10, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer11 = new Spacer();
+        FourthPanel.add(spacer11, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer12 = new Spacer();
+        FourthPanel.add(spacer12, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
     }
 
     /**
@@ -682,7 +719,7 @@ public class Main extends JFrame {
             int choose = JOptionPane.showConfirmDialog(Main.main, "是否保存设置？", "关闭提示", JOptionPane.YES_NO_CANCEL_OPTION);
             if (choose == JOptionPane.YES_OPTION) {
                 Main.main.centre.save();
-                if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().toLowerCase().equals("false")) {
+                if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().equalsIgnoreCase("false")) {
                     CloseInformation();
                     System.exit(0);
                 }
@@ -695,8 +732,8 @@ public class Main extends JFrame {
         }
 
         //加载配置文件
-        Main.main.init.Loading();
-        if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().toLowerCase().equals("false")) {
+        init.Loading();
+        if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().equalsIgnoreCase("false")) {
             CloseInformation();
             System.exit(0);
         }
@@ -710,7 +747,7 @@ public class Main extends JFrame {
         //创建文字
         var jLabel1 = new JLabel("Are you sure you want to exit?");
         //设置文字字体、格式
-        jLabel1.setFont(new Font("微软雅黑", 0, 15));
+        jLabel1.setFont(new Font("微软雅黑", Font.PLAIN, 15));
         //设置显示大小、坐标
         jLabel1.setBounds(15, 3, 290, 50);
         //创建按钮
