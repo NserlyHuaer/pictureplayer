@@ -2,7 +2,7 @@ package Component;
 
 import Tools.Component.WindowLocation;
 import Tools.String.Formation;
-import Tools.DownloadFile.DownloadUpdate;
+import Version.DownloadUpdate;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 

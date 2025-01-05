@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class DownloadFile {
-    private static final int BUFFER_SIZE = 4096;//增加缓冲区大小
+    private static final int BUFFER_SIZE = 524288;//增加缓冲区大小（512KB缓冲区）
     //设置连接超时时间
     public static final int ConnectionTimeout = 5000;
     //设置读取超时时间

@@ -48,10 +48,10 @@ public class PaintPicture extends JPanel {
     public SizeOperate sizeOperate;
     //图片渲染管理
     public MyCanvas myCanvas;
-    //判断按钮是否被按下
-    private static boolean IsDragging;
     //移动图片时，鼠标最开始的坐标（对于桌面）
     Point mouseLocation;
+    //当前图片路径下所有图片
+    ArrayList<String> CurrentPathOfPicture = null;
 
 
     //构造方法（函数）
@@ -59,7 +59,7 @@ public class PaintPicture extends JPanel {
         setLayout(new BorderLayout());
         paintPicture = this;
         //获取当前图片路径下所有图片
-        ArrayList<String> CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(path);
+        CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(path);
         percentLabel = new PercentLabel();
         //向控制台输出打开文件路径
         System.out.println("Opened:\t\"" + path + "\"");
@@ -84,8 +84,6 @@ public class PaintPicture extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {//点击、长按触发
                 isDown = false;
-                //将鼠标被按下属性设为true
-                IsDragging = true;
                 new Thread(() -> {
                     do {
                         if (!biggest.isEnabled()) return;
@@ -105,8 +103,6 @@ public class PaintPicture extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {//鼠标放出触发
                 isDown = true;
-                //将鼠标被按下属性设为false
-                IsDragging = false;
             }
         });
         smallest = new JButton("reduce");
@@ -119,8 +115,6 @@ public class PaintPicture extends JPanel {
             public void mousePressed(MouseEvent e) {
                 //设置鼠标没有释放
                 isReleased = false;
-                //将鼠标被按下属性设为true
-                IsDragging = true;
                 //创建线程
                 new Thread(() -> {
                     //循环
@@ -147,8 +141,6 @@ public class PaintPicture extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {
                 isReleased = true;
-                //将鼠标被按下属性设为false
-                IsDragging = false;
             }
         });
         ChangeFocusListener changeFocusListener = new ChangeFocusListener(myCanvas);
@@ -173,14 +165,14 @@ public class PaintPicture extends JPanel {
                     if (CurrentIndex > 0) {
                         //向控制台输出打开文件路径
                         System.out.println("Opened:\t\"" + CurrentPathOfPicture.get(CurrentIndex - 1) + "\"");
-                        myCanvas.changeOriginalPicturePath(CurrentPathOfPicture.get(CurrentIndex - 1));
+                        myCanvas.changePicturePath(CurrentPathOfPicture.get(CurrentIndex - 1));
                         sizeOperate.update();
                     }
                 } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                     if (CurrentIndex + 1 < CurrentPathOfPicture.size()) {
                         //向控制台输出打开文件路径
                         System.out.println("Opened:\t\"" + CurrentPathOfPicture.get(CurrentIndex + 1) + "\"");
-                        myCanvas.changeOriginalPicturePath(CurrentPathOfPicture.get(CurrentIndex + 1));
+                        myCanvas.changePicturePath(CurrentPathOfPicture.get(CurrentIndex + 1));
                         sizeOperate.update();
                     }
                 }
@@ -249,8 +241,7 @@ public class PaintPicture extends JPanel {
 
     //改变图片路径
     public void changePicturePath(String path) {
-        myCanvas.changeOriginalPicturePath(path);
-        sizeOperate.update();
+        myCanvas.changePicturePath(path);
     }
 
     public class MyCanvas extends JComponent {
@@ -387,16 +378,16 @@ public class PaintPicture extends JPanel {
                 //鼠标滚轮事件
                 @Override
                 public void mouseWheelMoved(MouseWheelEvent e) {
-                    if (IsDragging) return;
-                    myCanvas.setMouseCoordinate(e.getX(), e.getY());
                     //滚轮向后
                     if (e.getWheelRotation() == 1) {
                         if (sizeOperate.adjustPercent(SizeOperate.Reduce) || sizeOperate.adjustPercent(SizeOperate.Reduce)) {
+                            myCanvas.setMouseCoordinate(e.getX(), e.getY());
                             sizeOperate.update();
                         }
                     }//滚轮向前
                     else if (e.getWheelRotation() == -1) {
                         if (sizeOperate.adjustPercent(SizeOperate.Enlarge) || sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
+                            myCanvas.setMouseCoordinate(e.getX(), e.getY());
                             sizeOperate.update();
                         }
                     }
@@ -437,7 +428,6 @@ public class PaintPicture extends JPanel {
 
         //设置度数
         private void setDegrees(int Degrees) {
-
             RotationDegrees = (byte) (Degrees % 4);
             if (RotationDegrees < 0) RotationDegrees = (byte) (4 + RotationDegrees);
             sizeOperate.changeCanvas(this);
@@ -449,10 +439,15 @@ public class PaintPicture extends JPanel {
         }
 
         //改变图片路径
-        public void changeOriginalPicturePath(String path) {
+        public void changePicturePath(String path) {
             //如果字符串前缀与后缀包含"，则去除其中的"
             if (path.startsWith("\"") && path.endsWith("\"")) {
                 path = path.substring(1, path.length() - 1);
+            }
+            //若这两个文件父目录不相同
+            if (!new File(this.path).getParent().equals(new File(path).getParent())) {
+                //获取当前图片路径下所有图片
+                CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(path);
             }
             RotationDegrees = lastRotationDegrees = 0;
             this.path = path;
@@ -477,7 +472,6 @@ public class PaintPicture extends JPanel {
             }
             path = null;
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
-
             NewWindow = LastWindow = null;
             this.removeAll();
         }
@@ -490,16 +484,12 @@ public class PaintPicture extends JPanel {
         //获取图片高度
         public int getImageHeight() {
             if (image == null) return 0;
-//            else if (RotationDegrees % 2 == 0) return image.getHeight(null);
-//            else return image.getWidth(null);
             return image.getHeight(null);
         }
 
         //获取图片宽度
         public int getImageWidth() {
             if (image == null) return 0;
-//            else if (RotationDegrees % 2 == 0) return image.getWidth(null);
-//            else return image.getHeight(null);
             return image.getWidth(null);
         }
 
@@ -579,10 +569,6 @@ public class PaintPicture extends JPanel {
                 X = point.getX();
                 Y = point.getY();
             }
-
-//            if (NewWindow != null && NewWindow.getHeight() * NewWindow.getWidth() > lastHeight * lastWidth) {
-//                sizeOperate.setPercent(sizeOperate.getPercent() + 1);//面板·放大图片比例会变小，没写好该校正代码，暂以+1来校对，以后优化！
-//            }
 
             if (RotationDegrees == lastRotationDegrees && mouseX == 0 && mouseY == 0) {
                 if (RotationDegrees == 0) {

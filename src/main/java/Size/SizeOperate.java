@@ -65,7 +65,6 @@ public class SizeOperate {
         }
         FittestPercent = getPictureOptimalSize();
         setPercent(FittestPercent);
-
         update();
     }
 
@@ -121,16 +120,17 @@ public class SizeOperate {
     }
 
 
-    private void decide(double size) {
+    private double decide(double size) {
+        double result = 0;
         if (size > MaxPercent) {
-            percent = MaxPercent;
+            result = MaxPercent;
         } else {
-            percent = size;
+            result = size;
         }
         if (size < MinPercent) {
-            percent = MinPercent;
+            result = MinPercent;
         }
-        update();
+        return result;
     }
 
     //获取图片最佳比例
@@ -180,40 +180,46 @@ public class SizeOperate {
         if (percent > MaxPercent) {
             this.percent = MaxPercent;
         } else if (percent < MinPercent) {
-            this.percent = MaxPercent;
+            this.percent = MinPercent;
         } else this.percent = percent;
     }
 
     //调节比例（如果返回值为true表示需要刷新，反之不需刷新）
     public boolean adjustPercent(int operate) {
+        if ((operate == Enlarge && percent == MaxPercent) || (operate == Reduce && percent == MinPercent)) {
+            return false;
+        }
+        double result = 0;
         switch (operate) {
             case Enlarge -> {
-                if (percent >= MaxPercent) return false;
                 if (AdjustPercent <= 0) {
-                    if (percent < FittestPercent) decide(4 + percent);
+                    if (percent < FittestPercent) result = decide(4 + percent);
                     else {
-                        decide(11 + percent);
+                        result = decide(11 + percent);
                     }
-                    return true;
+                } else if (percent < FittestPercent) {
+                    result = decide(AdjustPercent + percent);
+                } else if (percent > FittestPercent) {
+                    result = decide(2 * AdjustPercent + percent);
                 }
-                if (percent < FittestPercent) {
-                    decide(AdjustPercent + percent);
-                } else {
-                    decide(2 * AdjustPercent + percent);
+                percent = result;
+                if (percent > MaxPercent) {
+                    percent = MaxPercent;
                 }
             }
             case Reduce -> {
-                if (percent <= MinPercent) return false;
                 if (AdjustPercent <= 0) {
-                    if (percent < FittestPercent) decide(-4 + percent);
+                    if (percent < FittestPercent) result = decide(-4 + percent);
                     else {
-                        decide(-11 + percent);
+                        result = decide(-11 + percent);
                     }
-                    return true;
+                } else if (percent < FittestPercent) result = decide(-AdjustPercent + percent);
+                else if (percent > FittestPercent) {
+                    result = decide(-2 * AdjustPercent + percent);
                 }
-                if (percent < FittestPercent) decide(-AdjustPercent + percent);
-                else {
-                    decide(-2 * AdjustPercent + percent);
+                percent = result;
+                if (percent < MinPercent) {
+                    percent = MaxPercent;
                 }
             }
         }

@@ -3,7 +3,7 @@ package Component;
 import Command.CommandCenter;
 import Runner.Main;
 import Tools.String.Formation;
-import Tools.DownloadFile.DownloadUpdate;
+import Version.DownloadUpdate;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

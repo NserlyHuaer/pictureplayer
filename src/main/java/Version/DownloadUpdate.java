@@ -1,10 +1,10 @@
-package Tools.DownloadFile;
+package Version;
 
 
 import Runner.Main;
+import Tools.DownloadFile.DownloadFile;
 import Tools.File.ReverseSearch;
 import Tools.String.Formation;
-import Version.Version;
 
 import javax.net.ssl.*;
 import javax.swing.*;

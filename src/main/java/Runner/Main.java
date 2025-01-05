@@ -6,7 +6,7 @@ import Tools.Component.WindowLocation;
 import Tools.File.ImageThumbnailManage.Center;
 import Tools.ImageManager.CheckFileIsRightPictureType;
 import Tools.ImageManager.GetImageInformation;
-import Tools.DownloadFile.DownloadUpdate;
+import Version.DownloadUpdate;
 import Tools.OSInformation.SystemMonitor;
 import Version.Version;
 import com.intellij.uiDesigner.core.GridConstraints;
