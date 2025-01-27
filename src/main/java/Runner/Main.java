@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -80,6 +81,7 @@ public class Main extends JFrame {
     private JLabel DefaultJVMMem;
     private JLabel ProgramStartTime;
     private JLabel CPUName;
+    private JLabel JavaPath;
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
     private final ChangeFocusListener changeFocusListener;
@@ -113,27 +115,7 @@ public class Main extends JFrame {
                 Transferable transferable = dtde.getTransferable();
                 if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                     List<File> files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                    CheckFileIsRightPictureType checkFileIsRightPictureType = new CheckFileIsRightPictureType();
-                    checkFileIsRightPictureType.add(files);
-                    checkFileIsRightPictureType.statistics();
-
-                    if (checkFileIsRightPictureType.getNotImageCount() != 0) {
-                        JOptionPane.showMessageDialog(Main.main, "尚未支持打开此文件:\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", "Error", JOptionPane.ERROR_MESSAGE);
-                        if (checkFileIsRightPictureType.getImageCount() == 0) return;
-                    }
-                    File choose;
-                    if (checkFileIsRightPictureType.getImageCount() == 1) {
-                        choose = checkFileIsRightPictureType.getImageList().getFirst();
-                        if (Main.main.paintPicture != null && !new File(Main.main.paintPicture.myCanvas.getPath()).equals(choose) && JOptionPane.showConfirmDialog(Main.main, "是否打开文件:\n\"" + choose.getPath() + "\"", "打开", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
-                            return;
-                        }
-                    } else {
-                        choose = OpenImageChooser.openImageWithChoice(Main.main, checkFileIsRightPictureType.getImageList());
-                        if (choose == null) return;
-                    }
-                    if (paintPicture != null && paintPicture.myCanvas != null && choose.equals(new File(paintPicture.myCanvas.getPath())))
-                        return;
-                    openPicture(String.valueOf(choose));
+                    openPicture(checkFileOpen(files, true).getPath());
                 }
             } catch (IOException | UnsupportedFlavorException e) {
                 System.out.println("Error:" + e);
@@ -248,6 +230,7 @@ public class Main extends JFrame {
             }
         });
 
+        JavaPath.setText(JavaPath.getText() + System.getProperty("sun.boot.library.path"));
         DefaultJVMMem.setText(DefaultJVMMem.getText() + SystemMonitor.convertSize(SystemMonitor.JVM_Initialize_Memory));
         JVMVersionLabel.setText(JVMVersionLabel.getText() + System.getProperty("java.runtime.version"));
         ProgramStartTime.setText(ProgramStartTime.getText() + SystemMonitor.PROGRAM_START_TIME);
@@ -609,32 +592,32 @@ public class Main extends JFrame {
         EnableProxyServerCheckBox.setText("启用代理服务器");
         panel4.add(EnableProxyServerCheckBox, cc.xy(1, 13));
         FourthPanel = new JPanel();
-        FourthPanel.setLayout(new GridLayoutManager(9, 7, new Insets(0, 0, 0, 0), -1, -1));
+        FourthPanel.setLayout(new GridLayoutManager(10, 7, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane1.addTab("关于", FourthPanel);
         JVMVersionLabel = new JLabel();
         Font JVMVersionLabelFont = this.$$$getFont$$$(null, -1, 16, JVMVersionLabel.getFont());
         if (JVMVersionLabelFont != null) JVMVersionLabel.setFont(JVMVersionLabelFont);
-        JVMVersionLabel.setText("JVM版本:");
-        FourthPanel.add(JVMVersionLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        JVMVersionLabel.setText("JVM版本：");
+        FourthPanel.add(JVMVersionLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer8 = new Spacer();
-        FourthPanel.add(spacer8, new GridConstraints(8, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        FourthPanel.add(spacer8, new GridConstraints(9, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         CurrentSoftwareVersionLabel = new JLabel();
         Font CurrentSoftwareVersionLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareVersionLabel.getFont());
         if (CurrentSoftwareVersionLabelFont != null)
             CurrentSoftwareVersionLabel.setFont(CurrentSoftwareVersionLabelFont);
         CurrentSoftwareVersionLabel.setText("软件版本：");
-        FourthPanel.add(CurrentSoftwareVersionLabel, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FourthPanel.add(CurrentSoftwareVersionLabel, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CurrentSoftwareInteriorLabel = new JLabel();
         Font CurrentSoftwareInteriorLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareInteriorLabel.getFont());
         if (CurrentSoftwareInteriorLabelFont != null)
             CurrentSoftwareInteriorLabel.setFont(CurrentSoftwareInteriorLabelFont);
         CurrentSoftwareInteriorLabel.setText("软件内部版本：");
-        FourthPanel.add(CurrentSoftwareInteriorLabel, new GridConstraints(6, 2, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FourthPanel.add(CurrentSoftwareInteriorLabel, new GridConstraints(7, 2, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CheckVersionButton = new JButton();
         Font CheckVersionButtonFont = this.$$$getFont$$$(null, -1, 16, CheckVersionButton.getFont());
         if (CheckVersionButtonFont != null) CheckVersionButton.setFont(CheckVersionButtonFont);
         CheckVersionButton.setText("检查更新");
-        FourthPanel.add(CheckVersionButton, new GridConstraints(7, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FourthPanel.add(CheckVersionButton, new GridConstraints(8, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         OSLabel = new JLabel();
         Font OSLabelFont = this.$$$getFont$$$(null, -1, 16, OSLabel.getFont());
         if (OSLabelFont != null) OSLabel.setFont(OSLabelFont);
@@ -644,7 +627,7 @@ public class Main extends JFrame {
         Font ProgramStartTimeFont = this.$$$getFont$$$(null, -1, 16, ProgramStartTime.getFont());
         if (ProgramStartTimeFont != null) ProgramStartTime.setFont(ProgramStartTimeFont);
         ProgramStartTime.setText("软件启动时间：");
-        FourthPanel.add(ProgramStartTime, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FourthPanel.add(ProgramStartTime, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CurrentSoftwareLanguage = new JLabel();
         CurrentSoftwareLanguage.setEnabled(true);
         Font CurrentSoftwareLanguageFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareLanguage.getFont());
@@ -660,17 +643,17 @@ public class Main extends JFrame {
         Font TotalThreadFont = this.$$$getFont$$$(null, -1, 16, TotalThread.getFont());
         if (TotalThreadFont != null) TotalThread.setFont(TotalThreadFont);
         TotalThread.setText("总线程数：");
-        FourthPanel.add(TotalThread, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FourthPanel.add(TotalThread, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         MemUsed = new JLabel();
         Font MemUsedFont = this.$$$getFont$$$(null, -1, 16, MemUsed.getFont());
         if (MemUsedFont != null) MemUsed.setFont(MemUsedFont);
         MemUsed.setText("JVM内存：");
-        FourthPanel.add(MemUsed, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FourthPanel.add(MemUsed, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         DefaultJVMMem = new JLabel();
         Font DefaultJVMMemFont = this.$$$getFont$$$(null, -1, 16, DefaultJVMMem.getFont());
         if (DefaultJVMMemFont != null) DefaultJVMMem.setFont(DefaultJVMMemFont);
         DefaultJVMMem.setText("JVM初始默认内存：");
-        FourthPanel.add(DefaultJVMMem, new GridConstraints(4, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FourthPanel.add(DefaultJVMMem, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer9 = new Spacer();
         FourthPanel.add(spacer9, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer10 = new Spacer();
@@ -679,6 +662,11 @@ public class Main extends JFrame {
         FourthPanel.add(spacer11, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer12 = new Spacer();
         FourthPanel.add(spacer12, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        JavaPath = new JLabel();
+        Font JavaPathFont = this.$$$getFont$$$(null, -1, 16, JavaPath.getFont());
+        if (JavaPathFont != null) JavaPath.setFont(JavaPathFont);
+        JavaPath.setText("Java路径：");
+        FourthPanel.add(JavaPath, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
@@ -844,26 +832,55 @@ public class Main extends JFrame {
                     lastChooseDir = new File(paintPicture.myCanvas.getPath()).getParent();
                 }
                 fileChooser.setCurrentDirectory(new File(lastChooseDir));
+                String picturePath;
                 while (true) {
                     int returnValue = fileChooser.showOpenDialog(Main.main);
+                    picturePath = fileChooser.getSelectedFile().getAbsolutePath();
                     if (returnValue == JFileChooser.APPROVE_OPTION) {
-                        String picturePath = fileChooser.getSelectedFile().getAbsolutePath();
-                        if (!GetImageInformation.isImageFile(new File(picturePath))) {
-                            JOptionPane.showMessageDialog(Main.main, "尚未支持打开此文件:\n\"" + picturePath + "\"", "Error", JOptionPane.ERROR_MESSAGE);
-                            continue;
-                        } else {
-                            if (Main.main.paintPicture != null && new File(Main.main.paintPicture.myCanvas.getPath()).equals(fileChooser.getSelectedFile())) {
-                                tabbedPane1.setSelectedIndex(1);
-                                return;
-                            }
+                        if (checkFileOpen(false, new File(picturePath)) != null) {
+                            tabbedPane1.setSelectedIndex(1);
                             break;
                         }
                     }
                     return;
                 }
-                openPicture(fileChooser.getSelectedFile().getPath());
+                openPicture(picturePath);
             }
         });
         FileChoosePane.add(openButton);
+    }
+
+    //检查文件打开
+    private File checkFileOpen(boolean isMakeSure, File... files) {
+        return checkFileOpen(new CheckFileIsRightPictureType(files), isMakeSure);
+    }
+
+    private File checkFileOpen(List<File> files, boolean isMakeSure) {
+        return checkFileOpen(new CheckFileIsRightPictureType(files), isMakeSure);
+    }
+
+    private File checkFileOpen(CheckFileIsRightPictureType checkFileIsRightPictureType, boolean isMakeSure) {
+        checkFileIsRightPictureType.statistics();
+        if (checkFileIsRightPictureType.getNotImageCount() != 0) {
+            JOptionPane.showMessageDialog(Main.main, "尚未支持打开此文件:\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        if (checkFileIsRightPictureType.getImageCount() == 0) return null;
+        File choose;
+        if (checkFileIsRightPictureType.getImageCount() == 1) {
+            choose = checkFileIsRightPictureType.getImageList().getFirst();
+            String choose_hashcode = GetImageInformation.getHashcode(choose);
+            if (Main.main.paintPicture != null) {
+                if (choose_hashcode == null && paintPicture.myCanvas.getPicture_hashcode() == null) {
+                    System.out.println("Waring:Couldn't get current or opening picture hashcode,this will fake the judgment file path");
+                    if (!new File(Main.main.paintPicture.myCanvas.getPath()).equals(choose)) return null;
+                } else if (Objects.equals(choose_hashcode, paintPicture.myCanvas.getPicture_hashcode()))
+                    return null;
+                if (isMakeSure && JOptionPane.showConfirmDialog(Main.main, "是否打开文件:\n\"" + choose.getPath() + "\"", "打开", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+                    return null;
+            }
+        } else {
+            choose = OpenImageChooser.openImageWithChoice(Main.main, checkFileIsRightPictureType.getImageList());
+        }
+        return choose;
     }
 }

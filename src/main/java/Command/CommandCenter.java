@@ -9,8 +9,8 @@ import java.nio.file.attribute.PosixFilePermissions;
 
 public class CommandCenter {
     public static final int FOR_UPDATE = 0;
-    private static String CURRENT_JAR_PATH; // 当前JAR文件路径
-    private static String CURRENT_JAR_NAME;//当前JAR文件路径
+    private static final String CURRENT_JAR_PATH; // 当前JAR文件路径
+    private static final String CURRENT_JAR_NAME;//当前JAR文件路径
 
     static {
         ClassLoader classLoader = CommandCenter.class.getClassLoader();
@@ -65,7 +65,7 @@ public class CommandCenter {
                 + "del .\\" + CURRENT_JAR_NAME + "\r\n"
                 + "ren " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + " " + CURRENT_JAR_NAME + "\n" +
                 "cls\n"
-                + "java -jar " + CURRENT_JAR_NAME;
+                + System.getProperty("sun.boot.library.path")+"\\java.exe -jar " + CURRENT_JAR_NAME;
         Path batchPath = Path.of("./replace.bat");
         Files.write(batchPath, batchContent.getBytes());
         batchContent = "start replace.bat";
