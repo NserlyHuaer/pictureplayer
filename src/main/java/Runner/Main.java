@@ -173,6 +173,9 @@ public class Main extends JFrame {
         //获取软件版本
         System.out.println("Software Version:" + Version.getVersion());
         main = new Main("Picture Player");
+        if (args.length > 0 && GetImageInformation.isImageFile(new File(args[0]))) {
+            main.openPicture(args[0]);
+        }
         if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
             DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
             new Thread(() -> {
