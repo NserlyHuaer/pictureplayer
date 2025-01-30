@@ -115,7 +115,9 @@ public class Main extends JFrame {
                 Transferable transferable = dtde.getTransferable();
                 if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                     List<File> files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                    openPicture(checkFileOpen(files, true).getPath());
+                    File file = checkFileOpen(files, true);
+                    if (file != null)
+                        openPicture(file.getPath());
                 }
             } catch (IOException | UnsupportedFlavorException e) {
                 System.out.println("Error:" + e);
@@ -835,7 +837,9 @@ public class Main extends JFrame {
                 String picturePath;
                 while (true) {
                     int returnValue = fileChooser.showOpenDialog(Main.main);
-                    picturePath = fileChooser.getSelectedFile().getAbsolutePath();
+                    File chooseFile = fileChooser.getSelectedFile();
+                    if (chooseFile == null) return;
+                    picturePath = chooseFile.getAbsolutePath();
                     if (returnValue == JFileChooser.APPROVE_OPTION) {
                         if (checkFileOpen(false, new File(picturePath)) != null) {
                             tabbedPane1.setSelectedIndex(1);

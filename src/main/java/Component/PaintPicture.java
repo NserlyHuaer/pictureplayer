@@ -241,6 +241,7 @@ public class PaintPicture extends JPanel {
 
     //改变图片路径
     public void changePicturePath(String path) {
+        System.out.println("Opened:\t\"" + path + "\"");
         myCanvas.changePicturePath(path);
     }
 
