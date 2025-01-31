@@ -101,6 +101,7 @@ public class Main extends JFrame {
     final String ProxyServerPrefix;
     public PaintPicture paintPicture;
     private boolean IsFreshen;
+    private static final File REPEAT_PICTURE_PATH_LOGOTYPE = new File("???");
     private final MouseAdapter mouseAdapter = new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
@@ -302,8 +303,11 @@ public class Main extends JFrame {
 
     //打开图片
     public void openPicture(String path) {
+        if (path == null) return;
         if (paintPicture == null) {
             paintPicture = new PaintPicture(path);
+        } else if (path.endsWith("???")) {
+            return;
         } else {
             paintPicture.changePicturePath(path);
         }
@@ -839,16 +843,19 @@ public class Main extends JFrame {
                     int returnValue = fileChooser.showOpenDialog(Main.main);
                     File chooseFile = fileChooser.getSelectedFile();
                     if (chooseFile == null) return;
-                    picturePath = chooseFile.getAbsolutePath();
+                    picturePath = chooseFile.getPath();
                     if (returnValue == JFileChooser.APPROVE_OPTION) {
-                        if (checkFileOpen(false, new File(picturePath)) != null) {
+                        File file = checkFileOpen(false, new File(picturePath));
+                        if (file == null) continue;
+                        String filePath = file.getAbsolutePath();
+                        if (filePath.endsWith("???")) {
                             tabbedPane1.setSelectedIndex(1);
                             break;
                         }
+                        openPicture(filePath);
                     }
                     return;
                 }
-                openPicture(picturePath);
             }
         });
         FileChoosePane.add(openButton);
@@ -878,9 +885,9 @@ public class Main extends JFrame {
                     System.out.println("Waring:Couldn't get current or opening picture hashcode,this will fake the judgment file path");
                     if (!new File(Main.main.paintPicture.myCanvas.getPath()).equals(choose)) return null;
                 } else if (Objects.equals(choose_hashcode, paintPicture.myCanvas.getPicture_hashcode()))
-                    return null;
+                    return REPEAT_PICTURE_PATH_LOGOTYPE;
                 if (isMakeSure && JOptionPane.showConfirmDialog(Main.main, "是否打开文件:\n\"" + choose.getPath() + "\"", "打开", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
-                    return null;
+                    return REPEAT_PICTURE_PATH_LOGOTYPE;
             }
         } else {
             choose = OpenImageChooser.openImageWithChoice(Main.main, checkFileIsRightPictureType.getImageList());
