@@ -86,9 +86,10 @@ public class DownloadFile {
             //如果Content-Disposition中有文件名，则使用它
             saveDir = saveDir + "/" + fileName;
         } else {
-            saveDir = saveDir + "/" + fileURL.substring(fileURL.lastIndexOf("/") + 1);
+            String cache = fileURL;
+            if (cache.contains("?")) cache = cache.substring(0, cache.indexOf("?"));
+            saveDir = saveDir + "/" + cache.substring(fileURL.lastIndexOf("/") + 1);
         }
-
         ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         responseCode = httpURLConnection.getResponseCode();
         // 检查响应状态码是否为200（HTTP OK）

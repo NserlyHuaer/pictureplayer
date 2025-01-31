@@ -73,31 +73,32 @@ public class AdvancedDownloadSpeed {
         });
         DaemonUpdate.start();
         new Thread(() -> {
-            simulateDownload(downloadUpdate.TotalDownloadingFile - downloadUpdate.HaveDownloadedFile, downloadUpdate.TotalDownloadingFile);
+            simulateDownload();
         }).start();
     }
 
 
-    private void simulateDownload(int currentProgressFile, int totalFile) {
+    private void simulateDownload() {
         final Timer totalTimer = new Timer(350, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                int totalFile = downloadUpdate.TotalDownloadingFile;
+                int currentProgressFile = Math.min(downloadUpdate.HaveDownloadedFile + 1, totalFile);
                 if (downloadUpdate.CurrentDownloadingFile.isGettingFileSize)
                     speedPrefix = "{Speed} - {FinishedSize}/{TotalSize},{NeedTime}";
                 else
                     speedPrefix = "{Speed} - {FinishedSize}/0B";
-                if (currentProgressFile < totalFile) {
+                if (downloadUpdate.CurrentDownloadingFile.isCompleted) {
+                    Totalformation = new Formation(totalPrefix);
+                    Totalformation.Change("current", String.valueOf(downloadUpdate.TotalDownloadingFile));
+                    DownloadCountings.setText(Totalformation.getResult().toString());
+                    ((Timer) actionEvent.getSource()).stop(); // 停止计时器
+                } else {
                     // 更新总进度
                     totalProgress.setValue(currentProgressFile);
                     Totalformation = new Formation(totalPrefix);
                     Totalformation.Change("current", String.valueOf(downloadUpdate.HaveDownloadedFile + 1));
                     DownloadCountings.setText(Totalformation.getResult().toString());
-                } else {
-                    totalProgress.setValue(totalFile);
-                    Totalformation = new Formation(totalPrefix);
-                    Totalformation.Change("current", String.valueOf(downloadUpdate.TotalDownloadingFile));
-                    DownloadCountings.setText(Totalformation.getResult().toString());
-                    ((Timer) actionEvent.getSource()).stop(); // 停止计时器
                 }
             }
         });
