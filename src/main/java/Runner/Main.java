@@ -157,7 +157,7 @@ public class Main extends JFrame {
         System.out.println("Java Runtime:" + System.getProperty("java.vm.name") + " " + System.getProperty("java.runtime.version") + " (" + System.getProperty("sun.boot.library.path") + ")");
         //获取软件版本
         System.out.println("Software Version:" + Version.getVersion());
-        main = new Main("Picture Player");
+        main = new Main("Picture Player(Version:" + Version.getVersion() + ")");
         if (args.length > 0 && GetImageInformation.isImageFile(new File(args[0]))) {
             main.openPicture(args[0]);
         }
