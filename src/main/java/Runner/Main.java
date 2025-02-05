@@ -574,7 +574,7 @@ public class Main extends JFrame {
         MouseMoveOffsetsLabel = new JLabel();
         MouseMoveOffsetsLabel.setRequestFocusEnabled(false);
         MouseMoveOffsetsLabel.setText("鼠标移动补偿:");
-        panel4.add(MouseMoveOffsetsLabel, cc.xy(1, 9));
+        panel4.add(MouseMoveOffsetsLabel, cc.xyw(1, 9, 5));
         MouseMoveOffsetsSlider = new JSlider();
         MouseMoveOffsetsSlider.setMaximum(150);
         MouseMoveOffsetsSlider.setMinimum(-65);
@@ -587,7 +587,7 @@ public class Main extends JFrame {
         ProxyServerLabel = new JLabel();
         ProxyServerLabel.setRequestFocusEnabled(false);
         ProxyServerLabel.setText("代理服务器：");
-        panel4.add(ProxyServerLabel, cc.xy(1, 15));
+        panel4.add(ProxyServerLabel, cc.xyw(1, 15, 3));
         ProxyServerButton = new JButton();
         ProxyServerButton.setRequestFocusEnabled(false);
         ProxyServerButton.setText("设置代理服务器");
