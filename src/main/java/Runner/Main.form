@@ -226,26 +226,26 @@
                     <border type="none"/>
                     <children>
                       <grid id="44319" layout-manager="FormLayout">
-                        <rowspec value="center:d:grow"/>
+                        <rowspec value="center:max(d;4px):noGrow"/>
                         <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:d:grow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:d:grow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:d:grow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:d:grow"/>
+                        <rowspec value="center:max(d;4px):noGrow"/>
                         <rowspec value="top:4dlu:noGrow"/>
                         <rowspec value="center:max(d;4px):noGrow"/>
                         <rowspec value="top:4dlu:noGrow"/>
                         <rowspec value="center:max(d;4px):noGrow"/>
                         <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:d:grow"/>
+                        <rowspec value="center:max(d;4px):noGrow"/>
                         <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:d:grow"/>
+                        <rowspec value="center:max(d;4px):noGrow"/>
                         <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:d:grow"/>
-                        <colspec value="fill:max(d;4px):noGrow"/>
+                        <rowspec value="center:max(d;4px):noGrow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:max(d;4px):noGrow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:max(d;4px):noGrow"/>
+                        <rowspec value="top:4dlu:noGrow"/>
+                        <rowspec value="center:max(d;4px):noGrow"/>
+                        <colspec value="fill:114px:noGrow"/>
                         <colspec value="left:4dlu:noGrow"/>
                         <colspec value="fill:d:grow"/>
                         <colspec value="left:4dlu:noGrow"/>
@@ -254,24 +254,23 @@
                         <properties/>
                         <border type="none"/>
                         <children>
-                          <component id="9cd24" class="javax.swing.JCheckBox" binding="DoNotThingOnCloseCheckBox">
+                          <component id="9c2dd" class="javax.swing.JCheckBox" binding="EnableConfirmExitCheckBox">
                             <constraints>
                               <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                               <forms/>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="退出时，隐藏至系统托盘"/>
+                              <text value="启用退出提示"/>
                             </properties>
                           </component>
-                          <component id="9c2dd" class="javax.swing.JCheckBox" binding="EnableConfirmExitCheckBox">
+                          <component id="72a4" class="javax.swing.JCheckBox" binding="EnableHardwareAccelerationCheckBox">
                             <constraints>
-                              <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                               <forms/>
                             </constraints>
                             <properties>
-                              <requestFocusEnabled value="false"/>
-                              <text value="启用退出提示"/>
+                              <text value="启用硬件加速"/>
                             </properties>
                           </component>
                           <component id="801b5" class="javax.swing.JCheckBox" binding="EnableHistoryLoaderCheckBox">
@@ -296,12 +295,33 @@
                           </component>
                           <component id="cbde1" class="javax.swing.JLabel" binding="MouseMoveOffsetsLabel">
                             <constraints>
-                              <grid row="8" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                               <forms/>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
                               <text value="鼠标移动补偿:"/>
+                            </properties>
+                          </component>
+                          <component id="fc8e5" class="javax.swing.JSlider" binding="MouseMoveOffsetsSlider">
+                            <constraints>
+                              <grid row="10" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                              <forms defaultalign-horz="false"/>
+                            </constraints>
+                            <properties>
+                              <maximum value="150"/>
+                              <minimum value="-65"/>
+                              <requestFocusEnabled value="false"/>
+                            </properties>
+                          </component>
+                          <component id="2876a" class="javax.swing.JCheckBox" binding="EnableProxyServerCheckBox">
+                            <constraints>
+                              <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用代理服务器"/>
                             </properties>
                           </component>
                           <component id="1c230" class="javax.swing.JLabel" binding="ProxyServerLabel">
@@ -342,27 +362,6 @@
                             <properties>
                               <requestFocusEnabled value="false"/>
                               <text value="启用自动检查更新"/>
-                            </properties>
-                          </component>
-                          <component id="fc8e5" class="javax.swing.JSlider" binding="MouseMoveOffsetsSlider">
-                            <constraints>
-                              <grid row="10" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                              <forms defaultalign-horz="false"/>
-                            </constraints>
-                            <properties>
-                              <maximum value="150"/>
-                              <minimum value="-65"/>
-                              <requestFocusEnabled value="false"/>
-                            </properties>
-                          </component>
-                          <component id="2876a" class="javax.swing.JCheckBox" binding="EnableProxyServerCheckBox">
-                            <constraints>
-                              <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
-                            </constraints>
-                            <properties>
-                              <requestFocusEnabled value="false"/>
-                              <text value="启用代理服务器"/>
                             </properties>
                           </component>
                         </children>

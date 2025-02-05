@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +53,8 @@ public class PaintPicture extends JPanel {
     Point mouseLocation;
     //当前图片路径下所有图片
     ArrayList<String> CurrentPathOfPicture = null;
+    //是否启用硬件加速
+    public static boolean isEnableHardwareAcceleration;
 
 
     //构造方法（函数）
@@ -281,7 +284,7 @@ public class PaintPicture extends JPanel {
         //构造方法初始化
         public MyCanvas(String path) {
             //加载图片
-            Loading_Image(path);
+            loadImage(path);
             //初始化监听器
             init_listener();
             //添加图片hashcode
@@ -290,7 +293,7 @@ public class PaintPicture extends JPanel {
 
         public MyCanvas(String path, String picture_hashcode) {
             //加载图片
-            Loading_Image(path);
+            loadImage(path);
             //初始化监听器
             init_listener();
             //添加图片hashcode
@@ -363,7 +366,7 @@ public class PaintPicture extends JPanel {
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
             NewWindow = LastWindow = null;
             try {
-                image = ImageIO.read(new File(path));
+                image = GetImageInformation.convert(ImageIO.read(new File(path)));
             } catch (IOException e) {
                 System.out.println("Error:" + e);
             }
@@ -613,16 +616,20 @@ public class PaintPicture extends JPanel {
         }
 
         //加载图片
-        private void Loading_Image(String path) {
+        private void loadImage(String PicturePath) {
             //如果字符串前缀与后缀包含"，则去除其中的"
-            if (path.startsWith("\"") && path.endsWith("\"")) {
-                path = path.substring(1, path.length() - 1);
+            if (PicturePath.startsWith("\"") && PicturePath.endsWith("\"")) {
+                PicturePath = PicturePath.substring(1, PicturePath.length() - 1);
             }
-            this.path = path;
+            this.path = PicturePath;
             try {
                 image = ImageIO.read(new File(path));
             } catch (IOException e) {
-                System.out.println("Error:" + e);
+                System.out.println("Error loading image " + path);
+            }
+            if (image == null) return;
+            if (isEnableHardwareAcceleration) {
+                image = GetImageInformation.convert((BufferedImage) image);
             }
         }
 

@@ -1,8 +1,6 @@
 package Loading;
 
 public @interface DefaultArgs {
-    //退出时，隐藏至系统托盘
-    boolean DoNotThingOnClose() default false;
 
     //启用退出提示
     boolean EnableConfirmExit() default true;
@@ -27,4 +25,8 @@ public @interface DefaultArgs {
 
     //启动光标显示
     boolean EnableCursorDisplay() default false;
+
+    //启用硬件加速
+    boolean EnableHardwareAcceleration() default true;
+
 }

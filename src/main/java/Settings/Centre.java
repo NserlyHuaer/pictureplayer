@@ -76,6 +76,7 @@ public class Centre {
         return getDouble(Description, map, -65, 150);
     }
 
+
     //获取某建的对应布尔值
     private static double getDouble(String Description, Map map, double min, double max) {
         if (min > max) {
@@ -88,7 +89,7 @@ public class Centre {
         try {
             result = Double.parseDouble(cache);
         } catch (NumberFormatException e) {
-
+            System.out.println("Error:" + e);
         }
         if (result > max) {
             result = max;

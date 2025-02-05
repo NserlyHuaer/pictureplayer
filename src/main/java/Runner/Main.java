@@ -18,6 +18,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
@@ -46,7 +47,6 @@ public class Main extends JFrame {
     public static Main main;
     private JPanel panel1;
     private JTabbedPane tabbedPane1;
-    private JCheckBox DoNotThingOnCloseCheckBox;
     private JCheckBox EnableConfirmExitCheckBox;
     private JCheckBox EnableCursorDisplayCheckBox;
     private JCheckBox EnableHistoryLoaderCheckBox;
@@ -76,19 +76,17 @@ public class Main extends JFrame {
     private JPanel FirstPanel;
     private JPanel ThirdPanel;
     private JPanel FourthPanel;
-    private JLabel PhysicalUsedMemory;
     private JLabel TotalThread;
     private JLabel DefaultJVMMem;
     private JLabel ProgramStartTime;
     private JLabel CPUName;
     private JLabel JavaPath;
+    private JCheckBox EnableHardwareAccelerationCheckBox;
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
     private final ChangeFocusListener changeFocusListener;
     //图片缩略图
     public Center center;
-    //判断按钮是否被按下
-    private static boolean IsDragging;
     //是否启用代理服务器
     private static boolean EnableProxyServer;
     //最新版本下载地址（如果当前是最新版本，则返回null值）
@@ -146,6 +144,9 @@ public class Main extends JFrame {
             }
             EnableProxyServer = true;
         }
+        if (!GetImageInformation.isHardwareAccelerated) {
+            System.out.println("Waring:Hardware acceleration is not supported, and the image will be rendered using software!");
+        }
     }
 
     public static void main(String[] args) {
@@ -187,6 +188,8 @@ public class Main extends JFrame {
         MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
         Init();
         About();
+        PaintPicture.isEnableHardwareAcceleration = EnableHardwareAccelerationCheckBox.isSelected() && GetImageInformation.isHardwareAccelerated;
+        System.out.println("Enable Hardware Acceleration:" + PaintPicture.isEnableHardwareAcceleration);
         setVisible(true);
     }
 
@@ -320,10 +323,6 @@ public class Main extends JFrame {
     //设置界面
     private void Settings() {
         reFresh();
-        DoNotThingOnCloseCheckBox.addActionListener(e -> {
-            centre.CurrentData.replace("DoNotThingOnClose", String.valueOf(DoNotThingOnCloseCheckBox.isSelected()));
-            SettingRevised(true);
-        });
         EnableConfirmExitCheckBox.addActionListener(e -> {
             centre.CurrentData.replace("EnableConfirmExit", String.valueOf(EnableConfirmExitCheckBox.isSelected()));
             SettingRevised(true);
@@ -348,6 +347,11 @@ public class Main extends JFrame {
             ProxyServerButton.setEnabled(EnableProxyServerCheckBox.isSelected());
             SettingRevised(true);
         });
+        EnableHardwareAccelerationCheckBox.addActionListener(e -> {
+            centre.CurrentData.replace("EnableHardwareAcceleration", String.valueOf(EnableHardwareAccelerationCheckBox.isSelected()));
+            ProxyServerButton.setEnabled(EnableHardwareAccelerationCheckBox.isSelected());
+            SettingRevised(true);
+        });
         EnableSecureConnectionCheckBox.addActionListener(e -> {
             if (!EnableSecureConnectionCheckBox.isSelected()) {
                 EnableSecureConnectionCheckBox.setSelected(true);
@@ -367,7 +371,7 @@ public class Main extends JFrame {
     }
 
     private void reFresh() {
-        DoNotThingOnCloseCheckBox.setSelected(Centre.getBoolean("DoNotThingOnClose", centre.CurrentData));
+        EnableHardwareAccelerationCheckBox.setSelected(Centre.getBoolean("EnableHardwareAcceleration", centre.CurrentData));
         EnableConfirmExitCheckBox.setSelected(Centre.getBoolean("EnableConfirmExit", centre.CurrentData));
         EnableHistoryLoaderCheckBox.setSelected(Centre.getBoolean("EnableHistoryLoader", centre.CurrentData));
         EnableCursorDisplayCheckBox.setSelected(Centre.getBoolean("EnableCursorDisplay", centre.CurrentData));
@@ -549,17 +553,16 @@ public class Main extends JFrame {
         final JScrollPane scrollPane1 = new JScrollPane();
         panel3.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(502, 372), null, 0, false));
         final JPanel panel4 = new JPanel();
-        panel4.setLayout(new FormLayout("fill:max(d;4px):noGrow,left:4dlu:noGrow,fill:d:grow,left:4dlu:noGrow,fill:max(d;4px):noGrow", "center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow,top:4dlu:noGrow,center:d:grow"));
+        panel4.setLayout(new FormLayout("fill:114px:noGrow,left:4dlu:noGrow,fill:d:grow,left:4dlu:noGrow,fill:max(d;4px):noGrow", "center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow"));
         scrollPane1.setViewportView(panel4);
-        DoNotThingOnCloseCheckBox = new JCheckBox();
-        DoNotThingOnCloseCheckBox.setRequestFocusEnabled(false);
-        DoNotThingOnCloseCheckBox.setText("退出时，隐藏至系统托盘");
-        CellConstraints cc = new CellConstraints();
-        panel4.add(DoNotThingOnCloseCheckBox, cc.xyw(1, 1, 3));
         EnableConfirmExitCheckBox = new JCheckBox();
         EnableConfirmExitCheckBox.setRequestFocusEnabled(false);
         EnableConfirmExitCheckBox.setText("启用退出提示");
-        panel4.add(EnableConfirmExitCheckBox, cc.xyw(1, 3, 3));
+        CellConstraints cc = new CellConstraints();
+        panel4.add(EnableConfirmExitCheckBox, cc.xyw(1, 1, 3));
+        EnableHardwareAccelerationCheckBox = new JCheckBox();
+        EnableHardwareAccelerationCheckBox.setText("启用硬件加速");
+        panel4.add(EnableHardwareAccelerationCheckBox, cc.xy(1, 3));
         EnableHistoryLoaderCheckBox = new JCheckBox();
         EnableHistoryLoaderCheckBox.setRequestFocusEnabled(false);
         EnableHistoryLoaderCheckBox.setText("启用历史路径加载");
@@ -571,7 +574,16 @@ public class Main extends JFrame {
         MouseMoveOffsetsLabel = new JLabel();
         MouseMoveOffsetsLabel.setRequestFocusEnabled(false);
         MouseMoveOffsetsLabel.setText("鼠标移动补偿:");
-        panel4.add(MouseMoveOffsetsLabel, cc.xyw(1, 9, 3));
+        panel4.add(MouseMoveOffsetsLabel, cc.xy(1, 9));
+        MouseMoveOffsetsSlider = new JSlider();
+        MouseMoveOffsetsSlider.setMaximum(150);
+        MouseMoveOffsetsSlider.setMinimum(-65);
+        MouseMoveOffsetsSlider.setRequestFocusEnabled(false);
+        panel4.add(MouseMoveOffsetsSlider, cc.xyw(1, 11, 5, CellConstraints.FILL, CellConstraints.DEFAULT));
+        EnableProxyServerCheckBox = new JCheckBox();
+        EnableProxyServerCheckBox.setRequestFocusEnabled(false);
+        EnableProxyServerCheckBox.setText("启用代理服务器");
+        panel4.add(EnableProxyServerCheckBox, cc.xy(1, 13));
         ProxyServerLabel = new JLabel();
         ProxyServerLabel.setRequestFocusEnabled(false);
         ProxyServerLabel.setText("代理服务器：");
@@ -588,15 +600,6 @@ public class Main extends JFrame {
         AutoCheckUpdateCheckBox.setRequestFocusEnabled(false);
         AutoCheckUpdateCheckBox.setText("启用自动检查更新");
         panel4.add(AutoCheckUpdateCheckBox, cc.xyw(1, 19, 3));
-        MouseMoveOffsetsSlider = new JSlider();
-        MouseMoveOffsetsSlider.setMaximum(150);
-        MouseMoveOffsetsSlider.setMinimum(-65);
-        MouseMoveOffsetsSlider.setRequestFocusEnabled(false);
-        panel4.add(MouseMoveOffsetsSlider, cc.xyw(1, 11, 5, CellConstraints.FILL, CellConstraints.DEFAULT));
-        EnableProxyServerCheckBox = new JCheckBox();
-        EnableProxyServerCheckBox.setRequestFocusEnabled(false);
-        EnableProxyServerCheckBox.setText("启用代理服务器");
-        panel4.add(EnableProxyServerCheckBox, cc.xy(1, 13));
         FourthPanel = new JPanel();
         FourthPanel.setLayout(new GridLayoutManager(10, 7, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane1.addTab("关于", FourthPanel);
@@ -832,7 +835,7 @@ public class Main extends JFrame {
         openButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
+                JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
                 String lastChooseDir = "";
                 if (paintPicture != null && paintPicture.myCanvas != null) {
                     lastChooseDir = new File(paintPicture.myCanvas.getPath()).getParent();
@@ -894,4 +897,6 @@ public class Main extends JFrame {
         }
         return choose;
     }
+
+
 }

@@ -7,11 +7,10 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
-import java.awt.datatransfer.MimeTypeParseException;
 import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +18,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class GetImageInformation {
+    public static final boolean isHardwareAccelerated;
+
+    static {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        GraphicsConfiguration gc = gd.getDefaultConfiguration();
+        isHardwareAccelerated = gc.getBufferCapabilities().isPageFlipping();
+    }
+
     //判断文件路径是否正确、是否为文件（非文件夹）
     public static boolean isRightPath(String path) {
         if (path.startsWith("\"") && path.startsWith("\"")) {
@@ -66,6 +74,37 @@ public class GetImageInformation {
             sb.append(String.format("%02X", b));
         }
         return sb.toString();
+    }
+
+    //算法实现：将Image转换成VolatileImage
+    public static VolatileImage convert(BufferedImage source) {
+        // 获取当前图形环境配置
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        GraphicsConfiguration gc = gd.getDefaultConfiguration();
+
+        // 创建兼容的 VolatileImage（尺寸与 BufferedImage 一致）
+        VolatileImage volatileImage = gc.createCompatibleVolatileImage(
+                source.getWidth(),
+                source.getHeight(),
+                VolatileImage.TRANSLUCENT // 根据需求选择透明度模式
+        );
+
+        // 验证 VolatileImage 有效性
+        if (volatileImage.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE) {
+            volatileImage = gc.createCompatibleVolatileImage(
+                    source.getWidth(),
+                    source.getHeight(),
+                    VolatileImage.TRANSLUCENT
+            );
+        }
+
+        // 绘制 BufferedImage 到 VolatileImage
+        Graphics2D g = volatileImage.createGraphics();
+        g.drawImage(source, 0, 0, null);
+        g.dispose();
+
+        return volatileImage;
     }
 
     //算法实现：获取图片大小

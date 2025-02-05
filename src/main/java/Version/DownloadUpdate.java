@@ -1,7 +1,6 @@
 package Version;
 
 
-import Runner.Main;
 import Tools.DownloadFile.DownloadFile;
 import Tools.File.ReverseSearch;
 import Tools.String.Formation;
@@ -32,6 +31,9 @@ public class DownloadUpdate {
     public long NewVersionID = 0;
     public String NewVersionName = "";
     public String DescribeFileWebSide = "";
+    // 定义选项内容
+    private Object[] options = {"重试", "跳过当前文件", "退出"};
+
 
     public DownloadUpdate(String DownloadPath, String webSide) {
         this.webSide = webSide;
@@ -104,28 +106,71 @@ public class DownloadUpdate {
         for (String down : downloadWebSide) {
             FilePath.add(down);
             HaveDownloadedFile = index;
-            try {
-                CurrentDownloadingFile = new DownloadFile(down, f.getPath());
-                System.out.println("Downloading " + down);
-                if (!EnableSecureConnection)
-                    System.out.println("Waring:The connection is not secure from " + down + "!");
-                CurrentDownloadingFile.startToDownload();
-                List list = new ArrayList();
-                String cache = CurrentDownloadingFile.getSaveDir();
-                if (cache != null) {
-                    list.add(cache);
-                    list.add(CurrentDownloadingFile);
-                    finalA.put(down, list);
+            switch (download(down, finalA, false)) {
+                case 1 -> {
+                    TotalDownloadingFile--;
+                    continue;
                 }
-            } catch (IOException e) {
-                System.out.println("Error:" + e);
-                JOptionPane.showMessageDialog(Main.main, "在下载过程中出现了错误：\n" + e, "下载失败", JOptionPane.ERROR_MESSAGE);
-                return null;
+                case 2 -> {
+                    return null;
+                }
             }
             index++;
         }
+        if (finalA.isEmpty()) return null;
         System.out.println("Download completed!");
         return finalA;
+    }
+
+    //返回值：0.下载完成 1.跳过当前文件 2.取消下载
+    private int download(String down, Map<String, List> finalA, boolean isTry) {
+        try {
+            if (!isTry)
+                CurrentDownloadingFile = new DownloadFile(down, f.getPath());
+            System.out.println("Downloading " + down);
+            if (!EnableSecureConnection)
+                System.out.println("Waring:The connection is not secure from " + down + "!");
+            if (isTry)
+                CurrentDownloadingFile.retryToDownload();
+            else
+                CurrentDownloadingFile.startToDownload();
+            List list = new ArrayList();
+            String cache = CurrentDownloadingFile.getSaveDir();
+            if (cache != null) {
+                list.add(cache);
+                list.add(CurrentDownloadingFile);
+                finalA.put(down, list);
+            }
+        } catch (IOException e) {
+            switch (ExceptionHandling(e)) {
+                case 0 -> {
+                    return download(down, finalA, true);
+                }
+                case 1 -> {
+                    return 1;
+                }
+                case 2 -> {
+                    return 2;
+                }
+            }
+        }
+        return 0;
+
+    }
+
+    private int ExceptionHandling(IOException e) {
+        System.out.println("Error:" + e);
+        int choice = JOptionPane.showOptionDialog(
+                null,
+                "在下载过程中出现了错误：\n" + e,
+                "下载失败",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options
+        );
+        return choice;
     }
 
     //一键下载所有文件(Map(Key:下载网站,Value:List[0]:文件存放路径;[1]下载类))[调用此方法时，推进使用新线程，否则窗体可能会无相应]

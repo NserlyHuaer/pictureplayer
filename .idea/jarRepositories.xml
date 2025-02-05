@@ -16,5 +16,15 @@
       <option name="name" value="JBoss Community repository" />
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="jetbrains-releases" />
+      <option name="name" value="JetBrains Releases Repository" />
+      <option name="url" value="https://www.jetbrains.com/intellij-repository/releases" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="com.jetbrains.intellij.ae" />
+      <option name="name" value="Custom Repository" />
+      <option name="url" value="https://www.jetbrains.com/intellij-repository/releases/" />
+    </remote-repository>
   </component>
 </project>
