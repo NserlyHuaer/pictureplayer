@@ -29,4 +29,7 @@ public @interface DefaultArgs {
     //启用硬件加速
     boolean EnableHardwareAcceleration() default true;
 
+    //启用图片上下打开
+    boolean EnableTurnAboveOrBelow() default false;
+
 }

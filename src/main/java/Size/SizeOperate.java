@@ -65,7 +65,7 @@ public class SizeOperate {
         }
         FittestPercent = getPictureOptimalSize();
         setPercent(FittestPercent);
-        update();
+        update(false);
     }
 
 
@@ -227,8 +227,9 @@ public class SizeOperate {
     }
 
     //刷新图片
-    public void update() {
+    public void update(boolean isMove) {
         myCanvas.setWindowSize(Component);
+        myCanvas.setIsMove(isMove || myCanvas.getIsMove());
         myCanvas.repaint();
     }
 

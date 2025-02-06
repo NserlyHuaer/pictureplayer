@@ -82,6 +82,7 @@ public class Main extends JFrame {
     private JLabel CPUName;
     private JLabel JavaPath;
     private JCheckBox EnableHardwareAccelerationCheckBox;
+    private JCheckBox EnableTurnAboveOrBelowCheckBox;
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
     private final ChangeFocusListener changeFocusListener;
@@ -115,8 +116,7 @@ public class Main extends JFrame {
                 if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                     List<File> files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
                     File file = checkFileOpen(files, true);
-                    if (file != null)
-                        openPicture(file.getPath());
+                    if (file != null) openPicture(file.getPath());
                 }
             } catch (IOException | UnsupportedFlavorException e) {
                 System.out.println("Error:" + e);
@@ -150,6 +150,10 @@ public class Main extends JFrame {
     }
 
     public static void main(String[] args) {
+        main = new Main("Picture Player(Version:" + Version.getVersion() + ")");
+        if (args.length > 0 && GetImageInformation.isImageFile(new File(args[0]))) {
+            main.openPicture(args[0]);
+        }
         //获取操作系统版本
         System.out.println("OS:" + SystemMonitor.OS_NAME);
         //获取系统语言
@@ -158,10 +162,8 @@ public class Main extends JFrame {
         System.out.println("Java Runtime:" + System.getProperty("java.vm.name") + " " + System.getProperty("java.runtime.version") + " (" + System.getProperty("sun.boot.library.path") + ")");
         //获取软件版本
         System.out.println("Software Version:" + Version.getVersion());
-        main = new Main("Picture Player(Version:" + Version.getVersion() + ")");
-        if (args.length > 0 && GetImageInformation.isImageFile(new File(args[0]))) {
-            main.openPicture(args[0]);
-        }
+        //程序是否启用硬件加速
+        System.out.println("Enable Hardware Acceleration:" + PaintPicture.isEnableHardwareAcceleration);
         if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
             DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
             new Thread(() -> {
@@ -175,22 +177,24 @@ public class Main extends JFrame {
 
     public Main(String title) {
         super(title);
-        center = new Center();
-        changeFocusListener = new ChangeFocusListener(this);
-        centre = new Centre();
         $$$setupUI$$$();
-        setContentPane(this.panel1);
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-//        pack();
-        setSize(800, 580);
-        setLocation(WindowLocation.ComponentCenter(null, 800, 580));
+        new Thread(() -> {
+            setContentPane(this.panel1);
+            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+            setVisible(true);
+            setSize(800, 580);
+        }).start();
+        changeFocusListener = new ChangeFocusListener(this);
+        new Thread(() -> {
+            setLocation(WindowLocation.ComponentCenter(null, 800, 580));
+            centre = new Centre();
+            center = new Center();
+            Init();
+            PaintPicture.isEnableHardwareAcceleration = EnableHardwareAccelerationCheckBox.isSelected() && GetImageInformation.isHardwareAccelerated;
+            About();
+        }).start();
         ProxyServerPrefix = ProxyServerLabel.getText();
         MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
-        Init();
-        About();
-        PaintPicture.isEnableHardwareAcceleration = EnableHardwareAccelerationCheckBox.isSelected() && GetImageInformation.isHardwareAccelerated;
-        System.out.println("Enable Hardware Acceleration:" + PaintPicture.isEnableHardwareAcceleration);
-        setVisible(true);
     }
 
     //初始化所有组件设置
@@ -235,40 +239,39 @@ public class Main extends JFrame {
                 SettingRevised(true);
             }
         });
-
-        JavaPath.setText(JavaPath.getText() + System.getProperty("sun.boot.library.path"));
-        DefaultJVMMem.setText(DefaultJVMMem.getText() + SystemMonitor.convertSize(SystemMonitor.JVM_Initialize_Memory));
-        JVMVersionLabel.setText(JVMVersionLabel.getText() + System.getProperty("java.runtime.version"));
-        ProgramStartTime.setText(ProgramStartTime.getText() + SystemMonitor.PROGRAM_START_TIME);
-        CurrentSoftwareVersionLabel.setText(CurrentSoftwareVersionLabel.getText() + Version.getVersion());
-        CurrentSoftwareInteriorLabel.setText(CurrentSoftwareInteriorLabel.getText() + Version.getVersionID());
-        CheckVersionButton.addMouseListener(changeFocusListener);
-        OSLabel.setText(OSLabel.getText() + SystemMonitor.OS_NAME);
-        CPUName.setText(CPUName.getText() + SystemMonitor.CPU_NAME);
-        CurrentSoftwareLanguage.setText(CurrentSoftwareLanguage.getText() + System.getProperty("user.language"));
-        if (EnableProxyServer) CheckVersionButton.setText(CheckVersionButton.getText() + "（已启用代理服务器）");
-        final String JmemI = MemUsed.getText();
-        final String TTI = TotalThread.getText();
-        tabbedPane1.addChangeListener(e -> {
-            request();
-            if (tabbedPane1.getSelectedIndex() == 3) {
-                future = executor.scheduleAtFixedRate(new Runnable() {
-                    @Override
-                    public void run() {
-                        SystemMonitor.GetInformation();
-                        MemUsed.setText(JmemI + SystemMonitor.convertSize(SystemMonitor.JVM_Used_Memory) + "/" + SystemMonitor.convertSize(SystemMonitor.JVM_Maximum_Free_Memory) + "(" + SystemMonitor.JVM_Memory_Usage + "%" + ")");
-                        TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
-                    }
-                }, 0, 2, TimeUnit.SECONDS);
-            } else {
-                if (future != null)
-                    future.cancel(false);
-            }
-            if (tabbedPane1.getSelectedIndex() == 2 && !IsFreshen) {
-                IsFreshen = true;
-                reFresh();
-            }
-        });
+        new Thread(() -> {
+            JavaPath.setText(JavaPath.getText() + System.getProperty("sun.boot.library.path"));
+            DefaultJVMMem.setText(DefaultJVMMem.getText() + SystemMonitor.convertSize(SystemMonitor.JVM_Initialize_Memory));
+            JVMVersionLabel.setText(JVMVersionLabel.getText() + System.getProperty("java.runtime.version"));
+            ProgramStartTime.setText(ProgramStartTime.getText() + SystemMonitor.PROGRAM_START_TIME);
+            CurrentSoftwareVersionLabel.setText(CurrentSoftwareVersionLabel.getText() + Version.getVersion());
+            CurrentSoftwareInteriorLabel.setText(CurrentSoftwareInteriorLabel.getText() + Version.getVersionID());
+            OSLabel.setText(OSLabel.getText() + SystemMonitor.OS_NAME);
+            CPUName.setText(CPUName.getText() + SystemMonitor.CPU_NAME);
+            CurrentSoftwareLanguage.setText(CurrentSoftwareLanguage.getText() + System.getProperty("user.language"));
+            if (EnableProxyServer) CheckVersionButton.setText(CheckVersionButton.getText() + "（已启用代理服务器）");
+            final String JmemI = MemUsed.getText();
+            final String TTI = TotalThread.getText();
+            tabbedPane1.addChangeListener(e -> {
+                request();
+                if (tabbedPane1.getSelectedIndex() == 3) {
+                    future = executor.scheduleAtFixedRate(new Runnable() {
+                        @Override
+                        public void run() {
+                            SystemMonitor.GetInformation();
+                            MemUsed.setText(JmemI + SystemMonitor.convertSize(SystemMonitor.JVM_Used_Memory) + "/" + SystemMonitor.convertSize(SystemMonitor.JVM_Maximum_Free_Memory) + "(" + SystemMonitor.JVM_Memory_Usage + "%" + ")");
+                            TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
+                        }
+                    }, 0, 2, TimeUnit.SECONDS);
+                } else {
+                    if (future != null) future.cancel(false);
+                }
+                if (tabbedPane1.getSelectedIndex() == 2 && !IsFreshen) {
+                    IsFreshen = true;
+                    reFresh();
+                }
+            });
+        }).start();
         //设置窗体在显示时自动获取焦点
         addWindowListener(new WindowAdapter() {
             @Override
@@ -323,6 +326,10 @@ public class Main extends JFrame {
     //设置界面
     private void Settings() {
         reFresh();
+        EnableTurnAboveOrBelowCheckBox.addActionListener(e -> {
+            centre.CurrentData.replace("EnableTurnAboveOrBelow", String.valueOf(EnableTurnAboveOrBelowCheckBox.isSelected()));
+            SettingRevised(true);
+        });
         EnableConfirmExitCheckBox.addActionListener(e -> {
             centre.CurrentData.replace("EnableConfirmExit", String.valueOf(EnableConfirmExitCheckBox.isSelected()));
             SettingRevised(true);
@@ -371,6 +378,7 @@ public class Main extends JFrame {
     }
 
     private void reFresh() {
+        EnableTurnAboveOrBelowCheckBox.setSelected(Centre.getBoolean("EnableTurnAboveOrBelow", centre.CurrentData));
         EnableHardwareAccelerationCheckBox.setSelected(Centre.getBoolean("EnableHardwareAcceleration", centre.CurrentData));
         EnableConfirmExitCheckBox.setSelected(Centre.getBoolean("EnableConfirmExit", centre.CurrentData));
         EnableHistoryLoaderCheckBox.setSelected(Centre.getBoolean("EnableHistoryLoader", centre.CurrentData));
@@ -452,6 +460,7 @@ public class Main extends JFrame {
         textField1 = new JTextField();
         FirstPanel.add(textField1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         TurnButton = new JButton();
+        TurnButton.setRequestFocusEnabled(false);
         TurnButton.setText("打开");
         FirstPanel.add(TurnButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         FirstPanel.add(FileChoosePane, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -553,7 +562,7 @@ public class Main extends JFrame {
         final JScrollPane scrollPane1 = new JScrollPane();
         panel3.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(502, 372), null, 0, false));
         final JPanel panel4 = new JPanel();
-        panel4.setLayout(new FormLayout("fill:114px:noGrow,left:4dlu:noGrow,fill:d:grow,left:4dlu:noGrow,fill:max(d;4px):noGrow", "center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow"));
+        panel4.setLayout(new FormLayout("fill:114px:noGrow,left:4dlu:noGrow,fill:d:grow,left:4dlu:noGrow,fill:max(d;4px):noGrow", "center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow,top:4dlu:noGrow,center:max(d;4px):noGrow"));
         scrollPane1.setViewportView(panel4);
         EnableConfirmExitCheckBox = new JCheckBox();
         EnableConfirmExitCheckBox.setRequestFocusEnabled(false);
@@ -561,6 +570,7 @@ public class Main extends JFrame {
         CellConstraints cc = new CellConstraints();
         panel4.add(EnableConfirmExitCheckBox, cc.xyw(1, 1, 3));
         EnableHardwareAccelerationCheckBox = new JCheckBox();
+        EnableHardwareAccelerationCheckBox.setRequestFocusEnabled(false);
         EnableHardwareAccelerationCheckBox.setText("启用硬件加速");
         panel4.add(EnableHardwareAccelerationCheckBox, cc.xy(1, 3));
         EnableHistoryLoaderCheckBox = new JCheckBox();
@@ -570,36 +580,40 @@ public class Main extends JFrame {
         EnableCursorDisplayCheckBox = new JCheckBox();
         EnableCursorDisplayCheckBox.setRequestFocusEnabled(false);
         EnableCursorDisplayCheckBox.setText("启用鼠标光标显示");
-        panel4.add(EnableCursorDisplayCheckBox, cc.xyw(1, 7, 3));
+        panel4.add(EnableCursorDisplayCheckBox, cc.xyw(1, 9, 3));
         MouseMoveOffsetsLabel = new JLabel();
         MouseMoveOffsetsLabel.setRequestFocusEnabled(false);
         MouseMoveOffsetsLabel.setText("鼠标移动补偿:");
-        panel4.add(MouseMoveOffsetsLabel, cc.xyw(1, 9, 5));
+        panel4.add(MouseMoveOffsetsLabel, cc.xyw(1, 11, 5));
         MouseMoveOffsetsSlider = new JSlider();
         MouseMoveOffsetsSlider.setMaximum(150);
         MouseMoveOffsetsSlider.setMinimum(-65);
         MouseMoveOffsetsSlider.setRequestFocusEnabled(false);
-        panel4.add(MouseMoveOffsetsSlider, cc.xyw(1, 11, 5, CellConstraints.FILL, CellConstraints.DEFAULT));
+        panel4.add(MouseMoveOffsetsSlider, cc.xyw(1, 13, 5, CellConstraints.FILL, CellConstraints.DEFAULT));
         EnableProxyServerCheckBox = new JCheckBox();
         EnableProxyServerCheckBox.setRequestFocusEnabled(false);
         EnableProxyServerCheckBox.setText("启用代理服务器");
-        panel4.add(EnableProxyServerCheckBox, cc.xy(1, 13));
+        panel4.add(EnableProxyServerCheckBox, cc.xy(1, 15));
         ProxyServerLabel = new JLabel();
         ProxyServerLabel.setRequestFocusEnabled(false);
         ProxyServerLabel.setText("代理服务器：");
-        panel4.add(ProxyServerLabel, cc.xyw(1, 15, 3));
+        panel4.add(ProxyServerLabel, cc.xyw(1, 17, 3));
         ProxyServerButton = new JButton();
         ProxyServerButton.setRequestFocusEnabled(false);
         ProxyServerButton.setText("设置代理服务器");
-        panel4.add(ProxyServerButton, cc.xy(5, 15));
+        panel4.add(ProxyServerButton, cc.xy(5, 17));
         EnableSecureConnectionCheckBox = new JCheckBox();
         EnableSecureConnectionCheckBox.setRequestFocusEnabled(false);
         EnableSecureConnectionCheckBox.setText("启用安全连接模式");
-        panel4.add(EnableSecureConnectionCheckBox, cc.xyw(1, 17, 3));
+        panel4.add(EnableSecureConnectionCheckBox, cc.xyw(1, 19, 3));
         AutoCheckUpdateCheckBox = new JCheckBox();
         AutoCheckUpdateCheckBox.setRequestFocusEnabled(false);
         AutoCheckUpdateCheckBox.setText("启用自动检查更新");
-        panel4.add(AutoCheckUpdateCheckBox, cc.xyw(1, 19, 3));
+        panel4.add(AutoCheckUpdateCheckBox, cc.xyw(1, 21, 3));
+        EnableTurnAboveOrBelowCheckBox = new JCheckBox();
+        EnableTurnAboveOrBelowCheckBox.setRequestFocusEnabled(false);
+        EnableTurnAboveOrBelowCheckBox.setText("启用图片上下打开");
+        panel4.add(EnableTurnAboveOrBelowCheckBox, cc.xyw(1, 7, 3));
         FourthPanel = new JPanel();
         FourthPanel.setLayout(new GridLayoutManager(10, 7, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane1.addTab("关于", FourthPanel);
@@ -625,6 +639,7 @@ public class Main extends JFrame {
         CheckVersionButton = new JButton();
         Font CheckVersionButtonFont = this.$$$getFont$$$(null, -1, 16, CheckVersionButton.getFont());
         if (CheckVersionButtonFont != null) CheckVersionButton.setFont(CheckVersionButtonFont);
+        CheckVersionButton.setRequestFocusEnabled(false);
         CheckVersionButton.setText("检查更新");
         FourthPanel.add(CheckVersionButton, new GridConstraints(8, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         OSLabel = new JLabel();
