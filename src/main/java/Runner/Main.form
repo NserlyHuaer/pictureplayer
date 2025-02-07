@@ -267,19 +267,9 @@
                               <text value="启用退出提示"/>
                             </properties>
                           </component>
-                          <component id="72a4" class="javax.swing.JCheckBox" binding="EnableHardwareAccelerationCheckBox">
-                            <constraints>
-                              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
-                            </constraints>
-                            <properties>
-                              <requestFocusEnabled value="false"/>
-                              <text value="启用硬件加速"/>
-                            </properties>
-                          </component>
                           <component id="801b5" class="javax.swing.JCheckBox" binding="EnableHistoryLoaderCheckBox">
                             <constraints>
-                              <grid row="4" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                               <forms/>
                             </constraints>
                             <properties>
@@ -376,6 +366,16 @@
                             <properties>
                               <requestFocusEnabled value="false"/>
                               <text value="启用图片上下打开"/>
+                            </properties>
+                          </component>
+                          <component id="72a4" class="javax.swing.JCheckBox" binding="EnableHardwareAccelerationCheckBox">
+                            <constraints>
+                              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                              <forms/>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用硬件加速"/>
                             </properties>
                           </component>
                         </children>

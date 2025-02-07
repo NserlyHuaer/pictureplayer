@@ -192,6 +192,7 @@ public class Main extends JFrame {
             Init();
             PaintPicture.isEnableHardwareAcceleration = EnableHardwareAccelerationCheckBox.isSelected() && GetImageInformation.isHardwareAccelerated;
             if (!GetImageInformation.isHardwareAccelerated) {
+                centre.CurrentData.replace("EnableHardwareAcceleration", "false");
                 EnableHardwareAccelerationCheckBox.setSelected(false);
                 EnableHardwareAccelerationCheckBox.setEnabled(false);
                 centre.save();
@@ -574,14 +575,10 @@ public class Main extends JFrame {
         EnableConfirmExitCheckBox.setText("启用退出提示");
         CellConstraints cc = new CellConstraints();
         panel4.add(EnableConfirmExitCheckBox, cc.xyw(1, 1, 3));
-        EnableHardwareAccelerationCheckBox = new JCheckBox();
-        EnableHardwareAccelerationCheckBox.setRequestFocusEnabled(false);
-        EnableHardwareAccelerationCheckBox.setText("启用硬件加速");
-        panel4.add(EnableHardwareAccelerationCheckBox, cc.xy(1, 3));
         EnableHistoryLoaderCheckBox = new JCheckBox();
         EnableHistoryLoaderCheckBox.setRequestFocusEnabled(false);
         EnableHistoryLoaderCheckBox.setText("启用历史路径加载");
-        panel4.add(EnableHistoryLoaderCheckBox, cc.xyw(1, 5, 3));
+        panel4.add(EnableHistoryLoaderCheckBox, cc.xyw(1, 3, 3));
         EnableCursorDisplayCheckBox = new JCheckBox();
         EnableCursorDisplayCheckBox.setRequestFocusEnabled(false);
         EnableCursorDisplayCheckBox.setText("启用鼠标光标显示");
@@ -619,6 +616,10 @@ public class Main extends JFrame {
         EnableTurnAboveOrBelowCheckBox.setRequestFocusEnabled(false);
         EnableTurnAboveOrBelowCheckBox.setText("启用图片上下打开");
         panel4.add(EnableTurnAboveOrBelowCheckBox, cc.xyw(1, 7, 3));
+        EnableHardwareAccelerationCheckBox = new JCheckBox();
+        EnableHardwareAccelerationCheckBox.setRequestFocusEnabled(false);
+        EnableHardwareAccelerationCheckBox.setText("启用硬件加速");
+        panel4.add(EnableHardwareAccelerationCheckBox, cc.xy(1, 5));
         FourthPanel = new JPanel();
         FourthPanel.setLayout(new GridLayoutManager(10, 7, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane1.addTab("关于", FourthPanel);
