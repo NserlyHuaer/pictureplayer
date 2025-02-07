@@ -191,6 +191,11 @@ public class Main extends JFrame {
             center = new Center();
             Init();
             PaintPicture.isEnableHardwareAcceleration = EnableHardwareAccelerationCheckBox.isSelected() && GetImageInformation.isHardwareAccelerated;
+            if (!GetImageInformation.isHardwareAccelerated) {
+                EnableHardwareAccelerationCheckBox.setSelected(false);
+                EnableHardwareAccelerationCheckBox.setEnabled(false);
+                centre.save();
+            }
             About();
         }).start();
         ProxyServerPrefix = ProxyServerLabel.getText();
