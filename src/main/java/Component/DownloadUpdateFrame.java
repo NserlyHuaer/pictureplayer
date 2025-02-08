@@ -45,6 +45,7 @@ public class DownloadUpdateFrame extends JFrame {
             public void windowClosing(WindowEvent e) {
                 int choose = JOptionPane.showConfirmDialog(downloadUpdateFrame, "下载还在继续，你确定关闭吗？", "关闭下载窗体", JOptionPane.ERROR_MESSAGE);
                 if (choose == JOptionPane.OK_OPTION) {
+                    downloadUpdate.stopToUpdate();
                     Runner.Main.main.setVisible(true);
                     downloadUpdateFrame.dispose();
                 }

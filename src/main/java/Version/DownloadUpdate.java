@@ -4,6 +4,7 @@ package Version;
 import Tools.DownloadFile.DownloadFile;
 import Tools.File.ReverseSearch;
 import Tools.String.Formation;
+import Exception.UpdateException;
 
 import javax.net.ssl.*;
 import javax.swing.*;
@@ -33,7 +34,7 @@ public class DownloadUpdate {
     public String DescribeFileWebSide = "";
     // 定义选项内容
     private Object[] options = {"重试", "跳过当前文件", "退出"};
-
+    private boolean StopToUpdate;
 
     public DownloadUpdate(String DownloadPath, String webSide) {
         this.webSide = webSide;
@@ -52,6 +53,7 @@ public class DownloadUpdate {
 
     //更新最新版本
     public List<String> getUpdateWebSide() {
+        StopToUpdate = false;
         if (!(downloadFileWebSide != null && !downloadFileWebSide.isEmpty())) {
             try {
                 checkIfTheLatestVersion();
@@ -64,6 +66,7 @@ public class DownloadUpdate {
 
     //检查是否存在最新版本
     public boolean checkIfTheLatestVersion() throws IOException {
+        StopToUpdate = false;
         DownloadFile downloadFile = new DownloadFile(webSide, f.getPath());
         System.out.println("Checking version...");
         downloadFile.startToDownload();
@@ -99,6 +102,7 @@ public class DownloadUpdate {
 
     //一键下载所有文件(Map(Key:下载网站,Value:List[0]:文件存放路径;[1]下载类))[调用此方法时，推进使用新线程，否则窗体可能会无相应]
     public Map<String, List> download(List<String> downloadWebSide) {
+        StopToUpdate = false;
         Map<String, List> finalA = new HashMap<>();
         if (downloadWebSide == null) return null;
         int index = 0;
@@ -125,6 +129,9 @@ public class DownloadUpdate {
     //返回值：0.下载完成 1.跳过当前文件 2.取消下载
     private int download(String down, Map<String, List> finalA, boolean isTry) {
         try {
+            if (StopToUpdate) {
+                throw new UpdateException("User terminated software update");
+            }
             if (!isTry)
                 CurrentDownloadingFile = new DownloadFile(down, f.getPath());
             System.out.println("Downloading " + down);
@@ -136,6 +143,9 @@ public class DownloadUpdate {
                 CurrentDownloadingFile.startToDownload();
             List list = new ArrayList();
             String cache = CurrentDownloadingFile.getSaveDir();
+            if (StopToUpdate) {
+                throw new UpdateException("User terminated software update");
+            }
             if (cache != null) {
                 list.add(cache);
                 list.add(CurrentDownloadingFile);
@@ -153,6 +163,9 @@ public class DownloadUpdate {
                     return 2;
                 }
             }
+        } catch (UpdateException e) {
+            System.out.println("Error:" + e);
+            return 2;
         }
         return 0;
 
@@ -175,15 +188,22 @@ public class DownloadUpdate {
 
     //一键下载所有文件(Map(Key:下载网站,Value:List[0]:文件存放路径;[1]下载类))[调用此方法时，推进使用新线程，否则窗体可能会无相应]
     public Map<String, List> download() {
+        StopToUpdate = false;
         return download(getUpdateWebSide());
     }
 
     //下载描述文件List[0]:文件存放路径;[1]下载类[调用此方法时，推进使用新线程，否则窗体可能会无相应]
     public List downloadDescribe() {
+        StopToUpdate = false;
         if (!(DescribeFileWebSide == null) && !DescribeFileWebSide.isEmpty()) {
             return download(Collections.singletonList(DescribeFileWebSide)).get(DescribeFileWebSide);
         }
         return null;
+    }
+
+    //终止更新
+    public void stopToUpdate() {
+        StopToUpdate = true;
     }
 
     public static boolean isEnableSecureConnection() {
