@@ -4,6 +4,8 @@ import Command.CommandCenter;
 import Runner.Main;
 import Tools.String.Formation;
 import Version.DownloadUpdate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -25,6 +27,7 @@ public class AdvancedDownloadSpeed {
     private Formation Totalformation;
     private Formation currentFormation;
     private DownloadUpdate downloadUpdate;
+    private static final Logger logger = LoggerFactory.getLogger(AdvancedDownloadSpeed.class);
 
     public AdvancedDownloadSpeed(DownloadUpdate downloadUpdate, JProgressBar totalProgress, JProgressBar currentFileProgress, JLabel speedLabel, JLabel DownloadCountings) {
         this.totalProgress = totalProgress;
@@ -65,7 +68,7 @@ public class AdvancedDownloadSpeed {
                 String osType = CommandCenter.detectOSType();
                 CommandCenter.executeOSSpecificCommands(osType, (String) map.get(website).getFirst());
             } catch (IOException | NoClassDefFoundError | ExceptionInInitializerError e) {
-                System.out.println("Error:" + e);
+                logger.error(e.getMessage());
                 JOptionPane.showMessageDialog(DownloadUpdateFrame.downloadUpdateFrame, "因程序内部存在严重错误，无法完成更新，请稍后重试：\nCaused by:" + e, "更新终止", JOptionPane.ERROR_MESSAGE);
                 DownloadUpdateFrame.downloadUpdateFrame.dispose();
                 Main.main.setVisible(true);

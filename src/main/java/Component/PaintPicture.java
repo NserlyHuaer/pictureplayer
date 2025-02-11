@@ -9,6 +9,8 @@ import Tools.Component.ComponentInJPanel;
 import Tools.EqualsProportion;
 import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.ImageRotationHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -69,6 +71,7 @@ public class PaintPicture extends JPanel {
 
     private MouseEvent lastMouseEvent;
     private MouseAdapter mouseAdapter;
+    private static final Logger logger = LoggerFactory.getLogger(PaintPicture.class);
 
 
     //构造方法（函数）
@@ -79,7 +82,7 @@ public class PaintPicture extends JPanel {
         CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(path);
         percentLabel = new PercentLabel();
         //向控制台输出打开文件路径
-        System.out.println("Opened:\t\"" + path + "\"");
+        logger.info("Opened:\"{}\"", path);
         //创建画布
         myCanvas = new MyCanvas(path);
         sizeOperate = new SizeOperate(myCanvas, myCanvas.getSize());
@@ -259,7 +262,7 @@ public class PaintPicture extends JPanel {
 
     //改变图片路径
     public void changePicturePath(String path) {
-        System.out.println("Opened:\t\"" + path + "\"");
+        logger.info("Opened:\"{}\"", path);
         myCanvas.changePicturePath(path);
     }
 
@@ -385,7 +388,7 @@ public class PaintPicture extends JPanel {
             try {
                 image = GetImageInformation.convert(ImageIO.read(new File(path)));
             } catch (IOException e) {
-                System.out.println("Error:" + e);
+                logger.error(e.getMessage());
             }
             sizeOperate.changeCanvas(this);
         }
@@ -429,7 +432,7 @@ public class PaintPicture extends JPanel {
                 case LastSign -> {
                     if (CurrentIndex > 0) {
                         //向控制台输出打开文件路径
-                        System.out.println("Opened:\t\"" + CurrentPathOfPicture.get(CurrentIndex - 1) + "\"");
+                        logger.info("Opened:\"{}\"", CurrentPathOfPicture.get(CurrentIndex - 1));
                         myCanvas.changePicturePath(CurrentPathOfPicture.get(CurrentIndex - 1));
                         sizeOperate.update(false);
                     }
@@ -437,7 +440,7 @@ public class PaintPicture extends JPanel {
                 case NextSign -> {
                     if (CurrentIndex + 1 < CurrentPathOfPicture.size()) {
                         //向控制台输出打开文件路径
-                        System.out.println("Opened:\t\"" + CurrentPathOfPicture.get(CurrentIndex + 1) + "\"");
+                        logger.info("Opened:\"{}\"", CurrentPathOfPicture.get(CurrentIndex + 1));
                         myCanvas.changePicturePath(CurrentPathOfPicture.get(CurrentIndex + 1));
                         sizeOperate.update(false);
                     }
@@ -694,7 +697,7 @@ public class PaintPicture extends JPanel {
             try {
                 image = ImageIO.read(new File(path));
             } catch (IOException e) {
-                System.out.println("Error loading image " + path);
+                logger.error("Error loading image \"{}\"", path);
             }
             if (image == null) return;
             if (isEnableHardwareAcceleration) {
@@ -708,7 +711,7 @@ public class PaintPicture extends JPanel {
             try {
                 robot = new Robot();
             } catch (AWTException e) {
-                System.out.println("Couldn't get Mouse Information");
+                logger.warn("Couldn't get Mouse Information");
             }
             Robot finalRobot = robot;
             Image image = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(0, 0, new int[0], 0, 0));

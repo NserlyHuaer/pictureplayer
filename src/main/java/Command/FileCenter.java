@@ -1,9 +1,13 @@
 package Command;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 
 public class FileCenter {
     private final File file;
+    private static final Logger logger = LoggerFactory.getLogger(FileCenter.class);
 
     public FileCenter(String FileName) {
         file = new File("./cache/" + FileName);
@@ -11,7 +15,7 @@ public class FileCenter {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                System.out.println("Error:" + e);
+                logger.error(e.getMessage());
             }
         }
     }
@@ -21,7 +25,7 @@ public class FileCenter {
             bufferedWriter.write(data);
             bufferedWriter.flush();
         } catch (IOException e) {
-            System.out.println("Error" + e);
+            logger.error(e.getMessage());
         }
     }
 
@@ -31,7 +35,7 @@ public class FileCenter {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
             size = bufferedReader.read(b);
         } catch (IOException e) {
-            System.out.println("Error" + e);
+            logger.error(e.getMessage());
         }
         return b.toString();
     }

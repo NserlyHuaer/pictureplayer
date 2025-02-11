@@ -1,7 +1,5 @@
 package Component;
 
-//import Dev.ImageListCellRenderer;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -17,9 +15,6 @@ public class OpenImageChooser {
 
         // 创建JList并设置模型
         JList<String> list = new JList<>(listModel);
-
-//        // 使用带有文件 - 图像路径映射的ImageListCellRenderer
-//        list.setCellRenderer(new ImageListCellRenderer(options,list.getHeight()));
 
         // 使用JOptionPane显示包含JList的对话框，不显示图标
         int choice = JOptionPane.showOptionDialog(component, new Object[]{new JScrollPane(list)}, "Open Image",

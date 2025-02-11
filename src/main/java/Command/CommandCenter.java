@@ -1,5 +1,8 @@
 package Command;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -11,6 +14,7 @@ public class CommandCenter {
     public static final int FOR_UPDATE = 0;
     private static final String CURRENT_JAR_PATH; // 当前JAR文件路径
     private static final String CURRENT_JAR_NAME;//当前JAR文件路径
+    private static final Logger logger = LoggerFactory.getLogger(CommandCenter.class);
 
     static {
         ClassLoader classLoader = CommandCenter.class.getClassLoader();
@@ -24,7 +28,7 @@ public class CommandCenter {
         Path sourcePath = Path.of(DownloadFilePath);
         Path destinationPath = Path.of("./" + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1));
         Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-        System.out.println("File moved successfully.");
+        logger.info("File moved successfully.");
     }
 
     public static String detectOSType() {
@@ -44,18 +48,18 @@ public class CommandCenter {
                 try {
                     createAndRunWindowsBatchFile(DownloadFilePath);
                 } catch (IOException e) {
-                    System.out.println("Error:" + e);
+                    logger.error(e.getMessage());
                 }
                 break;
             case "linux":
                 try {
                     createAndRunLinuxShellScript(DownloadFilePath);
                 } catch (IOException e) {
-                    System.out.println("Error:" + e);
+                    logger.error(e.getMessage());
                 }
                 break;
             default:
-                System.out.println("Unsupported OS:\"" + osType + "\"");
+                logger.error("Unsupported OS:\"{}\"", osType);
         }
     }
 

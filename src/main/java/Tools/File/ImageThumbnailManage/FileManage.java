@@ -1,9 +1,12 @@
 package Tools.File.ImageThumbnailManage;
 
 import Loading.Init;
+import Runner.Main;
 import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.GetPictureThumbnail;
 import Tools.String.RandomString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -18,6 +21,7 @@ public class FileManage implements Serializable {
     //<原本图片地址（String），{0.缩略图的地址（String），1.原图的hashcode值（String），2.缩略图的hashcode值（String）}>
     private final TreeMap<String, ArrayList> fileStoreInfo = new TreeMap<>();
     private static GetPictureThumbnail getPictureThumbnail = new GetPictureThumbnail(10, 10);
+    private static final Logger logger = LoggerFactory.getLogger(FileManage.class);
 
     public FileManage() {
 
@@ -40,7 +44,7 @@ public class FileManage implements Serializable {
             file1.createNewFile();
             ImageIO.write(image, "png", file1);
         } catch (IOException e) {
-            System.out.println("Error:" + e.getMessage());
+            logger.error(e.getMessage());
             return null;
         }
         arrayList.add(GetImageInformation.getHashcode(file));
@@ -55,7 +59,7 @@ public class FileManage implements Serializable {
         try {
             image = ImageIO.read(file);
         } catch (IOException e) {
-            System.out.println("Error:" + e.getMessage());
+            logger.error(e.getMessage());
         }
         int height = image.getHeight(null), width = image.getWidth(null);
         int finalWidth = maxHeight * width / height;

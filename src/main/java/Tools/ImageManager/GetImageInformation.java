@@ -2,6 +2,8 @@ package Tools.ImageManager;
 
 import Size.GetPictureSize;
 import Size.GetSystemSize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -19,6 +21,7 @@ import java.util.Iterator;
 
 public class GetImageInformation {
     public static final boolean isHardwareAccelerated;
+    private static final Logger logger = LoggerFactory.getLogger(GetImageInformation.class);
 
     static {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -28,11 +31,10 @@ public class GetImageInformation {
     }
 
     //判断文件路径是否正确、是否为文件（非文件夹）
-    public static boolean isRightPath(String path) {
-        if (path.startsWith("\"") && path.startsWith("\"")) {
-            path = path.substring(1, path.length() - 1);
-        }
-        return new File(path).isFile() && new File(path).exists();
+    public static boolean isRightFilePath(String path) {
+        path = path.trim();
+        File file = new File(path);
+        return file.exists() && file.isFile();
     }
 
     //算法实现：获取文件是否为受Java支持的图片格式
@@ -63,7 +65,7 @@ public class GetImageInformation {
             }
             return false;
         } catch (IOException e) {
-            System.out.println("Error: " + e);
+            logger.error(e.getMessage());
             return false;
         }
     }
@@ -133,7 +135,7 @@ public class GetImageInformation {
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException | IOException e) {
-            System.out.println("Error:" + e.getMessage());
+           logger.error(e.getMessage());
         }
         return null;
     }
@@ -149,7 +151,7 @@ public class GetImageInformation {
                 return reader.getFormatName();
             }
         } catch (IOException e) {
-            System.out.println("Error:" + e);
+            logger.error(e.getMessage());
         }
         return null;
     }

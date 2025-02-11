@@ -114,11 +114,11 @@ public class DownloadUpdateFrame extends JFrame {
         CurrentDownloadProgress.setText("当前下载进度:");
         Main.add(CurrentDownloadProgress, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CurrentProgress = new JProgressBar();
-        Main.add(CurrentProgress, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(463, 4), null, 0, false));
+        Main.add(CurrentProgress, new GridConstraints(3, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(463, 4), null, 0, false));
         DownloadCounting = new JLabel();
         DownloadCounting.setHorizontalAlignment(2);
         DownloadCounting.setText("下载数：");
-        Main.add(DownloadCounting, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(463, 17), null, 0, false));
+        Main.add(DownloadCounting, new GridConstraints(2, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(463, 17), null, 0, false));
     }
 
     /**

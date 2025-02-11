@@ -1,5 +1,8 @@
 package Loading;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -7,10 +10,11 @@ import java.util.Map;
 import java.util.Properties;
 
 public class Init<KEY, VALUE> {
-    private final File f = new File("data/Properties.prpt");
+    private final File f = new File("data/configuration.ch");
     private final Properties properties = new Properties();
     private boolean EnableAutoUpdate;
-    private final String[] createDirectory = {"data", "cache","cache/thum", "download"};
+    private final String[] createDirectory = {"data", "cache", "cache/thum", "download"};
+    private static final Logger logger = LoggerFactory.getLogger(Init.class);
 
     public Init() {
         File dire;
@@ -55,7 +59,7 @@ public class Init<KEY, VALUE> {
             properties.clear();
             properties.load(new BufferedReader(new FileReader(f)));
         } catch (IOException e) {
-            System.out.println("Error:Failed to read the configuration file");
+            logger.error("Failed to read the configuration file");
         }
     }
 
@@ -67,7 +71,7 @@ public class Init<KEY, VALUE> {
         try {
             properties.load(new BufferedReader(new FileReader(f)));
         } catch (IOException e) {
-            System.out.println("Error:Failed to read the configuration file");
+            logger.error("Failed to read the configuration file");
         }
     }
 
@@ -126,7 +130,7 @@ public class Init<KEY, VALUE> {
         try {
             properties.store(new BufferedWriter(new FileWriter(f)), "");
         } catch (IOException e) {
-            System.out.println("Error:Failed to save the configuration file");
+            logger.error("Failed to save the configuration file");
         }
     }
 }

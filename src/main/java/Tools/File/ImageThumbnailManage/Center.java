@@ -1,21 +1,26 @@
 package Tools.File.ImageThumbnailManage;
 
+import Runner.Main;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 
 public class Center {
     public static FileManage fileManage;
     public static String storePlace = "data/obj.thum";
+    private static final Logger logger = LoggerFactory.getLogger(Center.class);
 
     static {
         File file = new File(storePlace);
         if (!(file.exists() && file.isFile())) {
             fileManage = new FileManage();
-            System.out.println("Waring:Can't find thumbnail file or thumbnail file was broke");
+            logger.warn("Can't find thumbnail file or thumbnail file was broke");
             try {
-                System.out.println("Info:Creating new thumbnail file...");
+                logger.info("Creating new thumbnail file...");
                 file.createNewFile();
             } catch (IOException e) {
-                System.out.println("Error:" + e.getMessage());
+                logger.error(e.getMessage());
             }
         } else if (new File(storePlace).length() == 0) {
             fileManage = new FileManage();
@@ -24,8 +29,8 @@ public class Center {
                 fileManage = (FileManage) objectInputStream.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 fileManage = new FileManage();
-                System.out.println("Error:" + e.getMessage());
-                System.out.println("Waring:Can't find thumbnail file or thumbnail file was broke");
+                logger.error(e.getMessage());
+                logger.warn("Can't find thumbnail file or thumbnail file was broke");
             }
         }
     }

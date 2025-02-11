@@ -5,6 +5,8 @@ import Tools.DownloadFile.DownloadFile;
 import Tools.File.ReverseSearch;
 import Tools.String.Formation;
 import Exception.UpdateException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
 import javax.swing.*;
@@ -35,6 +37,7 @@ public class DownloadUpdate {
     // 定义选项内容
     private Object[] options = {"重试", "跳过当前文件", "退出"};
     private boolean StopToUpdate;
+    private static final Logger logger = LoggerFactory.getLogger(DownloadUpdate.class);
 
     public DownloadUpdate(String DownloadPath, String webSide) {
         this.webSide = webSide;
@@ -58,7 +61,7 @@ public class DownloadUpdate {
             try {
                 checkIfTheLatestVersion();
             } catch (IOException e) {
-                System.out.println("Error:" + e);
+                logger.error(e.getMessage());
             }
         }
         return downloadFileWebSide;
@@ -68,7 +71,7 @@ public class DownloadUpdate {
     public boolean checkIfTheLatestVersion() throws IOException {
         StopToUpdate = false;
         DownloadFile downloadFile = new DownloadFile(webSide, f.getPath());
-        System.out.println("Checking version...");
+        logger.info("Checking version...");
         downloadFile.startToDownload();
 
         File path = new File(downloadFile.getSaveDir());
@@ -122,7 +125,7 @@ public class DownloadUpdate {
             index++;
         }
         if (finalA.isEmpty()) return null;
-        System.out.println("Download completed!");
+        logger.info("Download completed!");
         return finalA;
     }
 
@@ -134,9 +137,9 @@ public class DownloadUpdate {
             }
             if (!isTry)
                 CurrentDownloadingFile = new DownloadFile(down, f.getPath());
-            System.out.println("Downloading " + down);
+            logger.info("Downloading " + down);
             if (!EnableSecureConnection)
-                System.out.println("Waring:The connection is not secure from " + down + "!");
+                logger.warn("The connection is not secure from {}!", down);
             if (isTry)
                 CurrentDownloadingFile.retryToDownload();
             else
@@ -164,7 +167,7 @@ public class DownloadUpdate {
                 }
             }
         } catch (UpdateException e) {
-            System.out.println("Error:" + e);
+            logger.error(e.getMessage());
             return 2;
         }
         return 0;
@@ -172,7 +175,7 @@ public class DownloadUpdate {
     }
 
     private int ExceptionHandling(IOException e) {
-        System.out.println("Error:" + e);
+        logger.error(e.getMessage());
         int choice = JOptionPane.showOptionDialog(
                 null,
                 "在下载过程中出现了错误：\n" + e,
@@ -238,10 +241,10 @@ public class DownloadUpdate {
                     SSLSocketFactory ssf = sc.getSocketFactory();
                     HttpsURLConnection.setDefaultSSLSocketFactory(ssf);
                 } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                    System.out.println("Error:" + e);
+                    logger.error(e.getMessage());
                     return;
                 }
-                System.out.println("Waring:SSL validation is turned off and your computer may be vulnerable!");
+                logger.warn("SSL validation is turned off and your computer may be vulnerable!");
             } else {
                 try {
                     //重新创建默认的SSLContext
@@ -251,10 +254,10 @@ public class DownloadUpdate {
                     SSLSocketFactory ssf = sc.getSocketFactory();
                     HttpsURLConnection.setDefaultSSLSocketFactory(ssf);
                 } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                    System.out.println("Error:" + e);
+                    logger.error(e.getMessage());
                     return;
                 }
-                System.out.println("SSL validation is enabled");
+                logger.info("SSL validation is enabled");
             }
         }
         EnableSecureConnection = Enable;

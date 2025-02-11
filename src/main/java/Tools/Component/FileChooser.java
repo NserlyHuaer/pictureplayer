@@ -1,5 +1,9 @@
 package Tools.Component;
 
+import Runner.Main;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
@@ -7,11 +11,12 @@ import java.io.File;
 
 public class FileChooser {
     private static final boolean isDesktopSupported;
+    private static final Logger logger = LoggerFactory.getLogger(FileChooser.class);
 
     static {
         isDesktopSupported = Desktop.isDesktopSupported();
         if (!isDesktopSupported) {
-            System.out.println("Windows fileChooser is not supported");
+            logger.error("Windows fileChooser is not supported");
         }
     }
 

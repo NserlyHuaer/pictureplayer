@@ -4,6 +4,9 @@ import java.awt.*;
 import java.io.IOException;
 
 import Component.PaintPicture;
+import Runner.Main;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SizeOperate {
     //默认缩放比例
@@ -34,6 +37,7 @@ public class SizeOperate {
     public static final Dimension ScreenSize = Toolkit.getDefaultToolkit().getScreenSize();
     //可用屏幕尺寸
     public static final Dimension FreeOfScreenSize;
+    private static final Logger logger = LoggerFactory.getLogger(SizeOperate.class);
 
     static {
         //获取可用屏幕分辨率
@@ -60,7 +64,7 @@ public class SizeOperate {
                     AdjustPercent = (int) (((Math.abs(Component.getHeight() - getPictureSize.height) / 5.5 / getPictureSize.height) + (Math.abs(Component.getWidth() - getPictureSize.width) / 5.5 / getPictureSize.width)) / 2);
                 }
             } catch (IOException e) {
-                System.out.println("Error:Could not read picture information\n" + e);
+                logger.error("Could not read picture information: {}", String.valueOf(e));
             }
         }
         FittestPercent = getPictureOptimalSize();
@@ -136,7 +140,7 @@ public class SizeOperate {
     //获取图片最佳比例
     public double getPictureOptimalSize() {
         if (Component == null || Component.width == 0 || Component.height == 0) {
-            System.out.println("Error:Could not get window optimal size");
+            logger.error("Could not get window optimal size");
             return Default;
         }
         int PictureWidth = myCanvas.getImageWidth();

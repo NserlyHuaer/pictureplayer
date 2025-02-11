@@ -2,6 +2,8 @@ package Settings;
 
 import Loading.DefaultArgs;
 import Runner.Main;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
@@ -13,6 +15,7 @@ import java.util.Properties;
 public class Centre {
     public static final Map<String, String> DefaultData = new HashMap<>();
     public final HashMap<String, String> CurrentData = new HashMap<String, String>();
+    private static final Logger logger = LoggerFactory.getLogger(Centre.class);
 
     //初始化
     static {
@@ -30,7 +33,7 @@ public class Centre {
                 }
             }
         } catch (RuntimeException e) {
-            System.out.println("Error:" + e);
+            logger.error(e.getMessage());
         }
     }
 
@@ -56,7 +59,7 @@ public class Centre {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Error:" + e);
+            logger.error(e.getMessage());
         }
     }
 
@@ -89,7 +92,7 @@ public class Centre {
         try {
             result = Double.parseDouble(cache);
         } catch (NumberFormatException e) {
-            System.out.println("Error:" + e);
+            logger.error(e.getMessage());
         }
         if (result > max) {
             result = max;

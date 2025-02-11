@@ -1,5 +1,9 @@
 package Tools.DownloadFile;
 
+import Runner.Main;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -34,7 +38,7 @@ public class DownloadFile {
     public boolean isGettingFileSize;
     //响应的Content-Type头
     public String contentType;
-
+    private static final Logger logger = LoggerFactory.getLogger(DownloadFile.class);
     public DownloadFile(String fileURL, String saveDir) throws IOException {
         this.fileURL = fileURL;
         this.saveDir = saveDir;
@@ -109,7 +113,7 @@ public class DownloadFile {
                 contentType = httpURLConnection.getContentType();
                 //获取文件总大小
                 fileSize = httpURLConnection.getContentLengthLong();
-                if (fileSize == -1) System.out.println("Error:Failed to get file size");
+                if (fileSize == -1) logger.error("Failed to get file size");
                 else isGettingFileSize = true;
 
 
@@ -122,7 +126,7 @@ public class DownloadFile {
                 }
 
             } else {
-                System.out.println("Error:Invalid HTTP response code:" + responseCode);
+                logger.error("Invalid HTTP response code:{}", responseCode);
             }
             progress = 100;
         } catch (IOException e) {
@@ -173,7 +177,7 @@ public class DownloadFile {
             // 检查服务器是否支持断点续传
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_PARTIAL) {
-                System.out.println("Error:The server does not support sumable upload, and it will be re-downloaded!By Invalid HTTP response code:" + responseCode);
+                logger.error("The server does not support sumable upload, and it will be re-downloaded!By Invalid HTTP response code:{}", responseCode);
                 startToDownload();
                 return;
             }
@@ -190,7 +194,7 @@ public class DownloadFile {
             contentType = connection.getContentType();
             //获取文件总大小
             fileSize = connection.getContentLengthLong();
-            if (fileSize == -1) System.out.println("Error:Failed to get file size");
+            if (fileSize == -1) logger.error("Failed to get file size");
             else {
                 isGettingFileSize = true;
                 fileSize += CurrentCompletedBytesRead;
@@ -227,7 +231,7 @@ public class DownloadFile {
             try {
                 startToDownload();
             } catch (IOException e) {
-                System.out.println("Error:Request failed");
+                logger.error("Request failed");
             }
         });
         download.start();
@@ -239,7 +243,7 @@ public class DownloadFile {
             try {
                 retryToDownload();
             } catch (IOException e) {
-                System.out.println("Error:Request failed");
+                logger.error("Request failed");
             }
         });
         download.start();

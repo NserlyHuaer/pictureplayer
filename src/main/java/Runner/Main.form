@@ -3,22 +3,13 @@
   <grid id="b9abd" binding="panel1" default-binding="true" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="812" height="522"/>
+      <xy x="20" y="20" width="812" height="585"/>
     </constraints>
     <properties>
       <requestFocusEnabled value="true"/>
     </properties>
     <border type="none"/>
     <children>
-      <component id="73eb6" class="javax.swing.JLabel" binding="TopLabel">
-        <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <font size="20"/>
-          <text value="Picture Player"/>
-        </properties>
-      </component>
       <tabbedpane id="c8af3" binding="tabbedPane1" default-binding="true">
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -152,7 +143,7 @@
               </vspacer>
             </children>
           </grid>
-          <grid id="9ef36" binding="ThirdPanel" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="9ef36" binding="ThirdPanel" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="设置"/>
@@ -160,10 +151,10 @@
             <properties/>
             <border type="none"/>
             <children>
-              <grid id="b48d2" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="b48d2" binding="A" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
@@ -204,12 +195,7 @@
                   </component>
                 </children>
               </grid>
-              <vspacer id="a025e">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </vspacer>
-              <grid id="43a9f" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="43a9f" binding="B" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -226,41 +212,17 @@
                     <properties/>
                     <border type="none"/>
                     <children>
-                      <grid id="44319" layout-manager="FormLayout">
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <rowspec value="top:4dlu:noGrow"/>
-                        <rowspec value="center:max(d;4px):noGrow"/>
-                        <colspec value="fill:114px:noGrow"/>
-                        <colspec value="left:4dlu:noGrow"/>
-                        <colspec value="fill:d:grow"/>
-                        <colspec value="left:4dlu:noGrow"/>
-                        <colspec value="fill:max(d;4px):noGrow"/>
+                      <grid id="df30f" layout-manager="GridLayoutManager" row-count="11" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                        <margin top="0" left="0" bottom="0" right="0"/>
                         <constraints/>
                         <properties/>
                         <border type="none"/>
                         <children>
                           <component id="9c2dd" class="javax.swing.JCheckBox" binding="EnableConfirmExitCheckBox">
                             <constraints>
-                              <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
+                              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="25"/>
+                              </grid>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
@@ -269,18 +231,42 @@
                           </component>
                           <component id="801b5" class="javax.swing.JCheckBox" binding="EnableHistoryLoaderCheckBox">
                             <constraints>
-                              <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
+                              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="25"/>
+                              </grid>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
                               <text value="启用历史路径加载"/>
                             </properties>
                           </component>
+                          <component id="72a4" class="javax.swing.JCheckBox" binding="EnableHardwareAccelerationCheckBox">
+                            <constraints>
+                              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="25"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用硬件加速"/>
+                            </properties>
+                          </component>
+                          <component id="da9a2" class="javax.swing.JCheckBox" binding="EnableTurnAboveOrBelowCheckBox">
+                            <constraints>
+                              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="25"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <requestFocusEnabled value="false"/>
+                              <text value="启用图片上下打开"/>
+                            </properties>
+                          </component>
                           <component id="69fe2" class="javax.swing.JCheckBox" binding="EnableCursorDisplayCheckBox">
                             <constraints>
-                              <grid row="8" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
+                              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="25"/>
+                              </grid>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
@@ -289,8 +275,9 @@
                           </component>
                           <component id="cbde1" class="javax.swing.JLabel" binding="MouseMoveOffsetsLabel">
                             <constraints>
-                              <grid row="10" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
+                              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="17"/>
+                              </grid>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
@@ -299,8 +286,7 @@
                           </component>
                           <component id="fc8e5" class="javax.swing.JSlider" binding="MouseMoveOffsetsSlider">
                             <constraints>
-                              <grid row="12" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-                              <forms defaultalign-horz="false"/>
+                              <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties>
                               <maximum value="150"/>
@@ -310,8 +296,9 @@
                           </component>
                           <component id="2876a" class="javax.swing.JCheckBox" binding="EnableProxyServerCheckBox">
                             <constraints>
-                              <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
+                              <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="25"/>
+                              </grid>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
@@ -320,28 +307,20 @@
                           </component>
                           <component id="1c230" class="javax.swing.JLabel" binding="ProxyServerLabel">
                             <constraints>
-                              <grid row="16" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
+                              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="17"/>
+                              </grid>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
                               <text value="代理服务器："/>
                             </properties>
                           </component>
-                          <component id="f0f0c" class="javax.swing.JButton" binding="ProxyServerButton">
-                            <constraints>
-                              <grid row="16" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                              <forms/>
-                            </constraints>
-                            <properties>
-                              <requestFocusEnabled value="false"/>
-                              <text value="设置代理服务器"/>
-                            </properties>
-                          </component>
                           <component id="9a4c5" class="javax.swing.JCheckBox" binding="EnableSecureConnectionCheckBox">
                             <constraints>
-                              <grid row="18" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
+                              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="25"/>
+                              </grid>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
@@ -350,32 +329,22 @@
                           </component>
                           <component id="74555" class="javax.swing.JCheckBox" binding="AutoCheckUpdateCheckBox">
                             <constraints>
-                              <grid row="20" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
+                              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="402" height="25"/>
+                              </grid>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
                               <text value="启用自动检查更新"/>
                             </properties>
                           </component>
-                          <component id="da9a2" class="javax.swing.JCheckBox" binding="EnableTurnAboveOrBelowCheckBox">
+                          <component id="f0f0c" class="javax.swing.JButton" binding="ProxyServerButton">
                             <constraints>
-                              <grid row="6" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
+                              <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="启用图片上下打开"/>
-                            </properties>
-                          </component>
-                          <component id="72a4" class="javax.swing.JCheckBox" binding="EnableHardwareAccelerationCheckBox">
-                            <constraints>
-                              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                              <forms/>
-                            </constraints>
-                            <properties>
-                              <requestFocusEnabled value="false"/>
-                              <text value="启用硬件加速"/>
+                              <text value="设置代理服务器"/>
                             </properties>
                           </component>
                         </children>
@@ -533,6 +502,16 @@
           </grid>
         </children>
       </tabbedpane>
+      <component id="73eb6" class="javax.swing.JLabel" binding="TopLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font size="20"/>
+          <horizontalTextPosition value="0"/>
+          <text value="Picture Player by nserly"/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>

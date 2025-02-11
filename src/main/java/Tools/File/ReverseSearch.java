@@ -1,12 +1,15 @@
 package Tools.File;
 
-import java.io.FileInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 
 public class ReverseSearch {
+    private static final Logger logger = LoggerFactory.getLogger(ReverseSearch.class);
+
     public static String get(String fileName, String searchString) {
         try {
             RandomAccessFile raf = new RandomAccessFile(fileName, "r");
@@ -41,10 +44,10 @@ public class ReverseSearch {
             if (found) {
                 return lastMatchingLine;
             } else {
-                System.out.println("Error:Couldn't find specific string");
+                logger.error("Couldn't find specific string");
             }
         } catch (IOException e) {
-            System.out.println("Error:" + e);
+            logger.error(e.getMessage());
         }
         return null;
     }
