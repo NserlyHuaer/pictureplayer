@@ -192,13 +192,6 @@ public class PaintPicture extends JPanel {
         add(On, BorderLayout.NORTH);
         //添加画布至组件中
         add(myCanvas, BorderLayout.CENTER);
-        myCanvas.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                myCanvas.openLONPicture(e.getKeyCode());
-
-            }
-        });
     }
 
     private JPanel getjPanel(ChangeFocusListener changeFocusListener) {
@@ -840,6 +833,13 @@ public class PaintPicture extends JPanel {
                             sizeOperate.update(false);
                         }
                     }
+                }
+            });
+            addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    myCanvas.openLONPicture(e.getKeyCode());
+
                 }
             });
         }

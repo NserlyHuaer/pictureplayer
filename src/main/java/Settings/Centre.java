@@ -65,13 +65,11 @@ public class Centre {
 
     //获取某建的对应布尔值
     public static boolean getBoolean(String Description, Map map) {
-        String cache = map.get(Description).toString().replace(" ", "").toLowerCase();
-        if (cache.equals("true")) {
-            return true;
-        } else if (cache.equals("false")) {
+        if (map == null || !map.containsKey(Description)) {
+            if (DefaultData.containsKey(Description)) return Boolean.parseBoolean(DefaultData.get(Description));
             return false;
         }
-        return (boolean) map.get(Description);
+        return Boolean.parseBoolean(map.get(Description).toString().trim().toLowerCase());
     }
 
     //获取某建的对应浮点值

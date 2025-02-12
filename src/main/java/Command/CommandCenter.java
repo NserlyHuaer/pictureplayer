@@ -11,7 +11,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermissions;
 
 public class CommandCenter {
-    public static final int FOR_UPDATE = 0;
     private static final String CURRENT_JAR_PATH; // 当前JAR文件路径
     private static final String CURRENT_JAR_NAME;//当前JAR文件路径
     private static final Logger logger = LoggerFactory.getLogger(CommandCenter.class);
@@ -49,6 +48,7 @@ public class CommandCenter {
                     createAndRunWindowsBatchFile(DownloadFilePath);
                 } catch (IOException e) {
                     logger.error(e.getMessage());
+                    logger.error("Automatic update failed");
                 }
                 break;
             case "linux":
@@ -56,6 +56,7 @@ public class CommandCenter {
                     createAndRunLinuxShellScript(DownloadFilePath);
                 } catch (IOException e) {
                     logger.error(e.getMessage());
+                    logger.error("Automatic update failed");
                 }
                 break;
             default:
@@ -69,12 +70,14 @@ public class CommandCenter {
                 + "del .\\" + CURRENT_JAR_NAME + "\r\n"
                 + "ren " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + " " + CURRENT_JAR_NAME + "\n" +
                 "cls\n"
-                + System.getProperty("sun.boot.library.path")+"\\java.exe -jar " + CURRENT_JAR_NAME;
+                + System.getProperty("sun.boot.library.path") + "\\java.exe -jar " + CURRENT_JAR_NAME;
         Path batchPath = Path.of("./replace.bat");
         Files.write(batchPath, batchContent.getBytes());
         batchContent = "start replace.bat";
         batchPath = Path.of("./runnable.bat");
         Files.write(batchPath, batchContent.getBytes());
+        logger.info("The script file is created!");
+        logger.info("Start running the script file and end the current software...");
         Runtime.getRuntime().exec("runnable.bat");
         System.exit(0);
     }
@@ -88,6 +91,8 @@ public class CommandCenter {
         Path shellPath = Path.of("./replace.sh");
         Files.write(shellPath, shellContent.getBytes());
         Files.setPosixFilePermissions(shellPath, PosixFilePermissions.fromString("rwx------"));
+        logger.info("The script file is created");
+        logger.info("Start running the script file and end the current software...");
         Runtime.getRuntime().exec("nohup sh ./replace.sh &");
         System.exit(0);
     }

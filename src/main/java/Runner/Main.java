@@ -95,8 +95,6 @@ public class Main extends JFrame {
     private static boolean EnableProxyServer;
     //最新版本下载地址（如果当前是最新版本，则返回null值）
     private static List<String> NewVersionDownloadingWebSide;
-    //更新维护线程
-    public static Thread DaemonUpdate;
     //更新网站（必须指定VersionID.sum下载地址）
     public static String UPDATE_WEBSITE = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum";
     final String MouseMoveLabelPrefix;
@@ -129,24 +127,11 @@ public class Main extends JFrame {
 
     //静态代码块
     static {
+        logger.info("The software starts running...");
         //初始化Init
         init = new Init<String, String>();
         init.SetUpdate(true);
         init.Run();
-        if (init.containsKey("EnableProxyServer") && init.containsKey("ProxyServer") && init.getProperties().get("EnableProxyServer").equals("true") && !init.getProperties().get("ProxyServer").toString().isBlank()) {
-            String website = init.getProperties().getProperty("ProxyServer");
-            if (website.endsWith(".sum")) {
-                UPDATE_WEBSITE = website;
-            } else {
-                UPDATE_WEBSITE = website.trim();
-                if (UPDATE_WEBSITE.endsWith("/")) {
-                    UPDATE_WEBSITE += "VersionID.sum";
-                } else {
-                    UPDATE_WEBSITE += "/VersionID.sum";
-                }
-            }
-            EnableProxyServer = true;
-        }
         if (!GetImageInformation.isHardwareAccelerated) {
             logger.warn("Hardware acceleration is not supported, and the image will be rendered using software!");
         }
@@ -154,9 +139,6 @@ public class Main extends JFrame {
 
     public static void main(String[] args) {
         main = new Main("Picture Player(Version:" + Version.getVersion() + ")");
-        if (args.length > 0 && GetImageInformation.isImageFile(new File(args[0]))) {
-            main.openPicture(args[0]);
-        }
         //获取操作系统版本
         logger.info("OS:{}", SystemMonitor.OS_NAME);
         //获取系统语言
@@ -164,17 +146,14 @@ public class Main extends JFrame {
         //获取java版本
         logger.info("Java Runtime:{} {} ({})", System.getProperty("java.vm.name"), System.getProperty("java.runtime.version"), System.getProperty("sun.boot.library.path"));
         //获取软件版本
-        logger.info("Software Version:{}", Version.getVersion());
+        logger.info("Software Version:{}({})", Version.getVersion(), Version.getVersionID());
         //程序是否启用硬件加速
         logger.info("Enable Hardware Acceleration:{}", PaintPicture.isEnableHardwareAcceleration);
-        if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
-            DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
-            new Thread(() -> {
-                NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
-                if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
-                    UpdateForm(downloadUpdate);
-                }
-            }).start();
+        for (String arg : args) {
+            if (GetImageInformation.isImageFile(new File(arg))) {
+                main.openPicture(arg);
+                return;
+            }
         }
     }
 
@@ -190,8 +169,8 @@ public class Main extends JFrame {
         changeFocusListener = new ChangeFocusListener(this);
         new Thread(() -> {
             setLocation(WindowLocation.ComponentCenter(null, 800, 580));
-            centre = new Centre();
             center = new Center();
+            centre = new Centre();
             Init();
             PaintPicture.isEnableHardwareAcceleration = EnableHardwareAccelerationCheckBox.isSelected() && GetImageInformation.isHardwareAccelerated;
             if (!GetImageInformation.isHardwareAccelerated) {
@@ -201,6 +180,20 @@ public class Main extends JFrame {
                 centre.save();
             }
             About();
+            if (Centre.getBoolean("EnableProxyServer", main.centre.CurrentData)) {
+                setProxyServer();
+                logger.info("Proxy Server is turned on, and all networking activities of the Program will be handled by the proxy server");
+                logger.info("proxy server ip(or domain):{}", UPDATE_WEBSITE);
+            }
+            if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
+                DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
+                new Thread(() -> {
+                    NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
+                    if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
+                        UpdateForm(downloadUpdate);
+                    }
+                }).start();
+            }
         }).start();
         ProxyServerPrefix = ProxyServerLabel.getText();
         MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
@@ -319,6 +312,22 @@ public class Main extends JFrame {
         }
     }
 
+    //代理服务器设置
+    private static void setProxyServer() {
+        String website = init.getProperties().getProperty("ProxyServer");
+        if (website.endsWith(".sum")) {
+            UPDATE_WEBSITE = website;
+        } else {
+            UPDATE_WEBSITE = website.trim();
+            if (UPDATE_WEBSITE.endsWith("/")) {
+                UPDATE_WEBSITE += "VersionID.sum";
+            } else {
+                UPDATE_WEBSITE += "/VersionID.sum";
+            }
+        }
+        EnableProxyServer = true;
+    }
+
     //打开图片
     public void openPicture(String path) {
         if (path == null) return;
@@ -410,6 +419,7 @@ public class Main extends JFrame {
     private void About() {
         DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
         CheckVersionButton.addActionListener(e -> {
+            downloadUpdate.setWebSide(UPDATE_WEBSITE);
             try {
                 if (!downloadUpdate.checkIfTheLatestVersion()) {
                     JOptionPane.showConfirmDialog(Main.main, "已是最新版本！", "You are up to date", JOptionPane.YES_NO_OPTION);

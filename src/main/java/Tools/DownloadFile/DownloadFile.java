@@ -1,6 +1,6 @@
 package Tools.DownloadFile;
 
-import Runner.Main;
+import Tools.String.RandomString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +39,8 @@ public class DownloadFile {
     //响应的Content-Type头
     public String contentType;
     private static final Logger logger = LoggerFactory.getLogger(DownloadFile.class);
+    boolean stop;
+
     public DownloadFile(String fileURL, String saveDir) throws IOException {
         this.fileURL = fileURL;
         this.saveDir = saveDir;
@@ -92,6 +94,7 @@ public class DownloadFile {
                     }
                 }
             }
+            String WA = saveDir;
             if (fileName != null) {
                 //如果Content-Disposition中有文件名，则使用它
                 saveDir = saveDir + "/" + fileName;
@@ -100,7 +103,8 @@ public class DownloadFile {
                 if (cache.contains("?")) cache = cache.substring(0, cache.indexOf("?"));
                 saveDir = saveDir + "/" + cache.substring(fileURL.lastIndexOf("/") + 1);
             }
-            ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+            File file = new File(saveDir);
+            if (file.exists()) saveDir = WA + "/" + RandomString.getRandomString(8);
             responseCode = httpURLConnection.getResponseCode();
             // 检查响应状态码是否为200（HTTP OK）
             if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -118,6 +122,10 @@ public class DownloadFile {
 
 
                 while ((bytesRead = inputStream.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
+                    if (stop) {
+                        httpURLConnection.disconnect();
+                        return;
+                    }
                     outputStream.write(dataBuffer, 0, bytesRead);
                     CurrentCompletedBytesRead += bytesRead;
                     processThroughput();
@@ -201,6 +209,10 @@ public class DownloadFile {
             }
 
             while ((bytesRead = inputStream.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
+                if (stop) {
+                    connection.disconnect();
+                    return;
+                }
                 outputStream.write(dataBuffer, 0, bytesRead);
                 CurrentCompletedBytesRead += bytesRead;
                 processThroughput();
@@ -250,6 +262,9 @@ public class DownloadFile {
 
     }
 
+    public void stopToDownload() {
+        stop = true;
+    }
 
     private void processThroughput() {
         long currentTime = System.currentTimeMillis();

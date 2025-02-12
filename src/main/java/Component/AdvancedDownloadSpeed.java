@@ -86,21 +86,23 @@ public class AdvancedDownloadSpeed {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 int totalFile = downloadUpdate.TotalDownloadingFile;
-                int currentProgressFile = Math.min(downloadUpdate.HaveDownloadedFile + 1, totalFile);
+                int currentProgressFile = downloadUpdate.HaveDownloadedFile;
+                totalProgress.setMaximum(downloadUpdate.getUpdateWebSide().size() * 100);
                 if (downloadUpdate.CurrentDownloadingFile.isGettingFileSize)
                     speedPrefix = "{Speed} - {FinishedSize}/{TotalSize},{NeedTime}";
                 else
                     speedPrefix = "{Speed} - {FinishedSize}/0B";
                 if (downloadUpdate.CurrentDownloadingFile.isCompleted) {
                     Totalformation = new Formation(totalPrefix);
-                    Totalformation.Change("current", String.valueOf(downloadUpdate.TotalDownloadingFile));
+                    Totalformation.Change("current", String.valueOf(totalFile));
                     DownloadCountings.setText(Totalformation.getResult().toString());
+                    totalProgress.setValue(totalProgress.getMaximum());
                     ((Timer) actionEvent.getSource()).stop(); // 停止计时器
                 } else {
                     // 更新总进度
-                    totalProgress.setValue(currentProgressFile);
+                    totalProgress.setValue((100 * currentProgressFile + (int) downloadUpdate.CurrentDownloadingFile.progress));
                     Totalformation = new Formation(totalPrefix);
-                    Totalformation.Change("current", String.valueOf(downloadUpdate.HaveDownloadedFile + 1));
+                    Totalformation.Change("current", String.valueOf(currentProgressFile + 1));
                     DownloadCountings.setText(Totalformation.getResult().toString());
                 }
             }
