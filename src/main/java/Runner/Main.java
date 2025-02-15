@@ -1,6 +1,7 @@
 package Runner;
 
 import Listener.ChangeFocusListener;
+import Loading.Bundle;
 import Loading.Init;
 import Tools.Component.WindowLocation;
 import Tools.File.ImageThumbnailManage.Center;
@@ -32,9 +33,11 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -85,6 +88,9 @@ public class Main extends JFrame {
     private JCheckBox EnableTurnAboveOrBelowCheckBox;
     private JPanel A;
     private JPanel B;
+    private JLabel Display_1st;
+    private JLabel Display_2nd;
+    private JLabel Display_3rd;
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
     private final ChangeFocusListener changeFocusListener;
@@ -231,16 +237,16 @@ public class Main extends JFrame {
         ProxyServerButton.addActionListener(e -> {
             String newProxyServer = null;
             if (!centre.CurrentData.get("ProxyServer").trim().isEmpty())
-                newProxyServer = JOptionPane.showInputDialog(Main.main, "Please type here for Proxy Server", centre.CurrentData.get("ProxyServer"));
+                newProxyServer = JOptionPane.showInputDialog(Main.main, Bundle.getMessage("InputProxyServer_Title"), centre.CurrentData.get("ProxyServer"));
             else
-                newProxyServer = JOptionPane.showInputDialog(Main.main, "Please type here for Proxy Server", "代理服务器地址");
+                newProxyServer = JOptionPane.showInputDialog(Main.main, Bundle.getMessage("InputProxyServer_Title"), "proxy server address");
             if (newProxyServer == null) return;
             newProxyServer = newProxyServer.replace(" ", "");
             if (newProxyServer.equals(centre.CurrentData.get("ProxyServer"))) return;
-            if (!newProxyServer.equals("代理服务器地址") && !newProxyServer.isEmpty()) {
+            if (!newProxyServer.equals("proxy server address") && !newProxyServer.isEmpty()) {
                 centre.CurrentData.replace("ProxyServer", newProxyServer);
-                ProxyServerLabel.setText("代理服务器: " + centre.CurrentData.get("ProxyServer"));
-                JOptionPane.showConfirmDialog(Main.main, "代理服务器设置成功，重启生效~", "Proxy Server have Done", JOptionPane.YES_NO_OPTION);
+                ProxyServerLabel.setText(Bundle.getMessage("ProxyServerLabel") + centre.CurrentData.get("ProxyServer"));
+                JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("ProxyServerWasModified_Content"), Bundle.getMessage("ProxyServerWasModified_Title"), JOptionPane.YES_NO_OPTION);
                 SettingRevised(true);
             }
         });
@@ -254,7 +260,8 @@ public class Main extends JFrame {
             OSLabel.setText(OSLabel.getText() + SystemMonitor.OS_NAME);
             CPUName.setText(CPUName.getText() + SystemMonitor.CPU_NAME);
             CurrentSoftwareLanguage.setText(CurrentSoftwareLanguage.getText() + System.getProperty("user.language"));
-            if (EnableProxyServer) CheckVersionButton.setText(CheckVersionButton.getText() + "（已启用代理服务器）");
+            if (EnableProxyServer)
+                CheckVersionButton.setText(CheckVersionButton.getText() + Bundle.getMessage("IsEnableProxyServer"));
             final String JmemI = MemUsed.getText();
             final String TTI = TotalThread.getText();
             tabbedPane1.addChangeListener(e -> {
@@ -366,13 +373,14 @@ public class Main extends JFrame {
         MouseMoveOffsetsSlider.addChangeListener(e -> {
             centre.CurrentData.replace("MouseMoveOffsets", String.valueOf(MouseMoveOffsetsSlider.getValue()));
             StringBuilder stringBuffer1 = new StringBuilder(MouseMoveLabelPrefix);
-            stringBuffer1.insert(MouseMoveLabelPrefix.indexOf(":"), MouseMoveOffsetsSlider.getValue() + "% ");
+            stringBuffer1.insert(MouseMoveLabelPrefix.indexOf(":") + 1, MouseMoveOffsetsSlider.getValue() + "% ");
             MouseMoveOffsetsLabel.setText(stringBuffer1.toString());
             SettingRevised(true);
         });
         EnableProxyServerCheckBox.addActionListener(e -> {
             centre.CurrentData.replace("EnableProxyServer", String.valueOf(EnableProxyServerCheckBox.isSelected()));
-            ProxyServerButton.setEnabled(EnableProxyServerCheckBox.isSelected());
+            ProxyServerButton.setVisible(EnableProxyServerCheckBox.isSelected());
+            ProxyServerLabel.setVisible(EnableProxyServerCheckBox.isSelected());
             SettingRevised(true);
         });
         EnableHardwareAccelerationCheckBox.addActionListener(e -> {
@@ -383,7 +391,7 @@ public class Main extends JFrame {
         EnableSecureConnectionCheckBox.addActionListener(e -> {
             if (!EnableSecureConnectionCheckBox.isSelected()) {
                 EnableSecureConnectionCheckBox.setSelected(true);
-                int choose = JOptionPane.showConfirmDialog(Main.main, "Are you sure it's closed?\nIt may make the computer more vulnerable", "Turn off Secure Connection", JOptionPane.YES_NO_OPTION);
+                int choose = JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("ConfirmCloseSecureConnection_Content_1Line") + "\n" + Bundle.getMessage("ConfirmCloseSecureConnection_Content_2Line"), Bundle.getMessage("ConfirmCloseSecureConnection_Title"), JOptionPane.YES_NO_OPTION);
                 if (choose == 1) {
                     return;
                 }
@@ -406,13 +414,14 @@ public class Main extends JFrame {
         EnableCursorDisplayCheckBox.setSelected(Centre.getBoolean("EnableCursorDisplay", centre.CurrentData));
         MouseMoveOffsetsSlider.setValue((int) Centre.getDouble("MouseMoveOffsets", centre.CurrentData));
         StringBuilder stringBuffer = new StringBuilder(MouseMoveLabelPrefix);
-        stringBuffer.insert(MouseMoveLabelPrefix.indexOf(":"), MouseMoveOffsetsSlider.getValue() + "% ");
+        stringBuffer.insert(MouseMoveLabelPrefix.indexOf(":") + 1, MouseMoveOffsetsSlider.getValue() + "% ");
         MouseMoveOffsetsLabel.setText(stringBuffer.toString());
         EnableProxyServerCheckBox.setSelected(Centre.getBoolean("EnableProxyServer", centre.CurrentData));
         ProxyServerLabel.setText(ProxyServerPrefix + centre.CurrentData.get("ProxyServer"));
         EnableSecureConnectionCheckBox.setSelected(Centre.getBoolean("EnableSecureConnection", centre.CurrentData));
         AutoCheckUpdateCheckBox.setSelected(Centre.getBoolean("AutoCheckUpdate", centre.CurrentData));
-        ProxyServerButton.setEnabled(EnableProxyServerCheckBox.isSelected());
+        ProxyServerButton.setVisible(EnableProxyServerCheckBox.isSelected());
+        ProxyServerLabel.setVisible(EnableProxyServerCheckBox.isSelected());
     }
 
     //关于界面设置
@@ -464,12 +473,13 @@ public class Main extends JFrame {
         panel1.setRequestFocusEnabled(true);
         tabbedPane1 = new JTabbedPane();
         tabbedPane1.setRequestFocusEnabled(false);
+        tabbedPane1.setToolTipText("");
         panel1.add(tabbedPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         FirstPanel = new JPanel();
         FirstPanel.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
         FirstPanel.setName("");
         FirstPanel.setToolTipText("");
-        tabbedPane1.addTab("打开", FirstPanel);
+        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "FirstPanel"), FirstPanel);
         VersionView = new JLabel();
         VersionView.setRequestFocusEnabled(false);
         VersionView.setText("Version:");
@@ -478,7 +488,7 @@ public class Main extends JFrame {
         FirstPanel.add(textField1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         TurnButton = new JButton();
         TurnButton.setRequestFocusEnabled(false);
-        TurnButton.setText("打开");
+        this.$$$loadButtonText$$$(TurnButton, this.$$$getMessageFromBundle$$$("messages", "TurnButton"));
         FirstPanel.add(TurnButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         FirstPanel.add(FileChoosePane, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         SecondPanel = new JPanel();
@@ -486,39 +496,39 @@ public class Main extends JFrame {
         SecondPanel.setBackground(new Color(-1643536));
         SecondPanel.setEnabled(true);
         SecondPanel.setForeground(new Color(-1));
-        tabbedPane1.addTab("显示", SecondPanel);
-        final JLabel label1 = new JLabel();
-        Font label1Font = this.$$$getFont$$$(null, -1, 35, label1.getFont());
-        if (label1Font != null) label1.setFont(label1Font);
-        label1.setHorizontalTextPosition(11);
-        label1.setText("开始使用照片查看器");
+        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "SecondPanel"), SecondPanel);
+        Display_1st = new JLabel();
+        Font Display_1stFont = this.$$$getFont$$$(null, -1, 35, Display_1st.getFont());
+        if (Display_1stFont != null) Display_1st.setFont(Display_1stFont);
+        Display_1st.setHorizontalTextPosition(11);
+        this.$$$loadLabelText$$$(Display_1st, this.$$$getMessageFromBundle$$$("messages", "Display_1st"));
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.gridwidth = 2;
-        SecondPanel.add(label1, gbc);
-        final JLabel label2 = new JLabel();
-        Font label2Font = this.$$$getFont$$$(null, -1, 20, label2.getFont());
-        if (label2Font != null) label2.setFont(label2Font);
-        label2.setText("选择图片后，你将能够在此处查看照片");
+        SecondPanel.add(Display_1st, gbc);
+        Display_2nd = new JLabel();
+        Font Display_2ndFont = this.$$$getFont$$$(null, -1, 20, Display_2nd.getFont());
+        if (Display_2ndFont != null) Display_2nd.setFont(Display_2ndFont);
+        this.$$$loadLabelText$$$(Display_2nd, this.$$$getMessageFromBundle$$$("messages", "Display_2nd"));
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        SecondPanel.add(label2, gbc);
-        final JLabel label3 = new JLabel();
-        label3.setBackground(new Color(-2104859));
-        Font label3Font = this.$$$getFont$$$(null, -1, 15, label3.getFont());
-        if (label3Font != null) label3.setFont(label3Font);
-        label3.setHorizontalAlignment(0);
-        label3.setHorizontalTextPosition(0);
-        label3.setText("点击此处导入图片或将图片拖拽到此处");
+        SecondPanel.add(Display_2nd, gbc);
+        Display_3rd = new JLabel();
+        Display_3rd.setBackground(new Color(-2104859));
+        Font Display_3rdFont = this.$$$getFont$$$(null, -1, 15, Display_3rd.getFont());
+        if (Display_3rdFont != null) Display_3rd.setFont(Display_3rdFont);
+        Display_3rd.setHorizontalAlignment(0);
+        Display_3rd.setHorizontalTextPosition(0);
+        this.$$$loadLabelText$$$(Display_3rd, this.$$$getMessageFromBundle$$$("messages", "Display_3rd"));
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
         gbc.gridy = 5;
-        SecondPanel.add(label3, gbc);
+        SecondPanel.add(Display_3rd, gbc);
         final JPanel spacer1 = new JPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 2;
@@ -551,7 +561,7 @@ public class Main extends JFrame {
         SecondPanel.add(spacer5, gbc);
         ThirdPanel = new JPanel();
         ThirdPanel.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
-        tabbedPane1.addTab("设置", ThirdPanel);
+        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "ThirdPanel"), ThirdPanel);
         A = new JPanel();
         A.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
         ThirdPanel.add(A, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -559,16 +569,16 @@ public class Main extends JFrame {
         A.add(spacer6, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         ResetButton = new JButton();
         ResetButton.setRequestFocusEnabled(false);
-        ResetButton.setText("重置所有设置");
+        this.$$$loadButtonText$$$(ResetButton, this.$$$getMessageFromBundle$$$("messages", "ResetButton"));
         A.add(ResetButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         RefreshButton = new JButton();
         RefreshButton.setRequestFocusEnabled(false);
-        RefreshButton.setText("恢复");
+        this.$$$loadButtonText$$$(RefreshButton, this.$$$getMessageFromBundle$$$("messages", "RefreshButton"));
         A.add(RefreshButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         SaveButton = new JButton();
         SaveButton.setHorizontalAlignment(0);
         SaveButton.setRequestFocusEnabled(false);
-        SaveButton.setText("保存");
+        this.$$$loadButtonText$$$(SaveButton, this.$$$getMessageFromBundle$$$("messages", "SaveButton"));
         SaveButton.setVerticalTextPosition(0);
         A.add(SaveButton, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         B = new JPanel();
@@ -577,31 +587,31 @@ public class Main extends JFrame {
         final JScrollPane scrollPane1 = new JScrollPane();
         B.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(502, 372), null, 0, false));
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(11, 2, new Insets(0, 0, 0, 0), -1, -1));
+        panel2.setLayout(new GridLayoutManager(11, 2, new Insets(0, 0, 0, 0), -1, -1, false, true));
         scrollPane1.setViewportView(panel2);
         EnableConfirmExitCheckBox = new JCheckBox();
         EnableConfirmExitCheckBox.setRequestFocusEnabled(false);
-        EnableConfirmExitCheckBox.setText("启用退出提示");
+        this.$$$loadButtonText$$$(EnableConfirmExitCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableConfirmExit"));
         panel2.add(EnableConfirmExitCheckBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         EnableHistoryLoaderCheckBox = new JCheckBox();
         EnableHistoryLoaderCheckBox.setRequestFocusEnabled(false);
-        EnableHistoryLoaderCheckBox.setText("启用历史路径加载");
+        this.$$$loadButtonText$$$(EnableHistoryLoaderCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableHistoryLoader"));
         panel2.add(EnableHistoryLoaderCheckBox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         EnableHardwareAccelerationCheckBox = new JCheckBox();
         EnableHardwareAccelerationCheckBox.setRequestFocusEnabled(false);
-        EnableHardwareAccelerationCheckBox.setText("启用硬件加速");
+        this.$$$loadButtonText$$$(EnableHardwareAccelerationCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableHardwareAcceleration"));
         panel2.add(EnableHardwareAccelerationCheckBox, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         EnableTurnAboveOrBelowCheckBox = new JCheckBox();
         EnableTurnAboveOrBelowCheckBox.setRequestFocusEnabled(false);
-        EnableTurnAboveOrBelowCheckBox.setText("启用图片上下打开");
+        this.$$$loadButtonText$$$(EnableTurnAboveOrBelowCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableTurnAboveOrBelow"));
         panel2.add(EnableTurnAboveOrBelowCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         EnableCursorDisplayCheckBox = new JCheckBox();
         EnableCursorDisplayCheckBox.setRequestFocusEnabled(false);
-        EnableCursorDisplayCheckBox.setText("启用鼠标光标显示");
+        this.$$$loadButtonText$$$(EnableCursorDisplayCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableCursorDisplayCheckBox"));
         panel2.add(EnableCursorDisplayCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         MouseMoveOffsetsLabel = new JLabel();
         MouseMoveOffsetsLabel.setRequestFocusEnabled(false);
-        MouseMoveOffsetsLabel.setText("鼠标移动补偿:");
+        this.$$$loadLabelText$$$(MouseMoveOffsetsLabel, this.$$$getMessageFromBundle$$$("messages", "MouseMoveOffsetsLabel"));
         panel2.add(MouseMoveOffsetsLabel, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
         MouseMoveOffsetsSlider = new JSlider();
         MouseMoveOffsetsSlider.setMaximum(150);
@@ -610,31 +620,31 @@ public class Main extends JFrame {
         panel2.add(MouseMoveOffsetsSlider, new GridConstraints(6, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         EnableProxyServerCheckBox = new JCheckBox();
         EnableProxyServerCheckBox.setRequestFocusEnabled(false);
-        EnableProxyServerCheckBox.setText("启用代理服务器");
+        this.$$$loadButtonText$$$(EnableProxyServerCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableProxyServerCheckBox"));
         panel2.add(EnableProxyServerCheckBox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         ProxyServerLabel = new JLabel();
         ProxyServerLabel.setRequestFocusEnabled(false);
-        ProxyServerLabel.setText("代理服务器：");
+        this.$$$loadLabelText$$$(ProxyServerLabel, this.$$$getMessageFromBundle$$$("messages", "ProxyServerLabel"));
         panel2.add(ProxyServerLabel, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
         EnableSecureConnectionCheckBox = new JCheckBox();
         EnableSecureConnectionCheckBox.setRequestFocusEnabled(false);
-        EnableSecureConnectionCheckBox.setText("启用安全连接模式");
+        this.$$$loadButtonText$$$(EnableSecureConnectionCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableSecureConnectionCheckBox"));
         panel2.add(EnableSecureConnectionCheckBox, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         AutoCheckUpdateCheckBox = new JCheckBox();
         AutoCheckUpdateCheckBox.setRequestFocusEnabled(false);
-        AutoCheckUpdateCheckBox.setText("启用自动检查更新");
+        this.$$$loadButtonText$$$(AutoCheckUpdateCheckBox, this.$$$getMessageFromBundle$$$("messages", "AutoCheckUpdateCheckBox"));
         panel2.add(AutoCheckUpdateCheckBox, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         ProxyServerButton = new JButton();
         ProxyServerButton.setRequestFocusEnabled(false);
-        ProxyServerButton.setText("设置代理服务器");
+        this.$$$loadButtonText$$$(ProxyServerButton, this.$$$getMessageFromBundle$$$("messages", "ProxyServerButton"));
         panel2.add(ProxyServerButton, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         FourthPanel = new JPanel();
         FourthPanel.setLayout(new GridLayoutManager(10, 7, new Insets(0, 0, 0, 0), -1, -1));
-        tabbedPane1.addTab("关于", FourthPanel);
+        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "FourthPanel"), FourthPanel);
         JVMVersionLabel = new JLabel();
         Font JVMVersionLabelFont = this.$$$getFont$$$(null, -1, 16, JVMVersionLabel.getFont());
         if (JVMVersionLabelFont != null) JVMVersionLabel.setFont(JVMVersionLabelFont);
-        JVMVersionLabel.setText("JVM版本：");
+        this.$$$loadLabelText$$$(JVMVersionLabel, this.$$$getMessageFromBundle$$$("messages", "JVMVersionLabel"));
         FourthPanel.add(JVMVersionLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer7 = new Spacer();
         FourthPanel.add(spacer7, new GridConstraints(9, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
@@ -642,55 +652,55 @@ public class Main extends JFrame {
         Font CurrentSoftwareVersionLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareVersionLabel.getFont());
         if (CurrentSoftwareVersionLabelFont != null)
             CurrentSoftwareVersionLabel.setFont(CurrentSoftwareVersionLabelFont);
-        CurrentSoftwareVersionLabel.setText("软件版本：");
+        this.$$$loadLabelText$$$(CurrentSoftwareVersionLabel, this.$$$getMessageFromBundle$$$("messages", "CurrentSoftwareVersionLabel"));
         FourthPanel.add(CurrentSoftwareVersionLabel, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CurrentSoftwareInteriorLabel = new JLabel();
         Font CurrentSoftwareInteriorLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareInteriorLabel.getFont());
         if (CurrentSoftwareInteriorLabelFont != null)
             CurrentSoftwareInteriorLabel.setFont(CurrentSoftwareInteriorLabelFont);
-        CurrentSoftwareInteriorLabel.setText("软件内部版本：");
+        this.$$$loadLabelText$$$(CurrentSoftwareInteriorLabel, this.$$$getMessageFromBundle$$$("messages", "CurrentSoftwareInteriorLabel"));
         FourthPanel.add(CurrentSoftwareInteriorLabel, new GridConstraints(7, 2, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CheckVersionButton = new JButton();
         Font CheckVersionButtonFont = this.$$$getFont$$$(null, -1, 16, CheckVersionButton.getFont());
         if (CheckVersionButtonFont != null) CheckVersionButton.setFont(CheckVersionButtonFont);
         CheckVersionButton.setRequestFocusEnabled(false);
-        CheckVersionButton.setText("检查更新");
+        this.$$$loadButtonText$$$(CheckVersionButton, this.$$$getMessageFromBundle$$$("messages", "CheckVersionButton"));
         FourthPanel.add(CheckVersionButton, new GridConstraints(8, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         OSLabel = new JLabel();
         Font OSLabelFont = this.$$$getFont$$$(null, -1, 16, OSLabel.getFont());
         if (OSLabelFont != null) OSLabel.setFont(OSLabelFont);
-        OSLabel.setText("操作系统：");
+        this.$$$loadLabelText$$$(OSLabel, this.$$$getMessageFromBundle$$$("messages", "OSLabel"));
         FourthPanel.add(OSLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         ProgramStartTime = new JLabel();
         Font ProgramStartTimeFont = this.$$$getFont$$$(null, -1, 16, ProgramStartTime.getFont());
         if (ProgramStartTimeFont != null) ProgramStartTime.setFont(ProgramStartTimeFont);
-        ProgramStartTime.setText("软件启动时间：");
+        this.$$$loadLabelText$$$(ProgramStartTime, this.$$$getMessageFromBundle$$$("messages", "ProgramStartTime"));
         FourthPanel.add(ProgramStartTime, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CurrentSoftwareLanguage = new JLabel();
         CurrentSoftwareLanguage.setEnabled(true);
         Font CurrentSoftwareLanguageFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareLanguage.getFont());
         if (CurrentSoftwareLanguageFont != null) CurrentSoftwareLanguage.setFont(CurrentSoftwareLanguageFont);
-        CurrentSoftwareLanguage.setText("系统语言：");
+        this.$$$loadLabelText$$$(CurrentSoftwareLanguage, this.$$$getMessageFromBundle$$$("messages", "CurrentSoftwareLanguage"));
         FourthPanel.add(CurrentSoftwareLanguage, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         CPUName = new JLabel();
         Font CPUNameFont = this.$$$getFont$$$(null, -1, 16, CPUName.getFont());
         if (CPUNameFont != null) CPUName.setFont(CPUNameFont);
-        CPUName.setText("CPU：");
+        this.$$$loadLabelText$$$(CPUName, this.$$$getMessageFromBundle$$$("messages", "CPULabel"));
         FourthPanel.add(CPUName, new GridConstraints(1, 0, 1, 7, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         TotalThread = new JLabel();
         Font TotalThreadFont = this.$$$getFont$$$(null, -1, 16, TotalThread.getFont());
         if (TotalThreadFont != null) TotalThread.setFont(TotalThreadFont);
-        TotalThread.setText("总线程数：");
+        this.$$$loadLabelText$$$(TotalThread, this.$$$getMessageFromBundle$$$("messages", "TotalThread"));
         FourthPanel.add(TotalThread, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         MemUsed = new JLabel();
         Font MemUsedFont = this.$$$getFont$$$(null, -1, 16, MemUsed.getFont());
         if (MemUsedFont != null) MemUsed.setFont(MemUsedFont);
-        MemUsed.setText("JVM内存：");
+        this.$$$loadLabelText$$$(MemUsed, this.$$$getMessageFromBundle$$$("messages", "MemUsed"));
         FourthPanel.add(MemUsed, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         DefaultJVMMem = new JLabel();
         Font DefaultJVMMemFont = this.$$$getFont$$$(null, -1, 16, DefaultJVMMem.getFont());
         if (DefaultJVMMemFont != null) DefaultJVMMem.setFont(DefaultJVMMemFont);
-        DefaultJVMMem.setText("JVM初始默认内存：");
+        this.$$$loadLabelText$$$(DefaultJVMMem, this.$$$getMessageFromBundle$$$("messages", "DefaultJVMMem"));
         FourthPanel.add(DefaultJVMMem, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer8 = new Spacer();
         FourthPanel.add(spacer8, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
@@ -703,7 +713,7 @@ public class Main extends JFrame {
         JavaPath = new JLabel();
         Font JavaPathFont = this.$$$getFont$$$(null, -1, 16, JavaPath.getFont());
         if (JavaPathFont != null) JavaPath.setFont(JavaPathFont);
-        JavaPath.setText("Java路径：");
+        this.$$$loadLabelText$$$(JavaPath, this.$$$getMessageFromBundle$$$("messages", "JavaPath"));
         FourthPanel.add(JavaPath, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         TopLabel = new JLabel();
         Font TopLabelFont = this.$$$getFont$$$(null, -1, 20, TopLabel.getFont());
@@ -735,6 +745,77 @@ public class Main extends JFrame {
         return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadLabelText$$$(JLabel component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setDisplayedMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadButtonText$$$(AbstractButton component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
+    }
+
     /**
      * @noinspection ALL
      */
@@ -752,15 +833,16 @@ public class Main extends JFrame {
     //关闭
     public static void close() {
         if (Main.main.getTitle().contains("*")) {
-            int choose = JOptionPane.showConfirmDialog(Main.main, "是否保存设置？", "关闭提示", JOptionPane.YES_NO_CANCEL_OPTION);
+            int choose = JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("WindowCloseWithSettingsNotSave_Content"), Bundle.getMessage("WindowCloseWithSettingsNotSave_Title"), JOptionPane.YES_NO_CANCEL_OPTION);
             if (choose == JOptionPane.YES_OPTION) {
+                logger.info("Saving Settings...");
                 Main.main.centre.save();
-                if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().equalsIgnoreCase("false")) {
-                    CloseInformation();
-                    System.exit(0);
-                }
+                CloseInformation();
+                logger.info("Program Termination!");
+                System.exit(0);
             } else if (choose == JOptionPane.NO_OPTION) {
                 CloseInformation();
+                logger.info("Program Termination!");
                 System.exit(0);
             } else if (choose == JOptionPane.CANCEL_OPTION || choose == JOptionPane.CLOSED_OPTION) {
                 return;
@@ -771,24 +853,25 @@ public class Main extends JFrame {
         init.Loading();
         if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().equalsIgnoreCase("false")) {
             CloseInformation();
+            logger.info("Program Termination!");
             System.exit(0);
         }
         //设置消息对话框面板
         var jDialog = new JDialog(main, true);
         //设置面板标题
-        jDialog.setTitle("Confirm Exit");
+        jDialog.setTitle(Bundle.getMessage("DefaultWindowClose_Title"));
         //设置面板大小（获取父面板坐标）
         jDialog.setSize(260, 170);
         jDialog.setLocation(WindowLocation.ComponentCenter(main, jDialog.getWidth(), jDialog.getHeight()));
         //创建文字
-        var jLabel1 = new JLabel("Are you sure you want to exit?");
+        var jLabel1 = new JLabel(Bundle.getMessage("DefaultWindowClose_Content"));
         //设置文字字体、格式
         jLabel1.setFont(new Font("微软雅黑", Font.PLAIN, 15));
         //设置显示大小、坐标
         jLabel1.setBounds(15, 3, 290, 50);
         //创建按钮
-        var yes = new JButton("exit");
-        var no = new JButton("cancel");
+        var yes = new JButton(Bundle.getMessage("DefaultWindowClose_EXIT"));
+        var no = new JButton(Bundle.getMessage("DefaultWindowClose_Cancel"));
         yes.setBounds(20, 50, 100, 35);
         yes.setForeground(Color.RED);
         no.setBounds(130, 50, 100, 35);
@@ -800,7 +883,7 @@ public class Main extends JFrame {
         jDialog.add(yes);
         jDialog.add(no);
         ChangeFocusListener changeFocusListener = new ChangeFocusListener(jDialog);
-        JCheckBox jCheckBox = new JCheckBox("Don't ask again");
+        JCheckBox jCheckBox = new JCheckBox(Bundle.getMessage("DefaultWindowClose_Under"));
         jCheckBox.setBounds(60, 95, 200, 25);
         jCheckBox.addMouseListener(changeFocusListener);
         jDialog.add(jCheckBox);
@@ -813,6 +896,7 @@ public class Main extends JFrame {
                 init.ChangeValue("EnableConfirmExit", "false");
                 init.Update();
             }
+            logger.info("Program Termination!");
             System.exit(0);
         });
         yes.addMouseListener(changeFocusListener);
@@ -841,6 +925,7 @@ public class Main extends JFrame {
                     if (Main.main != null) {
                         Main.main.center.save();
                     }
+                    logger.info("Program Termination!");
                     System.exit(0);
                 }
             }

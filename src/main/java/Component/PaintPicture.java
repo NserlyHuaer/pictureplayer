@@ -1,6 +1,7 @@
 package Component;//导入包
 
 import Listener.ChangeFocusListener;
+import Loading.Bundle;
 import Runner.Main;
 import Settings.Centre;
 import Size.OperatingCoordinate;
@@ -98,7 +99,7 @@ public class PaintPicture extends JPanel {
         });
         Last = new JButton("<");
         Next = new JButton(">");
-        biggest = new JButton("enlarge");
+        biggest = new JButton(Bundle.getMessage("Display_enlarge"));
         biggest.addMouseListener(new MouseAdapter() {
             boolean isDown = false;
 
@@ -126,7 +127,7 @@ public class PaintPicture extends JPanel {
                 isDown = true;
             }
         });
-        smallest = new JButton("reduce");
+        smallest = new JButton(Bundle.getMessage("Display_reduce"));
         smallest.addMouseListener(new MouseAdapter() {
             //判断是否鼠标释放
             boolean isReleased = false;
@@ -196,24 +197,24 @@ public class PaintPicture extends JPanel {
 
     private JPanel getjPanel(ChangeFocusListener changeFocusListener) {
         var On = new JPanel();
-        JButton TurnLeft = new JButton("Left");
-        //设置图片左转按钮可见
-        TurnLeft.setVisible(true);
-        //创建图片左转按钮监听器
-        TurnLeft.addActionListener(e -> {
+        JButton clockwise = new JButton(Bundle.getMessage("Display_RotateClockwiseButton"));
+        //设置图片顺时针按钮可见
+        clockwise.setVisible(true);
+        //创建图片顺时针按钮监听器
+        clockwise.addActionListener(e -> {
             myCanvas.turnLeft();
         });
-        TurnLeft.addMouseListener(changeFocusListener);
-        JButton TurnRight = new JButton("Right");
-        //设置图片右转按钮可见
-        TurnLeft.setVisible(true);
-        //创建图片右转按钮监听器
-        TurnRight.addActionListener(e -> {
+        clockwise.addMouseListener(changeFocusListener);
+        JButton counterclockwise = new JButton(Bundle.getMessage("Display_RotateCounterclockwise"));
+        //设置图片逆时针按钮可见
+        clockwise.setVisible(true);
+        //创建图片逆时针按钮监听器
+        counterclockwise.addActionListener(e -> {
             myCanvas.turnRight();
         });
-        TurnRight.addMouseListener(changeFocusListener);
+        counterclockwise.addMouseListener(changeFocusListener);
         //在容器On中添加还原图片按钮
-        JButton Reset = new JButton("reset");
+        JButton Reset = new JButton(Bundle.getMessage("Display_reset"));
         //设置重置按钮可见
         Reset.setVisible(true);
         //点击时间
@@ -242,12 +243,12 @@ public class PaintPicture extends JPanel {
         Reset.addMouseListener(changeFocusListener);
         JButton FlipHorizontally = new JButton("FlipHorizontally");
         FlipHorizontally.addMouseListener(changeFocusListener);
-        //将图片左转按钮添加到组件中
-        On.add(TurnLeft);
+        //将图片逆时针按钮添加到组件中
+        On.add(counterclockwise);
         //将重置按钮添加到组件中
         On.add(Reset);
-        //将图片右转按钮添加到组件中
-        On.add(TurnRight);
+        //将图片顺时针按钮添加到组件中
+        On.add(clockwise);
         //将比例显示添加到组件中
         On.add(percentLabel);
         return On;

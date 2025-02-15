@@ -16,13 +16,14 @@
         </constraints>
         <properties>
           <requestFocusEnabled value="false"/>
+          <toolTipText value=""/>
         </properties>
         <border type="none"/>
         <children>
           <grid id="6269e" binding="FirstPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <tabbedpane title="打开"/>
+              <tabbedpane title-resource-bundle="messages" title-key="FirstPanel"/>
             </constraints>
             <properties>
               <name value=""/>
@@ -53,7 +54,7 @@
                 </constraints>
                 <properties>
                   <requestFocusEnabled value="false"/>
-                  <text value="打开"/>
+                  <text resource-bundle="messages" key="TurnButton"/>
                 </properties>
               </component>
               <grid id="ea0eb" binding="FileChoosePane" custom-create="true" layout-manager="BorderLayout" hgap="0" vgap="0">
@@ -68,7 +69,7 @@
           </grid>
           <grid id="a8808" binding="SecondPanel" layout-manager="GridBagLayout">
             <constraints>
-              <tabbedpane title="显示"/>
+              <tabbedpane title-resource-bundle="messages" title-key="SecondPanel"/>
             </constraints>
             <properties>
               <background color="-1643536"/>
@@ -77,7 +78,7 @@
             </properties>
             <border type="none"/>
             <children>
-              <component id="1a97e" class="javax.swing.JLabel">
+              <component id="1a97e" class="javax.swing.JLabel" binding="Display_1st">
                 <constraints>
                   <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <gridbag weightx="0.0" weighty="0.0"/>
@@ -85,20 +86,20 @@
                 <properties>
                   <font size="35"/>
                   <horizontalTextPosition value="11"/>
-                  <text value="开始使用照片查看器"/>
+                  <text resource-bundle="messages" key="Display_1st"/>
                 </properties>
               </component>
-              <component id="cca5b" class="javax.swing.JLabel">
+              <component id="cca5b" class="javax.swing.JLabel" binding="Display_2nd">
                 <constraints>
                   <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                   <gridbag weightx="0.0" weighty="0.0"/>
                 </constraints>
                 <properties>
                   <font size="20"/>
-                  <text value="选择图片后，你将能够在此处查看照片"/>
+                  <text resource-bundle="messages" key="Display_2nd"/>
                 </properties>
               </component>
-              <component id="748d6" class="javax.swing.JLabel">
+              <component id="748d6" class="javax.swing.JLabel" binding="Display_3rd">
                 <constraints>
                   <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <gridbag weightx="0.0" weighty="0.0"/>
@@ -108,7 +109,7 @@
                   <font size="15"/>
                   <horizontalAlignment value="0"/>
                   <horizontalTextPosition value="0"/>
-                  <text value="点击此处导入图片或将图片拖拽到此处"/>
+                  <text resource-bundle="messages" key="Display_3rd"/>
                 </properties>
               </component>
               <vspacer id="e1d3d">
@@ -146,7 +147,7 @@
           <grid id="9ef36" binding="ThirdPanel" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <tabbedpane title="设置"/>
+              <tabbedpane title-resource-bundle="messages" title-key="ThirdPanel"/>
             </constraints>
             <properties/>
             <border type="none"/>
@@ -170,7 +171,7 @@
                     </constraints>
                     <properties>
                       <requestFocusEnabled value="false"/>
-                      <text value="重置所有设置"/>
+                      <text resource-bundle="messages" key="ResetButton"/>
                     </properties>
                   </component>
                   <component id="cd9ed" class="javax.swing.JButton" binding="RefreshButton">
@@ -179,7 +180,7 @@
                     </constraints>
                     <properties>
                       <requestFocusEnabled value="false"/>
-                      <text value="恢复"/>
+                      <text resource-bundle="messages" key="RefreshButton"/>
                     </properties>
                   </component>
                   <component id="df6fd" class="javax.swing.JButton" binding="SaveButton">
@@ -189,7 +190,7 @@
                     <properties>
                       <horizontalAlignment value="0"/>
                       <requestFocusEnabled value="false"/>
-                      <text value="保存"/>
+                      <text resource-bundle="messages" key="SaveButton"/>
                       <verticalTextPosition value="0"/>
                     </properties>
                   </component>
@@ -212,7 +213,7 @@
                     <properties/>
                     <border type="none"/>
                     <children>
-                      <grid id="df30f" layout-manager="GridLayoutManager" row-count="11" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                      <grid id="df30f" layout-manager="GridLayoutManager" row-count="11" column-count="2" same-size-horizontally="false" same-size-vertically="true" hgap="-1" vgap="-1">
                         <margin top="0" left="0" bottom="0" right="0"/>
                         <constraints/>
                         <properties/>
@@ -226,7 +227,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="启用退出提示"/>
+                              <text resource-bundle="messages" key="EnableConfirmExit"/>
                             </properties>
                           </component>
                           <component id="801b5" class="javax.swing.JCheckBox" binding="EnableHistoryLoaderCheckBox">
@@ -237,7 +238,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="启用历史路径加载"/>
+                              <text resource-bundle="messages" key="EnableHistoryLoader"/>
                             </properties>
                           </component>
                           <component id="72a4" class="javax.swing.JCheckBox" binding="EnableHardwareAccelerationCheckBox">
@@ -248,7 +249,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="启用硬件加速"/>
+                              <text resource-bundle="messages" key="EnableHardwareAcceleration"/>
                             </properties>
                           </component>
                           <component id="da9a2" class="javax.swing.JCheckBox" binding="EnableTurnAboveOrBelowCheckBox">
@@ -259,7 +260,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="启用图片上下打开"/>
+                              <text resource-bundle="messages" key="EnableTurnAboveOrBelow"/>
                             </properties>
                           </component>
                           <component id="69fe2" class="javax.swing.JCheckBox" binding="EnableCursorDisplayCheckBox">
@@ -270,7 +271,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="启用鼠标光标显示"/>
+                              <text resource-bundle="messages" key="EnableCursorDisplayCheckBox"/>
                             </properties>
                           </component>
                           <component id="cbde1" class="javax.swing.JLabel" binding="MouseMoveOffsetsLabel">
@@ -281,7 +282,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="鼠标移动补偿:"/>
+                              <text resource-bundle="messages" key="MouseMoveOffsetsLabel"/>
                             </properties>
                           </component>
                           <component id="fc8e5" class="javax.swing.JSlider" binding="MouseMoveOffsetsSlider">
@@ -302,7 +303,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="启用代理服务器"/>
+                              <text resource-bundle="messages" key="EnableProxyServerCheckBox"/>
                             </properties>
                           </component>
                           <component id="1c230" class="javax.swing.JLabel" binding="ProxyServerLabel">
@@ -313,7 +314,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="代理服务器："/>
+                              <text resource-bundle="messages" key="ProxyServerLabel"/>
                             </properties>
                           </component>
                           <component id="9a4c5" class="javax.swing.JCheckBox" binding="EnableSecureConnectionCheckBox">
@@ -324,7 +325,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="启用安全连接模式"/>
+                              <text resource-bundle="messages" key="EnableSecureConnectionCheckBox"/>
                             </properties>
                           </component>
                           <component id="74555" class="javax.swing.JCheckBox" binding="AutoCheckUpdateCheckBox">
@@ -335,7 +336,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="启用自动检查更新"/>
+                              <text resource-bundle="messages" key="AutoCheckUpdateCheckBox"/>
                             </properties>
                           </component>
                           <component id="f0f0c" class="javax.swing.JButton" binding="ProxyServerButton">
@@ -344,7 +345,7 @@
                             </constraints>
                             <properties>
                               <requestFocusEnabled value="false"/>
-                              <text value="设置代理服务器"/>
+                              <text resource-bundle="messages" key="ProxyServerButton"/>
                             </properties>
                           </component>
                         </children>
@@ -358,7 +359,7 @@
           <grid id="6ed20" binding="FourthPanel" layout-manager="GridLayoutManager" row-count="10" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
-              <tabbedpane title="关于"/>
+              <tabbedpane title-resource-bundle="messages" title-key="FourthPanel"/>
             </constraints>
             <properties/>
             <border type="none"/>
@@ -369,7 +370,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="JVM版本："/>
+                  <text resource-bundle="messages" key="JVMVersionLabel"/>
                 </properties>
               </component>
               <vspacer id="2584c">
@@ -383,7 +384,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="软件版本："/>
+                  <text resource-bundle="messages" key="CurrentSoftwareVersionLabel"/>
                 </properties>
               </component>
               <component id="e4ba5" class="javax.swing.JLabel" binding="CurrentSoftwareInteriorLabel">
@@ -392,7 +393,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="软件内部版本："/>
+                  <text resource-bundle="messages" key="CurrentSoftwareInteriorLabel"/>
                 </properties>
               </component>
               <component id="a000c" class="javax.swing.JButton" binding="CheckVersionButton">
@@ -402,7 +403,7 @@
                 <properties>
                   <font size="16"/>
                   <requestFocusEnabled value="false"/>
-                  <text value="检查更新"/>
+                  <text resource-bundle="messages" key="CheckVersionButton"/>
                 </properties>
               </component>
               <component id="e9e25" class="javax.swing.JLabel" binding="OSLabel">
@@ -411,7 +412,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="操作系统："/>
+                  <text resource-bundle="messages" key="OSLabel"/>
                 </properties>
               </component>
               <component id="e8b8e" class="javax.swing.JLabel" binding="ProgramStartTime">
@@ -420,7 +421,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="软件启动时间："/>
+                  <text resource-bundle="messages" key="ProgramStartTime"/>
                 </properties>
               </component>
               <component id="428e8" class="javax.swing.JLabel" binding="CurrentSoftwareLanguage">
@@ -430,7 +431,7 @@
                 <properties>
                   <enabled value="true"/>
                   <font size="16"/>
-                  <text value="系统语言："/>
+                  <text resource-bundle="messages" key="CurrentSoftwareLanguage"/>
                 </properties>
               </component>
               <component id="f7451" class="javax.swing.JLabel" binding="CPUName">
@@ -439,7 +440,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="CPU："/>
+                  <text resource-bundle="messages" key="CPULabel"/>
                 </properties>
               </component>
               <component id="48ddc" class="javax.swing.JLabel" binding="TotalThread">
@@ -448,7 +449,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="总线程数："/>
+                  <text resource-bundle="messages" key="TotalThread"/>
                 </properties>
               </component>
               <component id="b87f8" class="javax.swing.JLabel" binding="MemUsed">
@@ -457,7 +458,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="JVM内存："/>
+                  <text resource-bundle="messages" key="MemUsed"/>
                 </properties>
               </component>
               <component id="f83a5" class="javax.swing.JLabel" binding="DefaultJVMMem">
@@ -466,7 +467,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="JVM初始默认内存："/>
+                  <text resource-bundle="messages" key="DefaultJVMMem"/>
                 </properties>
               </component>
               <hspacer id="62dde">
@@ -495,7 +496,7 @@
                 </constraints>
                 <properties>
                   <font size="16"/>
-                  <text value="Java路径："/>
+                  <text resource-bundle="messages" key="JavaPath"/>
                 </properties>
               </component>
             </children>
