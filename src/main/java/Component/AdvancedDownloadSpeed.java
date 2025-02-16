@@ -1,6 +1,7 @@
 package Component;
 
 import Command.CommandCenter;
+import Loading.Bundle;
 import Runner.Main;
 import Tools.String.Formation;
 import Version.DownloadUpdate;
@@ -69,7 +70,7 @@ public class AdvancedDownloadSpeed {
                 CommandCenter.executeOSSpecificCommands(osType, (String) map.get(website).getFirst());
             } catch (IOException | NoClassDefFoundError | ExceptionInInitializerError e) {
                 logger.error(e.getMessage());
-                JOptionPane.showMessageDialog(DownloadUpdateFrame.downloadUpdateFrame, "因程序内部存在严重错误，无法完成更新，请稍后重试：\nCaused by:" + e, "更新终止", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(DownloadUpdateFrame.downloadUpdateFrame, Bundle.getMessage("UpdateError_Content") + "\nCaused by:" + e, Bundle.getMessage("UpdateError_Title"), JOptionPane.ERROR_MESSAGE);
                 DownloadUpdateFrame.downloadUpdateFrame.dispose();
                 Main.main.setVisible(true);
             }

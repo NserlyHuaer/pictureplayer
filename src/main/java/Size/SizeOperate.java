@@ -4,7 +4,6 @@ import java.awt.*;
 import java.io.IOException;
 
 import Component.PaintPicture;
-import Runner.Main;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +28,6 @@ public class SizeOperate {
     public double FittestPercent;
     //最适合的调节比例
     private int AdjustPercent;
-    //默认调节比例
-    public int DefaultAdjustPercent;
     //图片信息类
     private GetPictureSize getPictureSize;
     //屏幕分辨率
@@ -106,8 +103,6 @@ public class SizeOperate {
         if (window != null) {
             this.Component = window;
             FittestPercent = getPictureOptimalSize();
-        }
-        if (window != null) {
             if (getPictureSize == null)
                 try {
                     getPictureSize = new GetPictureSize(myCanvas.getPath());

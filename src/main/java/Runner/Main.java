@@ -145,6 +145,14 @@ public class Main extends JFrame {
 
     public static void main(String[] args) {
         main = new Main("Picture Player(Version:" + Version.getVersion() + ")");
+        new Thread(() -> {
+            for (String arg : args) {
+                if (GetImageInformation.isImageFile(new File(arg))) {
+                    main.openPicture(arg);
+                    return;
+                }
+            }
+        }).start();
         //获取操作系统版本
         logger.info("OS:{}", SystemMonitor.OS_NAME);
         //获取系统语言
@@ -155,12 +163,6 @@ public class Main extends JFrame {
         logger.info("Software Version:{}({})", Version.getVersion(), Version.getVersionID());
         //程序是否启用硬件加速
         logger.info("Enable Hardware Acceleration:{}", PaintPicture.isEnableHardwareAcceleration);
-        for (String arg : args) {
-            if (GetImageInformation.isImageFile(new File(arg))) {
-                main.openPicture(arg);
-                return;
-            }
-        }
     }
 
     public Main(String title) {
@@ -392,7 +394,7 @@ public class Main extends JFrame {
             if (!EnableSecureConnectionCheckBox.isSelected()) {
                 EnableSecureConnectionCheckBox.setSelected(true);
                 int choose = JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("ConfirmCloseSecureConnection_Content_1Line") + "\n" + Bundle.getMessage("ConfirmCloseSecureConnection_Content_2Line"), Bundle.getMessage("ConfirmCloseSecureConnection_Title"), JOptionPane.YES_NO_OPTION);
-                if (choose == 1) {
+                if (choose != 0) {
                     return;
                 }
                 EnableSecureConnectionCheckBox.setSelected(false);
@@ -431,12 +433,12 @@ public class Main extends JFrame {
             downloadUpdate.setWebSide(UPDATE_WEBSITE);
             try {
                 if (!downloadUpdate.checkIfTheLatestVersion()) {
-                    JOptionPane.showConfirmDialog(Main.main, "已是最新版本！", "You are up to date", JOptionPane.YES_NO_OPTION);
+                    JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("NoAnyUpdate_Content"), Bundle.getMessage("NoAnyUpdate_Title"), JOptionPane.YES_NO_OPTION);
                     return;
                 }
             } catch (IOException e1) {
                 logger.error(e1.getMessage());
-                JOptionPane.showMessageDialog(Main.main, "Error: " + e1 + "\n无法获取更新，请稍后重试~", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(Main.main, "Error: " + e1 + "\n" + Bundle.getMessage("CantGetUpdate_Content"), Bundle.getMessage("CantGetUpdate_Title"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
             new Thread(() -> {
@@ -996,7 +998,7 @@ public class Main extends JFrame {
     private File checkFileOpen(CheckFileIsRightPictureType checkFileIsRightPictureType, boolean isMakeSure) {
         checkFileIsRightPictureType.statistics();
         if (checkFileIsRightPictureType.getNotImageCount() != 0) {
-            JOptionPane.showMessageDialog(Main.main, "尚未支持打开此文件:\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(Main.main, Bundle.getMessage("OpenPictureError_Content") + "\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", Bundle.getMessage("OpenPictureError_Title"), JOptionPane.ERROR_MESSAGE);
         }
         if (checkFileIsRightPictureType.getImageCount() == 0) return null;
         File choose;
@@ -1009,7 +1011,7 @@ public class Main extends JFrame {
                     if (!new File(Main.main.paintPicture.myCanvas.getPath()).equals(choose)) return null;
                 } else if (Objects.equals(choose_hashcode, paintPicture.myCanvas.getPicture_hashcode()))
                     return REPEAT_PICTURE_PATH_LOGOTYPE;
-                if (isMakeSure && JOptionPane.showConfirmDialog(Main.main, "是否打开文件:\n\"" + choose.getPath() + "\"", "打开", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+                if (isMakeSure && JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("OpenPictureExactly_Content") + "\n\"" + choose.getPath() + "\"", Bundle.getMessage("OpenPictureExactly_Title"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
                     return REPEAT_PICTURE_PATH_LOGOTYPE;
             }
         } else {
@@ -1017,6 +1019,5 @@ public class Main extends JFrame {
         }
         return choose;
     }
-
 
 }

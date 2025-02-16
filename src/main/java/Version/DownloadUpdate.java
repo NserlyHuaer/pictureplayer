@@ -1,6 +1,7 @@
 package Version;
 
 
+import Loading.Bundle;
 import Tools.DownloadFile.DownloadFile;
 import Tools.File.ReverseSearch;
 import Tools.String.Formation;
@@ -35,7 +36,7 @@ public class DownloadUpdate {
     public String NewVersionName = "";
     public String DescribeFileWebSide = "";
     // 定义选项内容
-    private Object[] options = {"重试", "跳过当前文件", "退出"};
+    private Object[] options = {Bundle.getMessage("DownloadUpdateOptions_1st"), Bundle.getMessage("DownloadUpdateOptions_2nd"), Bundle.getMessage("DownloadUpdateOptions_3rd")};
     private boolean StopToUpdate;
     private static final Logger logger = LoggerFactory.getLogger(DownloadUpdate.class);
 
@@ -182,7 +183,7 @@ public class DownloadUpdate {
 
     private int ExceptionHandling(IOException e) {
         logger.error(e.getMessage());
-        int choice = JOptionPane.showOptionDialog(null, "在下载过程中出现了错误：\n" + e, "下载失败", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options);
+        int choice = JOptionPane.showOptionDialog(null, Bundle.getMessage("DownloadUpdateError_Content") + "\n" + e, Bundle.getMessage("DownloadUpdateError_Title"), JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options);
         return choice;
     }
 

@@ -1,5 +1,7 @@
 package Component;
 
+import Loading.Bundle;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -17,7 +19,7 @@ public class OpenImageChooser {
         JList<String> list = new JList<>(listModel);
 
         // 使用JOptionPane显示包含JList的对话框，不显示图标
-        int choice = JOptionPane.showOptionDialog(component, new Object[]{new JScrollPane(list)}, "Open Image",
+        int choice = JOptionPane.showOptionDialog(component, new Object[]{new JScrollPane(list)}, Bundle.getMessage("ChoosePictureInManyPictures_Title"),
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
         if (choice == JOptionPane.OK_OPTION) {
             String selectedValue = list.getSelectedValue();

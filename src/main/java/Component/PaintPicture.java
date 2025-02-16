@@ -490,15 +490,13 @@ public class PaintPicture extends JPanel {
             double width;
             double WindowHeight = 0, WindowWidth = 0, LastWindowHeight = 0, LastWindowWidth = 0;
             //尝试获取之前和现在的组件大小信息
-            if (NewWindow != null) {
-                WindowWidth = NewWindow.getWidth();
-                WindowHeight = NewWindow.getHeight();
-                if (LastWindow == null || LastWindow.width == 0 || LastWindow.height == 0) {
-                    LastWindow = NewWindow;
-                }
-                LastWindowWidth = LastWindow.getWidth();
-                LastWindowHeight = LastWindow.getHeight();
+            WindowWidth = NewWindow.getWidth();
+            WindowHeight = NewWindow.getHeight();
+            if (LastWindow == null || LastWindow.width == 0 || LastWindow.height == 0) {
+                LastWindow = NewWindow;
             }
+            LastWindowWidth = LastWindow.getWidth();
+            LastWindowHeight = LastWindow.getHeight();
             //判断是否为移动（若移动，则执行本代码）;窗体、图片缩放比例相比于之前是否存在改变（如果没有，则执行本代码）
             if (isMove && RotationDegrees == lastRotationDegrees && LastPercent == sizeOperate.getPercent() && LastWindow != null && LastWindow.equals(NewWindow)) {
                 X += mouseX;

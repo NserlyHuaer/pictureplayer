@@ -1,5 +1,6 @@
 package Component;
 
+import Loading.Bundle;
 import Tools.Component.WindowLocation;
 import Tools.String.Formation;
 import Version.DownloadUpdate;
@@ -45,7 +46,7 @@ public class DownloadUpdateFrame extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                int choose = JOptionPane.showConfirmDialog(downloadUpdateFrame, "下载还在继续，你确定关闭吗？", "关闭下载窗体", JOptionPane.ERROR_MESSAGE);
+                int choose = JOptionPane.showConfirmDialog(downloadUpdateFrame, Bundle.getMessage("CancelUpdate_Content"), Bundle.getMessage("CancelUpdate_Title"), JOptionPane.ERROR_MESSAGE);
                 if (choose == JOptionPane.OK_OPTION) {
                     downloadUpdate.stopToUpdate();
                     Runner.Main.main.setVisible(true);

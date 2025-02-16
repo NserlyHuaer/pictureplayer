@@ -79,6 +79,7 @@ public class CommandCenter {
         logger.info("The script file is created!");
         logger.info("Start running the script file and end the current software...");
         Runtime.getRuntime().exec("runnable.bat");
+        logger.info("Program Termination!");
         System.exit(0);
     }
 
@@ -94,6 +95,7 @@ public class CommandCenter {
         logger.info("The script file is created");
         logger.info("Start running the script file and end the current software...");
         Runtime.getRuntime().exec("nohup sh ./replace.sh &");
+        logger.info("Program Termination!");
         System.exit(0);
     }
 
