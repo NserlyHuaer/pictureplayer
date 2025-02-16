@@ -108,6 +108,7 @@ public class Main extends JFrame {
     public PaintPicture paintPicture;
     private boolean IsFreshen;
     private static final File REPEAT_PICTURE_PATH_LOGOTYPE = new File("???");
+    private static ProxyServerChooser proxyServerChooser;
     private final MouseAdapter mouseAdapter = new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
@@ -193,6 +194,9 @@ public class Main extends JFrame {
                 logger.info("Proxy Server is turned on, and all networking activities of the Program will be handled by the proxy server");
                 logger.info("proxy server ip(or domain):{}", UPDATE_WEBSITE);
             }
+            proxyServerChooser = new ProxyServerChooser();
+            proxyServerChooser.pack();
+            proxyServerChooser.setTitle(Bundle.getMessage("InputProxyServer_Title"));
             if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
                 DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
                 new Thread(() -> {
@@ -237,20 +241,7 @@ public class Main extends JFrame {
             SettingRevised(false);
         });
         ProxyServerButton.addActionListener(e -> {
-            String newProxyServer = null;
-            if (!centre.CurrentData.get("ProxyServer").trim().isEmpty())
-                newProxyServer = JOptionPane.showInputDialog(Main.main, Bundle.getMessage("InputProxyServer_Title"), centre.CurrentData.get("ProxyServer"));
-            else
-                newProxyServer = JOptionPane.showInputDialog(Main.main, Bundle.getMessage("InputProxyServer_Title"), "proxy server address");
-            if (newProxyServer == null) return;
-            newProxyServer = newProxyServer.replace(" ", "");
-            if (newProxyServer.equals(centre.CurrentData.get("ProxyServer"))) return;
-            if (!newProxyServer.equals("proxy server address") && !newProxyServer.isEmpty()) {
-                centre.CurrentData.replace("ProxyServer", newProxyServer);
-                ProxyServerLabel.setText(Bundle.getMessage("ProxyServerLabel") + centre.CurrentData.get("ProxyServer"));
-                JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("ProxyServerWasModified_Content"), Bundle.getMessage("ProxyServerWasModified_Title"), JOptionPane.YES_NO_OPTION);
-                SettingRevised(true);
-            }
+            proxyServerChooser.setVisible(true);
         });
         new Thread(() -> {
             JavaPath.setText(JavaPath.getText() + System.getProperty("sun.boot.library.path"));
@@ -449,6 +440,25 @@ public class Main extends JFrame {
         });
 
 
+    }
+
+    //代理服务器更改
+    public void setProxyServer(String ProxyServerAddress) {
+        if (ProxyServerAddress == null || ProxyServerAddress.trim().isEmpty()) return;
+        ProxyServerAddress = ProxyServerAddress.trim();
+        if (ProxyServerAddress.equals(centre.CurrentData.get("ProxyServer"))) return;
+        if (!ProxyServerAddress.equals("proxy server address") && !ProxyServerAddress.isEmpty()) {
+            logger.info("To enable a new proxy server:{}", ProxyServerAddress);
+            UPDATE_WEBSITE = ProxyServerAddress;
+            EnableProxyServer = true;
+            EnableProxyServerCheckBox.setSelected(true);
+            ProxyServerButton.setVisible(true);
+            ProxyServerLabel.setVisible(true);
+            centre.CurrentData.replace("ProxyServer", ProxyServerAddress);
+            ProxyServerLabel.setText(Bundle.getMessage("ProxyServerLabel") + centre.CurrentData.get("ProxyServer"));
+            JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("ProxyServerWasModified_Content"), Bundle.getMessage("ProxyServerWasModified_Title"), JOptionPane.YES_NO_OPTION);
+            SettingRevised(true);
+        }
     }
 
     //设置修改
