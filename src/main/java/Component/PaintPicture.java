@@ -303,6 +303,7 @@ public class PaintPicture extends JPanel {
             init_listener();
             //添加图片hashcode
             this.picture_hashcode = GetImageInformation.getHashcode(new File(path));
+            setDoubleBuffered(true);
         }
 
         public MyCanvas(String path, String picture_hashcode) {
@@ -312,6 +313,7 @@ public class PaintPicture extends JPanel {
             init_listener();
             //添加图片hashcode
             this.picture_hashcode = picture_hashcode;
+            setDoubleBuffered(true);
 
         }
 
@@ -379,6 +381,7 @@ public class PaintPicture extends JPanel {
             picture_hashcode = GetImageInformation.getHashcode(new File(path));
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
             NewWindow = LastWindow = null;
+            if (image != null) image.flush();
             try {
                 image = GetImageInformation.convert(ImageIO.read(new File(path)));
             } catch (IOException e) {
@@ -685,6 +688,7 @@ public class PaintPicture extends JPanel {
             if (PicturePath.startsWith("\"") && PicturePath.endsWith("\"")) {
                 PicturePath = PicturePath.substring(1, PicturePath.length() - 1);
             }
+            if (image != null) image.flush();
             this.path = PicturePath;
             try {
                 image = ImageIO.read(new File(path));

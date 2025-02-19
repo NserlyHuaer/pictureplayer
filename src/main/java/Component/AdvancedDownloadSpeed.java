@@ -69,7 +69,7 @@ public class AdvancedDownloadSpeed {
                 String osType = CommandCenter.detectOSType();
                 CommandCenter.executeOSSpecificCommands(osType, (String) map.get(website).getFirst());
             } catch (IOException | NoClassDefFoundError | ExceptionInInitializerError e) {
-                logger.error(e.getMessage());
+                logger.error(e.toString());
                 JOptionPane.showMessageDialog(DownloadUpdateFrame.downloadUpdateFrame, Bundle.getMessage("UpdateError_Content") + "\nCaused by:" + e, Bundle.getMessage("UpdateError_Title"), JOptionPane.ERROR_MESSAGE);
                 DownloadUpdateFrame.downloadUpdateFrame.dispose();
                 Main.main.setVisible(true);

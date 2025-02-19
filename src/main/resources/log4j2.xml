@@ -2,14 +2,21 @@
 <Configuration status="WARN">
     <Appenders>
         <!-- All日志 -->
-        <RollingFile name="AllLog" fileName="logs/all.log" filePattern="logs/backup/all-%d{yyyy-MM-dd}.log">
+        <RollingFile name="AllLog" fileName="logs/all.log" filePattern="logs/backup/%d{yyyy-MM}/%d{dd}/all-%i.log.gz">
             <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
             <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <DefaultRolloverStrategy>
+                <Delete basePath="logs/backup/" maxDepth="3">
+                    <IfFileName glob="**/*.gz"/>
+                    <IfLastModified age="90d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
 
         <!-- Error日志 -->
-        <RollingFile name="ErrorLog" fileName="logs/error.log" filePattern="logs/backup/error-%d{yyyy-MM-dd}.log">
+        <RollingFile name="ErrorLog" fileName="logs/error.log"
+                     filePattern="logs/backup/%d{yyyy-MM}/%d{dd}/error-%i.log.gz">
             <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
             <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>

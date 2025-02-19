@@ -127,7 +127,7 @@ public class Main extends JFrame {
                     if (file != null) openPicture(file.getPath());
                 }
             } catch (IOException | UnsupportedFlavorException e) {
-                logger.error(e.getMessage());
+                logger.error(e.toString());
             }
         }
     };
@@ -135,6 +135,9 @@ public class Main extends JFrame {
     //静态代码块
     static {
         logger.info("The software starts running...");
+        System.setProperty("sun.java2d.opengl", "true");
+        System.setProperty("sun.java2d.accthreshold", "0");
+        setUncaughtExceptionHandler(logger);
         //初始化Init
         init = new Init<String, String>();
         init.SetUpdate(true);
@@ -170,6 +173,7 @@ public class Main extends JFrame {
         super(title);
         $$$setupUI$$$();
         new Thread(() -> {
+            setUncaughtExceptionHandler(logger);
             setContentPane(this.panel1);
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             setVisible(true);
@@ -177,6 +181,7 @@ public class Main extends JFrame {
         }).start();
         changeFocusListener = new ChangeFocusListener(this);
         new Thread(() -> {
+            setUncaughtExceptionHandler(logger);
             setLocation(WindowLocation.ComponentCenter(null, 800, 580));
             center = new Center();
             centre = new Centre();
@@ -200,6 +205,7 @@ public class Main extends JFrame {
             if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
                 DownloadUpdate downloadUpdate = new DownloadUpdate(UPDATE_WEBSITE);
                 new Thread(() -> {
+                    setUncaughtExceptionHandler(logger);
                     NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
                     if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
                         UpdateForm(downloadUpdate);
@@ -244,6 +250,7 @@ public class Main extends JFrame {
             proxyServerChooser.setVisible(true);
         });
         new Thread(() -> {
+            setUncaughtExceptionHandler(logger);
             JavaPath.setText(JavaPath.getText() + System.getProperty("sun.boot.library.path"));
             DefaultJVMMem.setText(DefaultJVMMem.getText() + SystemMonitor.convertSize(SystemMonitor.JVM_Initialize_Memory));
             JVMVersionLabel.setText(JVMVersionLabel.getText() + System.getProperty("java.runtime.version"));
@@ -433,6 +440,7 @@ public class Main extends JFrame {
                 return;
             }
             new Thread(() -> {
+                setUncaughtExceptionHandler(logger);
                 ConfirmUpdateDialog confirmUpdateDialog = new ConfirmUpdateDialog(downloadUpdate);
                 confirmUpdateDialog.pack();
                 confirmUpdateDialog.setVisible(true);
@@ -1028,6 +1036,13 @@ public class Main extends JFrame {
             choose = OpenImageChooser.openImageWithChoice(Main.main, checkFileIsRightPictureType.getImageList());
         }
         return choose;
+    }
+
+    public static void setUncaughtExceptionHandler(Logger logger) {
+        Thread.setDefaultUncaughtExceptionHandler((e1, e2) -> {
+            logger.error(e2.toString());
+        });
+
     }
 
 }
