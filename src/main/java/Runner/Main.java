@@ -3,6 +3,7 @@ package Runner;
 import Listener.ChangeFocusListener;
 import Loading.Bundle;
 import Loading.Init;
+import Size.SizeOperate;
 import Tools.Component.WindowLocation;
 import Tools.File.ImageThumbnailManage.Center;
 import Tools.ImageManager.CheckFileIsRightPictureType;
@@ -14,7 +15,7 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import Settings.Centre;
-import Component.*;
+import NComponent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +94,7 @@ public class Main extends JFrame {
     private JLabel Display_3rd;
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
-    private final ChangeFocusListener changeFocusListener;
+    private ChangeFocusListener changeFocusListener;
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     //图片缩略图
     public Center center;
@@ -103,8 +104,8 @@ public class Main extends JFrame {
     private static List<String> NewVersionDownloadingWebSide;
     //更新网站（必须指定VersionID.sum下载地址）
     public static String UPDATE_WEBSITE = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum";
-    final String MouseMoveLabelPrefix;
-    final String ProxyServerPrefix;
+    String MouseMoveLabelPrefix;
+    String ProxyServerPrefix;
     public PaintPicture paintPicture;
     private boolean IsFreshen;
     private static final File REPEAT_PICTURE_PATH_LOGOTYPE = new File("???");
@@ -116,6 +117,12 @@ public class Main extends JFrame {
             }
         }
     };
+    private Timer timer = new Timer(0, e -> {
+        paintPicture.sizeOperate.incomeWindowDimension(paintPicture.imageCanvas.getSize());
+        paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
+        paintPicture.sizeOperate.update(false);
+        ((Timer) e.getSource()).stop(); // 停止计时器
+    });
     private final DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
         public void drop(DropTargetDropEvent dtde) {
             try {
@@ -124,7 +131,9 @@ public class Main extends JFrame {
                 if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                     List<File> files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
                     File file = checkFileOpen(files, true);
-                    if (file != null) openPicture(file.getPath());
+                    if (file != null) {
+                        openPicture(file.getPath());
+                    }
                 }
             } catch (IOException | UnsupportedFlavorException e) {
                 logger.error(e.toString());
@@ -134,17 +143,13 @@ public class Main extends JFrame {
 
     //静态代码块
     static {
-        logger.info("The software starts running...");
-        System.setProperty("sun.java2d.opengl", "true");
-        System.setProperty("sun.java2d.accthreshold", "0");
-        setUncaughtExceptionHandler(logger);
         //初始化Init
         init = new Init<String, String>();
         init.SetUpdate(true);
-        init.Run();
-        if (!GetImageInformation.isHardwareAccelerated) {
-            logger.warn("Hardware acceleration is not supported, and the image will be rendered using software!");
-        }
+        setUncaughtExceptionHandler(logger);
+        logger.info("The software starts running...");
+        System.setProperty("sun.java2d.opengl", "true");
+        System.setProperty("sun.java2d.accthreshold", "0");
     }
 
     public static void main(String[] args) {
@@ -167,22 +172,28 @@ public class Main extends JFrame {
         logger.info("Software Version:{}({})", Version.getVersion(), Version.getVersionID());
         //程序是否启用硬件加速
         logger.info("Enable Hardware Acceleration:{}", PaintPicture.isEnableHardwareAcceleration);
+        if (!GetImageInformation.isHardwareAccelerated) {
+            logger.warn("Hardware acceleration is not supported, and the image will be rendered using software!");
+        }
     }
 
     public Main(String title) {
         super(title);
         $$$setupUI$$$();
         new Thread(() -> {
-            setUncaughtExceptionHandler(logger);
             setContentPane(this.panel1);
-            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             setVisible(true);
-            setSize(800, 580);
+            Dimension dimension = SizeOperate.FreeOfScreenSize;
+            setSize((int) (dimension.getWidth() * 0.5), (int) (dimension.getHeight() * 0.6));
+            setLocation(WindowLocation.ComponentCenter(null, getWidth(), getHeight()));
+            setUncaughtExceptionHandler(logger);
         }).start();
         changeFocusListener = new ChangeFocusListener(this);
         new Thread(() -> {
             setUncaughtExceptionHandler(logger);
-            setLocation(WindowLocation.ComponentCenter(null, 800, 580));
+            ProxyServerPrefix = ProxyServerLabel.getText();
+            MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
+            init.Run();
             center = new Center();
             centre = new Centre();
             Init();
@@ -195,7 +206,7 @@ public class Main extends JFrame {
             }
             About();
             if (Centre.getBoolean("EnableProxyServer", main.centre.CurrentData)) {
-                setProxyServer();
+                setProxyServerOfInit();
                 logger.info("Proxy Server is turned on, and all networking activities of the Program will be handled by the proxy server");
                 logger.info("proxy server ip(or domain):{}", UPDATE_WEBSITE);
             }
@@ -213,8 +224,6 @@ public class Main extends JFrame {
                 }).start();
             }
         }).start();
-        ProxyServerPrefix = ProxyServerLabel.getText();
-        MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
     }
 
     //初始化所有组件设置
@@ -224,8 +233,7 @@ public class Main extends JFrame {
         TurnButton.addActionListener(e -> {
             String path = textField1.getText().trim();
             File file = new File(path);
-            if (GetImageInformation.isImageFile(file))
-                openPicture(path);
+            if (GetImageInformation.isImageFile(file)) openPicture(path);
         });
         SecondPanel.addMouseListener(mouseAdapter);
         // 设置SecondPanel为可接受拖放
@@ -308,7 +316,7 @@ public class Main extends JFrame {
         } else if (tabbedPane1.getSelectedIndex() == 1) {
             //让图片渲染器获取焦点
             if (paintPicture != null) {
-                paintPicture.myCanvas.requestFocus();
+                paintPicture.imageCanvas.requestFocus();
             }
         } else if (tabbedPane1.getSelectedIndex() == 2) {
             //让窗体获取焦点
@@ -320,18 +328,20 @@ public class Main extends JFrame {
     }
 
     //代理服务器设置
-    private static void setProxyServer() {
+    private static void setProxyServerOfInit() {
         String website = init.getProperties().getProperty("ProxyServer");
-        if (website.endsWith(".sum")) {
-            UPDATE_WEBSITE = website;
-        } else {
-            UPDATE_WEBSITE = website.trim();
-            if (UPDATE_WEBSITE.endsWith("/")) {
-                UPDATE_WEBSITE += "VersionID.sum";
+        if (!website.startsWith("http")) {
+            website = "http://" + website;
+        }
+        if (!website.endsWith(".sum")) {
+            website = website.trim();
+            if (website.endsWith("/")) {
+                website += "VersionID.sum";
             } else {
-                UPDATE_WEBSITE += "/VersionID.sum";
+                website += "/VersionID.sum";
             }
         }
+        UPDATE_WEBSITE = website;
         EnableProxyServer = true;
     }
 
@@ -348,6 +358,7 @@ public class Main extends JFrame {
         new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
         tabbedPane1.setComponentAt(1, paintPicture);
         tabbedPane1.setSelectedIndex(1);
+        timer.start();
     }
 
 
@@ -451,14 +462,14 @@ public class Main extends JFrame {
     }
 
     //代理服务器更改
-    public void setProxyServer(String ProxyServerAddress) {
+    public void setProxyServerOfInit(String ProxyServerAddress) {
         if (ProxyServerAddress == null || ProxyServerAddress.trim().isEmpty()) return;
         ProxyServerAddress = ProxyServerAddress.trim();
         if (ProxyServerAddress.equals(centre.CurrentData.get("ProxyServer"))) return;
         if (!ProxyServerAddress.equals("proxy server address") && !ProxyServerAddress.isEmpty()) {
+            init.ChangeValue("ProxyServer", ProxyServerAddress);
+            setProxyServerOfInit();
             logger.info("To enable a new proxy server:{}", ProxyServerAddress);
-            UPDATE_WEBSITE = ProxyServerAddress;
-            EnableProxyServer = true;
             EnableProxyServerCheckBox.setSelected(true);
             ProxyServerButton.setVisible(true);
             ProxyServerLabel.setVisible(true);
@@ -977,8 +988,8 @@ public class Main extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
                 String lastChooseDir = "";
-                if (paintPicture != null && paintPicture.myCanvas != null) {
-                    lastChooseDir = new File(paintPicture.myCanvas.getPath()).getParent();
+                if (paintPicture != null && paintPicture.imageCanvas != null) {
+                    lastChooseDir = new File(paintPicture.imageCanvas.getPath()).getParent();
                 }
                 fileChooser.setCurrentDirectory(new File(lastChooseDir));
                 String picturePath;
@@ -996,6 +1007,7 @@ public class Main extends JFrame {
                             break;
                         }
                         openPicture(filePath);
+                        paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
                     }
                     return;
                 }
@@ -1024,10 +1036,10 @@ public class Main extends JFrame {
             choose = checkFileIsRightPictureType.getImageList().getFirst();
             String choose_hashcode = GetImageInformation.getHashcode(choose);
             if (Main.main.paintPicture != null) {
-                if (choose_hashcode == null && paintPicture.myCanvas.getPicture_hashcode() == null) {
+                if (choose_hashcode == null && paintPicture.imageCanvas.getPicture_hashcode() == null) {
                     logger.warn("Couldn't get current or opening picture hashcode,this will fake the judgment file path");
-                    if (!new File(Main.main.paintPicture.myCanvas.getPath()).equals(choose)) return null;
-                } else if (Objects.equals(choose_hashcode, paintPicture.myCanvas.getPicture_hashcode()))
+                    if (!new File(Main.main.paintPicture.imageCanvas.getPath()).equals(choose)) return null;
+                } else if (Objects.equals(choose_hashcode, paintPicture.imageCanvas.getPicture_hashcode()))
                     return REPEAT_PICTURE_PATH_LOGOTYPE;
                 if (isMakeSure && JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("OpenPictureExactly_Content") + "\n\"" + choose.getPath() + "\"", Bundle.getMessage("OpenPictureExactly_Title"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
                     return REPEAT_PICTURE_PATH_LOGOTYPE;
@@ -1042,7 +1054,6 @@ public class Main extends JFrame {
         Thread.setDefaultUncaughtExceptionHandler((e1, e2) -> {
             logger.error(e2.toString());
         });
-
     }
 
 }

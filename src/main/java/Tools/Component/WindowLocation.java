@@ -9,7 +9,7 @@ public class WindowLocation {
         int windowWidth = SizeOperate.FreeOfScreenSize.width;
         int windowHeight = SizeOperate.FreeOfScreenSize.height;
         if (parent == null)
-            return new Point((SizeOperate.ScreenSize.width - sonWidth) / 2, (SizeOperate.ScreenSize.height - sonHeight) / 2);
+            return DesktopCenter(sonWidth, sonHeight);
         int parentWidth = parent.getSize().width;
         int parentHeight = parent.getSize().height;
         int resultX = (parentWidth - sonWidth) / 2 + parent.getLocation().x;
@@ -25,9 +25,15 @@ public class WindowLocation {
         return new Point(resultX, resultY);
     }
 
-    public static Point ComponentCenter(Component component) {
+    public static Dimension ComponentCenter(Component component) {
         int resultWidth = component.getSize().width / 2;
         int resultHeight = component.getSize().height / 2;
-        return new Point(resultWidth, resultHeight);
+        return new Dimension(resultWidth, resultHeight);
+    }
+
+    public static Point DesktopCenter(int Width, int Height) {
+        int resultX = (SizeOperate.FreeOfScreenSize.width - Width) / 2;
+        int resultY = (SizeOperate.FreeOfScreenSize.height - Height) / 2;
+        return new Point(resultX, resultY);
     }
 }

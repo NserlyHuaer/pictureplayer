@@ -8,28 +8,32 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Init<KEY, VALUE> {
+    private static final AtomicBoolean isInit = new AtomicBoolean();
     private final File f = new File("data/configuration.ch");
     private final Properties properties = new Properties();
     private boolean EnableAutoUpdate;
-    private final String[] createDirectory = {"data", "cache", "cache/thum", "download"};
+    private static final String[] createDirectory = {"data", "cache", "cache/thum", "download"};
     private static final Logger logger = LoggerFactory.getLogger(Init.class);
 
-    public Init() {
-        File dire;
-        for (String directory : createDirectory) {
-            dire = new File(directory);
-            if (!dire.exists()) {
-                dire.mkdir();
+    public static void init() {
+        synchronized (isInit) {
+            if (isInit.get()) return;
+            File dire;
+            for (String directory : createDirectory) {
+                dire = new File(directory);
+                if (!dire.exists()) {
+                    dire.mkdir();
+                }
             }
+            clearDirectory(new File("./download/"));
+            clearDirectory(new File("replace.sh"));
+            clearDirectory(new File("replace.bat"));
+            clearDirectory(new File("runnable.bat"));
+            isInit.set(true);
         }
-        clearDirectory(new File("./download/"));
-        clearDirectory(new File("replace.sh"));
-        clearDirectory(new File("replace.bat"));
-        clearDirectory(new File("runnable.bat"));
-
-
     }
 
     public static void clearDirectory(File directory) {
@@ -52,6 +56,7 @@ public class Init<KEY, VALUE> {
     }
 
     public void Run() {
+        if (!isInit.get()) init();
         try {
             if (!f.exists()) {
                 Writer(setDefault());
@@ -68,6 +73,7 @@ public class Init<KEY, VALUE> {
     }
 
     public void Loading() {
+        if (!isInit.get()) init();
         try {
             properties.load(new BufferedReader(new FileReader(f)));
         } catch (IOException e) {
@@ -107,11 +113,13 @@ public class Init<KEY, VALUE> {
     }
 
     public void Writer(Map<KEY, VALUE> map) {
+        if (!isInit.get()) init();
         properties.putAll(map);
         Store();
     }
 
     public void Writer(KEY key, VALUE value) {
+        if (!isInit.get()) init();
         properties.put(key, value);
         Store();
     }
@@ -127,6 +135,7 @@ public class Init<KEY, VALUE> {
     }
 
     private void Store() {
+        if (!isInit.get()) init();
         try {
             properties.store(new BufferedWriter(new FileWriter(f)), "");
         } catch (IOException e) {

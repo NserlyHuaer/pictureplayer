@@ -1,4 +1,4 @@
-package Component;
+package NComponent;
 
 import Runner.Main;
 import Tools.Component.WindowLocation;
@@ -85,7 +85,7 @@ public class ProxyServerChooser extends JDialog {
     private void choice() {
         String str = ProxyServerList.getSelectedValue();
         if (str != null && !str.trim().isEmpty()) {
-            Main.main.setProxyServer(handle.getProxyServerAddress(str));
+            Main.main.setProxyServerOfInit(handle.getProxyServerAddress(str));
             dispose();
         }
     }

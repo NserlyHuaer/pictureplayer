@@ -1,4 +1,4 @@
-package Component;
+package NComponent;
 
 import Command.CommandCenter;
 import Loading.Bundle;

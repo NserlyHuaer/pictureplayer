@@ -1,4 +1,4 @@
-package Component;
+package NComponent;
 
 import Runner.Main;
 

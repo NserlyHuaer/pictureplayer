@@ -3,7 +3,6 @@ package Size;
 import java.awt.*;
 import java.io.IOException;
 
-import Component.PaintPicture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +20,10 @@ public class SizeOperate {
     //最小缩放比例
     public final short MinPercent = 2;
     //当前图片渲染器
-    private PaintPicture.MyCanvas myCanvas;
+    private NComponent.PaintPicture.ImageCanvas imageCanvas;
     //当前组件信息
     private Dimension Component;
-    //当前最适合组建的比例
+    //当前最适合组件的比例
     public double FittestPercent;
     //最适合的调节比例
     private int AdjustPercent;
@@ -52,11 +51,11 @@ public class SizeOperate {
     }
 
     //改变图片渲染器
-    public void changeCanvas(PaintPicture.MyCanvas myCanvas) {
-        this.myCanvas = myCanvas;
-        if (myCanvas.getPath() != null) {
+    public void changeCanvas(NComponent.PaintPicture.ImageCanvas imageCanvas) {
+        this.imageCanvas = imageCanvas;
+        if (imageCanvas.getPath() != null) {
             try {
-                getPictureSize = new GetPictureSize(myCanvas.getPath());
+                getPictureSize = new GetPictureSize(imageCanvas.getPath());
                 if (Component != null) {
                     AdjustPercent = (int) (((Math.abs(Component.getHeight() - getPictureSize.height) / 5.5 / getPictureSize.height) + (Math.abs(Component.getWidth() - getPictureSize.width) / 5.5 / getPictureSize.width)) / 2);
                 }
@@ -70,15 +69,15 @@ public class SizeOperate {
     }
 
 
-    public SizeOperate(PaintPicture.MyCanvas myCanvas, Dimension Component) {
+    public SizeOperate(NComponent.PaintPicture.ImageCanvas imageCanvas, Dimension Component) {
         this.Component = Component;
-        this.myCanvas = myCanvas;
+        this.imageCanvas = imageCanvas;
         FittestPercent = percent = Default = 100;
 
     }
 
-    public SizeOperate(PaintPicture.MyCanvas myCanvas, short defaultPercent, Dimension Component) {
-        this.myCanvas = myCanvas;
+    public SizeOperate(NComponent.PaintPicture.ImageCanvas imageCanvas, short defaultPercent, Dimension Component) {
+        this.imageCanvas = imageCanvas;
         FittestPercent = percent = Default = defaultPercent;
         this.Component = Component;
     }
@@ -105,7 +104,7 @@ public class SizeOperate {
             FittestPercent = getPictureOptimalSize();
             if (getPictureSize == null)
                 try {
-                    getPictureSize = new GetPictureSize(myCanvas.getPath());
+                    getPictureSize = new GetPictureSize(imageCanvas.getPath());
                 } catch (IOException e) {
                     return;
                 }
@@ -138,9 +137,9 @@ public class SizeOperate {
             logger.error("Could not get window optimal size");
             return Default;
         }
-        int PictureWidth = myCanvas.getImageWidth();
-        int PictureHeight = myCanvas.getImageHeight();
-        if (myCanvas.getDegrees() / 90 % 2 == 1) {
+        int PictureWidth = imageCanvas.getImageWidth();
+        int PictureHeight = imageCanvas.getImageHeight();
+        if (imageCanvas.getDegrees() / 90 % 2 == 1) {
             int temp = PictureHeight;
             PictureHeight = PictureWidth;
             PictureWidth = temp;
@@ -227,15 +226,15 @@ public class SizeOperate {
 
     //刷新图片
     public void update(boolean isMove) {
-        myCanvas.setWindowSize(Component);
-        myCanvas.setIsMove(isMove || myCanvas.getIsMove());
-        myCanvas.repaint();
+        imageCanvas.setWindowSize(Component);
+        imageCanvas.setIsMove(isMove || imageCanvas.getIsMove());
+        imageCanvas.repaint();
     }
 
     //关闭管理
     public void close() {
         percent = 0;
         Component = null;
-        myCanvas.close();
+        imageCanvas.close();
     }
 }
