@@ -10,6 +10,7 @@ import Tools.Component.ComponentInJPanel;
 import Tools.EqualsProportion;
 import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.ImageRotationHelper;
+import Tools.ImageManager.MultiThreadBlur;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
+import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -75,7 +77,6 @@ public class PaintPicture extends JPanel {
     private MouseAdapter mouseAdapter;
     private File lastPicturePathParent;
     private static final Logger logger = LoggerFactory.getLogger(PaintPicture.class);
-
 
     //构造方法（函数）
     public PaintPicture(String path) {
@@ -313,6 +314,9 @@ public class PaintPicture extends JPanel {
         private double lastHeight;
         //当前图片
         private Image image;
+
+        //模糊后的bufferedImage
+        private BufferedImage BlurBufferedImage;
         //渲染器
         private Graphics g;
         //当前组件信息
@@ -326,6 +330,11 @@ public class PaintPicture extends JPanel {
         //是否为移动
         private boolean isMove;
 
+        //是否要模糊显示
+        private boolean isNeedBlurToView;
+
+        //创建时间计时器，（图片模糊）
+        private Timer timer;
 
         //构造方法初始化
         public ImageCanvas(String path) {
@@ -337,6 +346,34 @@ public class PaintPicture extends JPanel {
                 init_listener();
                 //添加图片hashcode
                 this.picture_hashcode = GetImageInformation.getHashcode(new File(path));
+                AtomicReference<Double> LastPercent = new AtomicReference<>((double) -9999999);
+                AtomicReference<String> LastPicture_hashcode = new AtomicReference<>("");
+                MultiThreadBlur multiThreadBlur;
+                boolean isEnableHardware = image instanceof VolatileImage;
+                if (isEnableHardware) {
+                    multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
+                    timer = new Timer(400, e -> {
+                        ((Timer) e.getSource()).stop(); // 停止计时器
+                        new Thread(() -> {
+                            if (image != null) {
+                                if (!LastPicture_hashcode.get().equals(picture_hashcode)) {
+                                    multiThreadBlur.flushSrc();
+                                    multiThreadBlur.changeImage(BlurBufferedImage);
+                                } else if (LastPercent.get() == sizeOperate.getPercent()) {
+                                    isNeedBlurToView = true;
+                                    repaint();
+                                    return;
+                                }
+                                BlurBufferedImage.flush();
+                                BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(multiThreadBlur.calculateKernelSize(sizeOperate.getPercent()));
+                                isNeedBlurToView = true;
+                                LastPercent.set(sizeOperate.getPercent());
+                                LastPicture_hashcode.set(picture_hashcode);
+                                repaint();
+                            }
+                        }).start();
+                    });
+                }
             }).start();
         }
 
@@ -413,8 +450,14 @@ public class PaintPicture extends JPanel {
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
             NewWindow = LastWindow = null;
             if (image != null) image.flush();
+            if (BlurBufferedImage != null) BlurBufferedImage.flush();
             try {
-                image = GetImageInformation.convert(ImageIO.read(new File(path)));
+                image = GetImageInformation.CastToTYPE_INT_RGB(ImageIO.read(new File(path)));
+                if (isEnableHardwareAcceleration) {
+                    BlurBufferedImage = (BufferedImage) image;
+                    image = GetImageInformation.convert(BlurBufferedImage);
+                }
+
             } catch (IOException e) {
                 logger.error(e.getMessage());
             }
@@ -429,6 +472,10 @@ public class PaintPicture extends JPanel {
             if (image != null) {
                 image.flush();
                 image = null;
+            }
+            if (BlurBufferedImage != null) {
+                BlurBufferedImage.flush();
+                BlurBufferedImage = null;
             }
             path = null;
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
@@ -500,10 +547,17 @@ public class PaintPicture extends JPanel {
             if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0 || (LastPercent == sizeOperate.getPercent() && RotationDegrees == LastPercent && !isMove && lastPath.equals(path))) {
                 return;
             }
+            if (timer != null)
+                timer.stop();
             this.g = g;
             double FinalX = X, FinalY = Y;
             var graphics2D = (Graphics2D) g;
             graphics2D.rotate(Math.toRadians(RotationDegrees * 90));
+            if (isNeedBlurToView && BlurBufferedImage != null) {
+                graphics2D.drawImage(BlurBufferedImage, (int) X, (int) Y, (int) lastWidth, (int) lastHeight, null);
+                isNeedBlurToView = false;
+                return;
+            }
             //如果转动角度为0或180度，请无使用此值，此值为旋转其他度数的设计
             double tempHeight = 0, tempWidth = 0;
             tempWidth = lastHeight;
@@ -540,7 +594,7 @@ public class PaintPicture extends JPanel {
                     if (X > WindowWidth) X = WindowWidth;
                     if (Y > WindowHeight) Y = WindowHeight;
                     if (X + lastWidth < 0) X = -lastWidth;
-                    if (Y + lastWidth < 0) Y = -lastWidth;
+                    if (Y + lastHeight < 0) Y = -lastHeight;
                 } else if (RotationDegrees == 1) {
                     if (X > WindowHeight) X = WindowHeight;
                     if (Y > 0) Y = 0;
@@ -562,6 +616,9 @@ public class PaintPicture extends JPanel {
                 lastRotationDegrees = RotationDegrees;
                 isMove = false;
                 lastPath = path;
+                if (isEnableHardwareAcceleration && timer != null) {
+                    timer.start();
+                }
                 return;
             }
             //判断图片缩放比例是否与上次相同
@@ -651,7 +708,6 @@ public class PaintPicture extends JPanel {
 
             }
 
-
             //显示图像
             graphics2D.drawImage(image, (int) FinalX, (int) FinalY, (int) width, (int) height, null);
             //检查比例是否为最大值，如果为最大就把放大按钮禁用
@@ -676,6 +732,9 @@ public class PaintPicture extends JPanel {
             this.lastRotationDegrees = RotationDegrees;
             mouseX = mouseY = 0;
             lastPath = path;
+            if (isEnableHardwareAcceleration && timer != null) {
+                timer.start();
+            }
         }
 
         //设置是否图片移动（不应该改变图片大小）
@@ -722,15 +781,17 @@ public class PaintPicture extends JPanel {
                 PicturePath = PicturePath.substring(1, PicturePath.length() - 1);
             }
             if (image != null) image.flush();
+            if (BlurBufferedImage != null) BlurBufferedImage.flush();
             this.path = PicturePath;
             try {
-                image = ImageIO.read(new File(path));
+                image = GetImageInformation.CastToTYPE_INT_RGB(ImageIO.read(new File(path)));
             } catch (IOException e) {
                 logger.error("Error loading image \"{}\"", path);
+                return;
             }
-            if (image == null) return;
             if (isEnableHardwareAcceleration) {
-                image = GetImageInformation.convert((BufferedImage) image);
+                BlurBufferedImage = (BufferedImage) image;
+                image = GetImageInformation.convert(BlurBufferedImage);
             }
         }
 

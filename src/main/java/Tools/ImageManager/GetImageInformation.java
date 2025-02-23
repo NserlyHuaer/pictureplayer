@@ -78,6 +78,18 @@ public class GetImageInformation {
         return sb.toString();
     }
 
+    //算法实现：将普通的BufferedImage转化为TYPE_INT_RGB BufferedImage
+    public static BufferedImage CastToTYPE_INT_RGB(BufferedImage src) {
+        // 新增：统一图像格式
+        BufferedImage convertedImage = new BufferedImage(
+                src.getWidth(),
+                src.getHeight(),
+                BufferedImage.TYPE_INT_RGB
+        );
+        convertedImage.getGraphics().drawImage(src, 0, 0, null);
+        return convertedImage;
+    }
+
     //算法实现：将Image转换成VolatileImage
     public static VolatileImage convert(BufferedImage source) {
         // 获取当前图形环境配置
@@ -109,6 +121,7 @@ public class GetImageInformation {
         return volatileImage;
     }
 
+
     //算法实现：获取图片大小
     public static Dimension getImageSize(File file) throws IOException {
         if (file == null) return null;
@@ -135,7 +148,7 @@ public class GetImageInformation {
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException | IOException e) {
-           logger.error(e.getMessage());
+            logger.error(e.getMessage());
         }
         return null;
     }

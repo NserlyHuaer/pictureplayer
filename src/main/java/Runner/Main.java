@@ -1053,6 +1053,7 @@ public class Main extends JFrame {
     public static void setUncaughtExceptionHandler(Logger logger) {
         Thread.setDefaultUncaughtExceptionHandler((e1, e2) -> {
             logger.error(e2.toString());
+            e2.printStackTrace();
         });
     }
 
