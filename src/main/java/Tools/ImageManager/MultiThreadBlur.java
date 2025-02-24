@@ -1,5 +1,7 @@
 package Tools.ImageManager;
 
+import NComponent.PaintPicture;
+import Tools.Simplified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,15 +32,12 @@ public class MultiThreadBlur {
 
     private int[] tempPixels;
 
-    // 动态计算kernelSize
+    // 动态计算kernelSize（若抗锯齿能修复则不返回1（不需要模糊））
     public static int calculateKernelSize(int width, int height, double scaleFactor) {
-        // 核心计算逻辑
-        double area = Math.sqrt(width * height);
-        double baseValue = area / (10 * Math.abs(scaleFactor));
-
-        // 边界处理与奇数转换
-        int kernel = Math.max(3, Math.min(31, (int) Math.ceil(baseValue)));
-        return kernel % 2 == 0 ? kernel + 1 : kernel;
+        //此代码块目前未实现
+        if (0.75*scaleFactor < PaintPicture.paintPicture.sizeOperate.getPictureOptimalSize()) return 15;
+        if (scaleFactor > 1300) return 3;
+        return 1;
     }
 
     public MultiThreadBlur(BufferedImage src) {
@@ -53,6 +52,10 @@ public class MultiThreadBlur {
 
     public void flushSrc() {
         if (src != null) src.flush();
+    }
+
+    public BufferedImage getSrc() {
+        return src;
     }
 
     public void changeImage(BufferedImage src) {
@@ -77,30 +80,25 @@ public class MultiThreadBlur {
         verticalBlur(tempPixels, destPixels, width, height, kernelSize);
 
         dest = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        System.arraycopy(destPixels, 0,
-                ((DataBufferInt) dest.getRaster().getDataBuffer()).getData(), 0, destPixels.length);
+        System.arraycopy(destPixels, 0, ((DataBufferInt) dest.getRaster().getDataBuffer()).getData(), 0, destPixels.length);
         return dest;
     }
 
     // 水平方向模糊
-    private void horizontalBlur(int[] src, int[] dest,
-                                int width, int height, int kernelSize) {
+    private void horizontalBlur(int[] src, int[] dest, int width, int height, int kernelSize) {
         ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
         try {
-            pool.invoke(new BlurTask(src, dest, width, height,
-                    kernelSize, 0, height, true));
+            pool.invoke(new BlurTask(src, dest, width, height, kernelSize, 0, height, true));
         } finally {
             pool.shutdown();
         }
     }
 
     // 垂直方向模糊
-    private void verticalBlur(int[] src, int[] dest,
-                              int width, int height, int kernelSize) {
+    private void verticalBlur(int[] src, int[] dest, int width, int height, int kernelSize) {
         ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
         try {
-            pool.invoke(new BlurTask(src, dest, width, height,
-                    kernelSize, 0, width, false));
+            pool.invoke(new BlurTask(src, dest, width, height, kernelSize, 0, width, false));
         } finally {
             pool.shutdown();
         }
@@ -113,8 +111,7 @@ public class MultiThreadBlur {
         private final int width, height, kernelSize, start, end;
         private final boolean isHorizontal;
 
-        BlurTask(int[] src, int[] dest, int width, int height,
-                 int kernelSize, int start, int end, boolean isHorizontal) {
+        BlurTask(int[] src, int[] dest, int width, int height, int kernelSize, int start, int end, boolean isHorizontal) {
             this.src = src;
             this.dest = dest;
             this.width = width;
@@ -131,10 +128,7 @@ public class MultiThreadBlur {
                 processDirectly();
             } else {
                 int mid = (start + end) >>> 1;
-                invokeAll(
-                        new BlurTask(src, dest, width, height, kernelSize, start, mid, isHorizontal),
-                        new BlurTask(src, dest, width, height, kernelSize, mid, end, isHorizontal)
-                );
+                invokeAll(new BlurTask(src, dest, width, height, kernelSize, start, mid, isHorizontal), new BlurTask(src, dest, width, height, kernelSize, mid, end, isHorizontal));
             }
         }
 

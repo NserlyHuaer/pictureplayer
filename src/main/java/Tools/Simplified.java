@@ -18,7 +18,6 @@ public class Simplified {
         var cs123 = cs * Simplified.charter;
         a:
         for (int i = 2; i <= Math.min(bcs123, cs123); i++) {
-            b:
             for (; ; ) {
                 if (bcs123 == cs123) {
                     bcs123 = 1;

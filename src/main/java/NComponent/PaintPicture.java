@@ -365,7 +365,11 @@ public class PaintPicture extends JPanel {
                                     return;
                                 }
                                 BlurBufferedImage.flush();
-                                BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(multiThreadBlur.calculateKernelSize(sizeOperate.getPercent()));
+                                int KernelSize = multiThreadBlur.calculateKernelSize(sizeOperate.getPercent());
+                                BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(KernelSize);
+                                if (KernelSize == 1) {
+                                    BlurBufferedImage = multiThreadBlur.getSrc();
+                                }
                                 isNeedBlurToView = true;
                                 LastPercent.set(sizeOperate.getPercent());
                                 LastPicture_hashcode.set(picture_hashcode);
@@ -553,7 +557,30 @@ public class PaintPicture extends JPanel {
             double FinalX = X, FinalY = Y;
             var graphics2D = (Graphics2D) g;
             graphics2D.rotate(Math.toRadians(RotationDegrees * 90));
+            // 1. 启用图形抗锯齿（对线条、形状有效）
+            graphics2D.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+            );
+
+            // 2. 启用图像插值（对缩放后的图像有效）
+            graphics2D.setRenderingHint(
+                    RenderingHints.KEY_INTERPOLATION,
+                    RenderingHints.VALUE_INTERPOLATION_BILINEAR
+            );
+
+            //消除字体锯齿
+//            graphics2D.setRenderingHint(
+//                    RenderingHints.KEY_TEXT_ANTIALIASING,
+//                    RenderingHints.VALUE_TEXT_ANTIALIAS_ON
+//            );
+
             if (isNeedBlurToView && BlurBufferedImage != null) {
+                // 3. 可选：更高质量但更慢的插值
+                graphics2D.setRenderingHint(
+                        RenderingHints.KEY_INTERPOLATION,
+                        RenderingHints.VALUE_INTERPOLATION_BICUBIC
+                );
                 graphics2D.drawImage(BlurBufferedImage, (int) X, (int) Y, (int) lastWidth, (int) lastHeight, null);
                 isNeedBlurToView = false;
                 return;
