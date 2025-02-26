@@ -456,10 +456,14 @@ public class PaintPicture extends JPanel {
             if (image != null) image.flush();
             if (BlurBufferedImage != null) BlurBufferedImage.flush();
             try {
-                image = GetImageInformation.CastToTYPE_INT_RGB(ImageIO.read(new File(path)));
+                BlurBufferedImage = ImageIO.read(new File(path));
+                image = GetImageInformation.CastToTYPE_INT_RGB(BlurBufferedImage);
                 if (isEnableHardwareAcceleration) {
                     BlurBufferedImage = (BufferedImage) image;
                     image = GetImageInformation.convert(BlurBufferedImage);
+                } else {
+                    BlurBufferedImage.flush();
+                    BlurBufferedImage = null;
                 }
 
             } catch (IOException e) {
@@ -811,7 +815,8 @@ public class PaintPicture extends JPanel {
             if (BlurBufferedImage != null) BlurBufferedImage.flush();
             this.path = PicturePath;
             try {
-                image = GetImageInformation.CastToTYPE_INT_RGB(ImageIO.read(new File(path)));
+                BlurBufferedImage = ImageIO.read(new File(path));
+                image = GetImageInformation.CastToTYPE_INT_RGB(BlurBufferedImage);
             } catch (IOException e) {
                 logger.error("Error loading image \"{}\"", path);
                 return;
@@ -819,6 +824,9 @@ public class PaintPicture extends JPanel {
             if (isEnableHardwareAcceleration) {
                 BlurBufferedImage = (BufferedImage) image;
                 image = GetImageInformation.convert(BlurBufferedImage);
+            } else {
+                BlurBufferedImage.flush();
+                BlurBufferedImage = null;
             }
         }
 

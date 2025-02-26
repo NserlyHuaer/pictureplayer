@@ -1,17 +1,24 @@
 package Tools.ImageManager;
 
 import NComponent.PaintPicture;
-import Tools.Simplified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 本类用于处理图像模糊（算法实现：高斯模糊）
+ * 本类支持传入BufferedImage或图片路径
+ * 1.若传入BufferedImage则默认一直使用这个类除非改变（一直占用内存除非更改图片）
+ * 2.若传入图片路径则读取完图片并处理之后自动释放此文件（减少内存占用）
+ */
 public class MultiThreadBlur {
     private static final Logger log = LoggerFactory.getLogger(MultiThreadBlur.class);
     private final int TILE_SIZE = 64; // 缓存行友好的分块大小
@@ -20,6 +27,8 @@ public class MultiThreadBlur {
     private final int[] BLUE_TABLE = new int[0x1000000];
 
     private BufferedImage src;
+
+    private String srcPath;
 
     private BufferedImage dest;
 
@@ -35,9 +44,20 @@ public class MultiThreadBlur {
     // 动态计算kernelSize（若抗锯齿能修复则不返回1（不需要模糊））
     public static int calculateKernelSize(int width, int height, double scaleFactor) {
         //此代码块目前未实现
-        if (0.75*scaleFactor < PaintPicture.paintPicture.sizeOperate.getPictureOptimalSize()) return 15;
+        if (1.75 * scaleFactor < PaintPicture.paintPicture.sizeOperate.getPictureOptimalSize()) return 15;
         if (scaleFactor > 1300) return 3;
         return 1;
+    }
+
+    public MultiThreadBlur(String srcPath) {
+        this.srcPath = srcPath;
+        for (int i = 0; i < 0x1000000; i++) {
+            RED_TABLE[i] = (i >> 16) & 0xFF;
+            GREEN_TABLE[i] = (i >> 8) & 0xFF;
+            BLUE_TABLE[i] = i & 0xFF;
+        }
+        changeImage(srcPath);
+
     }
 
     public MultiThreadBlur(BufferedImage src) {
@@ -59,6 +79,7 @@ public class MultiThreadBlur {
     }
 
     public void changeImage(BufferedImage src) {
+        srcPath = null;
         this.src = src;
         width = src.getWidth();
         height = src.getHeight();
@@ -68,20 +89,53 @@ public class MultiThreadBlur {
         tempPixels = new int[srcPixels.length];
     }
 
+    public void changeImage(String srcPath) {
+        src = getImageAndCastToTYPE_INT_RGB(srcPath);
+        width = src.getWidth();
+        height = src.getHeight();
+        srcPixels = ((DataBufferInt) src.getRaster().getDataBuffer()).getData();
+        destPixels = new int[srcPixels.length];
+        // 分离滤波处理
+        tempPixels = new int[srcPixels.length];
+        src.flush();
+        src = null;
+    }
+
+    public static BufferedImage getImageAndCastToTYPE_INT_RGB(String srcPath) {
+        BufferedImage src = null;
+        try {
+            BufferedImage SimpleImage = ImageIO.read(new File(srcPath));
+            src = GetImageInformation.CastToTYPE_INT_RGB(SimpleImage);
+            SimpleImage.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            return null;
+        }
+        return src;
+    }
+
     public int calculateKernelSize(double scaleFactor) {
         return calculateKernelSize(width, height, scaleFactor);
     }
 
 
     public BufferedImage applyOptimizedBlur(int kernelSize) {
-        if (kernelSize % 2 == 0) throw new IllegalArgumentException("Kernel size must be odd");
-        // 分离滤波处理
-        horizontalBlur(srcPixels, tempPixels, width, height, kernelSize);
-        verticalBlur(tempPixels, destPixels, width, height, kernelSize);
+        if (srcPath != null) src = getImageAndCastToTYPE_INT_RGB(srcPath);
+        if (src != null) {
+            if (kernelSize % 2 == 0) throw new IllegalArgumentException("Kernel size must be odd");
+            // 分离滤波处理
+            horizontalBlur(srcPixels, tempPixels, width, height, kernelSize);
+            verticalBlur(tempPixels, destPixels, width, height, kernelSize);
 
-        dest = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        System.arraycopy(destPixels, 0, ((DataBufferInt) dest.getRaster().getDataBuffer()).getData(), 0, destPixels.length);
-        return dest;
+            dest = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            System.arraycopy(destPixels, 0, ((DataBufferInt) dest.getRaster().getDataBuffer()).getData(), 0, destPixels.length);
+            if (srcPath != null) {
+                src.flush();
+                src = null;
+            }
+            return dest;
+        }
+        return null;
     }
 
     // 水平方向模糊
