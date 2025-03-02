@@ -826,7 +826,8 @@ public class PaintPicture extends JPanel {
             //设置文本中显示的图片缩放比例
             percentLabel.set((int) sizeOperate.getPercent());
             //设置图片缩放滑动条
-            PercentSlider.setValue((int) sizeOperate.getPercent());
+            if (PercentSlider != null)
+                PercentSlider.setValue((int) sizeOperate.getPercent());
             this.X = FinalX;
             this.Y = FinalY;
             this.LastWindow = this.NewWindow;
