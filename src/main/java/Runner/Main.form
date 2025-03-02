@@ -403,6 +403,7 @@
                 <properties>
                   <font size="16"/>
                   <requestFocusEnabled value="false"/>
+                  <rolloverEnabled value="false"/>
                   <text resource-bundle="messages" key="CheckVersionButton"/>
                 </properties>
               </component>

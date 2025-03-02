@@ -10,7 +10,7 @@ public class PercentLabel extends Label {
         String text = percent + "%";
         String lastText = getText();
         super.setText(text);
-        if (text.length() != lastText.length() && Main.main.paintPicture != null) {
+        if (text.length() != lastText.length() && Main.main.paintPicture != null && Main.main.paintPicture.On != null) {
             Main.main.paintPicture.On.revalidate();
         }
 

@@ -149,7 +149,6 @@ public class Main extends JFrame {
         setUncaughtExceptionHandler(logger);
         logger.info("The software starts running...");
         System.setProperty("sun.java2d.opengl", "true");
-        System.setProperty("sun.java2d.accthreshold", "0");
     }
 
     public static void main(String[] args) {
@@ -181,12 +180,20 @@ public class Main extends JFrame {
         super(title);
         $$$setupUI$$$();
         new Thread(() -> {
+            setUncaughtExceptionHandler(logger);
+            setDefaultLookAndFeelDecorated(false);
+            try {
+                UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+            } catch (ClassNotFoundException | IllegalAccessException | UnsupportedLookAndFeelException |
+                     InstantiationException e) {
+                logger.error(e.getMessage());
+            }
             setContentPane(this.panel1);
             setVisible(true);
             Dimension dimension = SizeOperate.FreeOfScreenSize;
             setSize((int) (dimension.getWidth() * 0.5), (int) (dimension.getHeight() * 0.6));
             setLocation(WindowLocation.ComponentCenter(null, getWidth(), getHeight()));
-            setUncaughtExceptionHandler(logger);
+            setMinimumSize(new Dimension(680, 335));
         }).start();
         changeFocusListener = new ChangeFocusListener(this);
         new Thread(() -> {
@@ -695,6 +702,7 @@ public class Main extends JFrame {
         Font CheckVersionButtonFont = this.$$$getFont$$$(null, -1, 16, CheckVersionButton.getFont());
         if (CheckVersionButtonFont != null) CheckVersionButton.setFont(CheckVersionButtonFont);
         CheckVersionButton.setRequestFocusEnabled(false);
+        CheckVersionButton.setRolloverEnabled(false);
         this.$$$loadButtonText$$$(CheckVersionButton, this.$$$getMessageFromBundle$$$("messages", "CheckVersionButton"));
         FourthPanel.add(CheckVersionButton, new GridConstraints(8, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         OSLabel = new JLabel();
@@ -1052,9 +1060,22 @@ public class Main extends JFrame {
 
     public static void setUncaughtExceptionHandler(Logger logger) {
         Thread.setDefaultUncaughtExceptionHandler((e1, e2) -> {
-            logger.error(e2.toString());
-            e2.printStackTrace();
+            logger.error(getExceptionMessage(e2));
         });
     }
 
+    public static String getExceptionMessage(Throwable e) {
+        if (e == null) return null;
+        StringBuilder stringBuilder = new StringBuilder(e.getClass().getName() + ":" + e.getMessage() + "\n");
+        StackTraceElement[] stackTraceElements = e.getStackTrace();
+        if (stackTraceElements != null) {
+            for (StackTraceElement stackTraceElement : stackTraceElements) {
+                stringBuilder.append("at ").append(stackTraceElement.getClassName()).append("(line:").append(stackTraceElement.getLineNumber()).append(")\n");
+            }
+        }
+        Throwable throwable = e.getCause();
+        if (throwable == null) return stringBuilder.toString();
+        stringBuilder.append("Caused by:").append(getExceptionMessage(throwable));
+        return stringBuilder.toString();
+    }
 }

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public class AdvancedDownloadSpeed {
-    private DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    private static DecimalFormat decimalFormat = new DecimalFormat("#.##");
     public Thread DaemonUpdate;
     private JProgressBar totalProgress;
     private JProgressBar currentFileProgress;
@@ -141,7 +141,7 @@ public class AdvancedDownloadSpeed {
         return formatBytes(bytesPerSecond) + "/s";
     }
 
-    private String formatBytes(double bytes) {
+    public static String formatBytes(double bytes) {
         if (bytes >= 1099511627776L) {
             return decimalFormat.format(bytes / 1099511627776L) + "TB";
         } else if (bytes >= 1073741824) {

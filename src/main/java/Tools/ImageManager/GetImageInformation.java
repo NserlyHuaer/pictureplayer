@@ -127,6 +127,7 @@ public class GetImageInformation {
         if (file == null) return null;
         Image image = ImageIO.read(file);
         if (image == null) return null;
+        image.flush();
         return new Dimension(image.getWidth(null), image.getHeight(null));
     }
 
