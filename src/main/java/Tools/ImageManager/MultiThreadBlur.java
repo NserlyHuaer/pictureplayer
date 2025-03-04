@@ -71,7 +71,18 @@ public class MultiThreadBlur {
     }
 
     public void flushSrc() {
-        if (src != null) src.flush();
+        if (src != null) {
+            src.getGraphics().dispose();
+            src.flush();
+            src = null;
+        }
+    }
+    public void flushDest(){
+        if (dest != null) {
+            dest.getGraphics().dispose();
+            dest.flush();
+            dest = null;
+        }
     }
 
     public BufferedImage getSrc() {

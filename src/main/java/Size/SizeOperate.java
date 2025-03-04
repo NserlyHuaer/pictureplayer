@@ -73,7 +73,6 @@ public class SizeOperate {
         this.Component = Component;
         this.imageCanvas = imageCanvas;
         FittestPercent = percent = Default = 100;
-
     }
 
     public SizeOperate(NComponent.PaintPicture.ImageCanvas imageCanvas, short defaultPercent, Dimension Component) {
@@ -98,7 +97,7 @@ public class SizeOperate {
     }
 
     //传入窗体信息（此类无法直接获取窗体信息）
-    public void incomeWindowDimension(Dimension window) {
+    public synchronized void incomeWindowDimension(Dimension window) {
         if (window != null) {
             this.Component = window;
             FittestPercent = getPictureOptimalSize();

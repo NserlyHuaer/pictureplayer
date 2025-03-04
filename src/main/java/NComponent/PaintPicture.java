@@ -104,11 +104,8 @@ public class PaintPicture extends JPanel {
         paintPicture = this;
         percentLabel = new PercentLabel();
         fullScreenWindow = new FullScreenWindow();
-        //向控制台输出打开文件路径
-        logger.info("Opened:\"{}\"", path);
         //创建画布
         imageCanvas = new NComponent.PaintPicture.ImageCanvas(path);
-        imageCanvas.setBorder(BorderFactory.createEtchedBorder());
         //添加画布至组件中
         add(imageCanvas, BorderLayout.CENTER);
         sizeOperate = new SizeOperate(imageCanvas, imageCanvas.getSize());
@@ -250,6 +247,11 @@ public class PaintPicture extends JPanel {
             PercentSlider.setValue((int) sizeOperate.getPercent());
             paintPicture.validate();
             loadPictureInTheParent(path);
+            sizeOperate.incomeWindowDimension(imageCanvas.getSize());
+            sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
+            sizeOperate.update(false);
+            //向控制台输出打开文件路径
+            logger.info("Opened:\"{}\"", path);
         }).start();
     }
 
@@ -554,22 +556,15 @@ public class PaintPicture extends JPanel {
         }
 
         public void close() {
-            if (g != null) {
-                g.dispose();
-                g = null;
-            }
-            if (image != null) {
-                image.flush();
-                image = null;
-            }
-            if (BlurBufferedImage != null) {
-                BlurBufferedImage.flush();
-                BlurBufferedImage = null;
-            }
-            path = null;
-            LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
+            removeAll();
+            g = null;
+            image = BlurBufferedImage = null;
+            path = lastPath = picture_hashcode = null;
+            LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = lastRotationDegrees = RotationDegrees = 0;
             NewWindow = LastWindow = null;
-            this.removeAll();
+            isNeedBlurToView = isMove = false;
+            timer = null;
+            System.gc();
         }
 
         //设置已知组件长度

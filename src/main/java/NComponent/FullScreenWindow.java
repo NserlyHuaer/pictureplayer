@@ -19,7 +19,7 @@ public class FullScreenWindow extends JFrame {
     }
 
     private void init() {
-        setUndecorated(false);
+//        setUndecorated(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         add(panel1);
         addComponentListener(new ComponentAdapter() {
@@ -45,13 +45,6 @@ public class FullScreenWindow extends JFrame {
     public FullScreenWindow(PaintPicture.ImageCanvas imageCanvas) {
         init();
         setImageCanvas(imageCanvas);
-    }
-
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
-        PaintPicture.paintPicture.sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-        PaintPicture.paintPicture.sizeOperate.update(false);
-        if (!visible) getGraphics().dispose();
     }
 
     public void setImageCanvas(PaintPicture.ImageCanvas imageCanvas) {

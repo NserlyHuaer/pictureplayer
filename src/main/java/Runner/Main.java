@@ -117,12 +117,7 @@ public class Main extends JFrame {
             }
         }
     };
-    private Timer timer = new Timer(0, e -> {
-        paintPicture.sizeOperate.incomeWindowDimension(paintPicture.imageCanvas.getSize());
-        paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
-        paintPicture.sizeOperate.update(false);
-        ((Timer) e.getSource()).stop(); // 停止计时器
-    });
+
     private final DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
         public void drop(DropTargetDropEvent dtde) {
             try {
@@ -357,15 +352,14 @@ public class Main extends JFrame {
         if (path == null) return;
         if (paintPicture == null) {
             paintPicture = new PaintPicture(path);
+            new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
         } else if (path.endsWith("???")) {
             return;
         } else {
             paintPicture.changePicturePath(path);
         }
-        new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
         tabbedPane1.setComponentAt(1, paintPicture);
         tabbedPane1.setSelectedIndex(1);
-        timer.start();
     }
 
 
