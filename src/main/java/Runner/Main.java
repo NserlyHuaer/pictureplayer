@@ -191,15 +191,14 @@ public class Main extends JFrame {
             setMinimumSize(new Dimension(680, 335));
         }).start();
         changeFocusListener = new ChangeFocusListener(this);
+        init.Run();
         new Thread(() -> {
             setUncaughtExceptionHandler(logger);
             ProxyServerPrefix = ProxyServerLabel.getText();
             MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
-            init.Run();
             center = new Center();
             centre = new Centre();
             Init();
-            PaintPicture.isEnableHardwareAcceleration = EnableHardwareAccelerationCheckBox.isSelected() && GetImageInformation.isHardwareAccelerated;
             if (!GetImageInformation.isHardwareAccelerated) {
                 centre.CurrentData.replace("EnableHardwareAcceleration", "false");
                 EnableHardwareAccelerationCheckBox.setSelected(false);
@@ -226,6 +225,7 @@ public class Main extends JFrame {
                 }).start();
             }
         }).start();
+        PaintPicture.isEnableHardwareAcceleration = Boolean.parseBoolean(init.getProperties().getProperty("EnableHardwareAcceleration")) && GetImageInformation.isHardwareAccelerated;
     }
 
     //初始化所有组件设置
@@ -298,8 +298,8 @@ public class Main extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowActivated(WindowEvent e) {
-                //当前窗体成为活动窗体时，获取焦点
                 request();
+
             }
 
             @Override
@@ -314,18 +314,19 @@ public class Main extends JFrame {
         //当选项界面切换时
         if (tabbedPane1.getSelectedIndex() == 0) {
             //让路径输入框获取焦点
-            textField1.requestFocus();
+            textField1.requestFocusInWindow();
         } else if (tabbedPane1.getSelectedIndex() == 1) {
             //让图片渲染器获取焦点
-            if (paintPicture != null) {
-                paintPicture.imageCanvas.requestFocus();
+            if (paintPicture != null && paintPicture.imageCanvas != null) {
+                paintPicture.imageCanvas.CheckImageIsUsual();
+                paintPicture.imageCanvas.requestFocusInWindow();
             }
         } else if (tabbedPane1.getSelectedIndex() == 2) {
             //让窗体获取焦点
-            tabbedPane1.requestFocus();
+            tabbedPane1.requestFocusInWindow();
         } else {
             //让窗体获取焦点
-            requestFocus();
+            requestFocusInWindow();
         }
     }
 

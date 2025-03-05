@@ -98,20 +98,15 @@ public class GetImageInformation {
         GraphicsConfiguration gc = gd.getDefaultConfiguration();
 
         // 创建兼容的 VolatileImage（尺寸与 BufferedImage 一致）
-        VolatileImage volatileImage = gc.createCompatibleVolatileImage(
-                source.getWidth(),
-                source.getHeight(),
-                VolatileImage.TRANSLUCENT // 根据需求选择透明度模式
-        );
-
-        // 验证 VolatileImage 有效性
-        if (volatileImage.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE) {
+        VolatileImage volatileImage = null;
+        do {
             volatileImage = gc.createCompatibleVolatileImage(
                     source.getWidth(),
                     source.getHeight(),
-                    VolatileImage.TRANSLUCENT
+                    VolatileImage.OPAQUE // 根据需求选择透明度模式
             );
-        }
+            // 验证 VolatileImage 有效性
+        } while (volatileImage.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE);
 
         // 绘制 BufferedImage 到 VolatileImage
         Graphics2D g = volatileImage.createGraphics();

@@ -376,6 +376,8 @@ public class PaintPicture extends JPanel {
     public class ImageCanvas extends JComponent {
         //图片路径
         String path;
+        //判断是否启用硬件加速（针对本图片渲染）
+        private boolean isEnableHardware;
         //上次图片路径
         String lastPath;
         //图片hashcode
@@ -399,8 +401,6 @@ public class PaintPicture extends JPanel {
 
         //模糊后的bufferedImage
         private BufferedImage BlurBufferedImage;
-        //渲染器
-        private Graphics g;
         //当前组件信息
         private Dimension NewWindow;
         //上次组件信息
@@ -417,6 +417,8 @@ public class PaintPicture extends JPanel {
 
         //创建时间计时器，（图片模糊）
         private Timer timer;
+        //模糊化类
+        MultiThreadBlur multiThreadBlur;
 
         //构造方法初始化
         public ImageCanvas(String path) {
@@ -428,38 +430,36 @@ public class PaintPicture extends JPanel {
                 init_listener();
                 //添加图片hashcode
                 this.picture_hashcode = GetImageInformation.getHashcode(new File(path));
+                if (!isEnableHardware) return;
                 AtomicReference<Double> LastPercent = new AtomicReference<>((double) -9999999);
                 AtomicReference<String> LastPicture_hashcode = new AtomicReference<>("");
-                MultiThreadBlur multiThreadBlur;
-                boolean isEnableHardware = image instanceof VolatileImage;
-                if (isEnableHardware) {
-                    multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
-                    timer = new Timer(400, e -> {
-                        ((Timer) e.getSource()).stop(); // 停止计时器
-                        new Thread(() -> {
-                            if (image != null) {
-                                if (!LastPicture_hashcode.get().equals(picture_hashcode)) {
-                                    multiThreadBlur.flushSrc();
-                                    multiThreadBlur.changeImage(BlurBufferedImage);
-                                } else if (LastPercent.get() == sizeOperate.getPercent()) {
-                                    isNeedBlurToView = true;
-                                    repaint();
-                                    return;
-                                }
-                                BlurBufferedImage.flush();
-                                int KernelSize = multiThreadBlur.calculateKernelSize(sizeOperate.getPercent());
-                                BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(KernelSize);
-                                if (KernelSize == 1) {
-                                    BlurBufferedImage = multiThreadBlur.getSrc();
-                                }
+                multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
+                timer = new Timer(400, e -> {
+                    if (!isEnableHardware) return;
+                    ((Timer) e.getSource()).stop(); // 停止计时器
+                    new Thread(() -> {
+                        if (image != null) {
+                            if (!LastPicture_hashcode.get().equals(picture_hashcode)) {
+                                multiThreadBlur.flushSrc();
+                                multiThreadBlur.flushDest();
+                                multiThreadBlur.changeImage(BlurBufferedImage);
+                            } else if (LastPercent.get() == sizeOperate.getPercent()) {
                                 isNeedBlurToView = true;
-                                LastPercent.set(sizeOperate.getPercent());
-                                LastPicture_hashcode.set(picture_hashcode);
                                 repaint();
+                                return;
                             }
-                        }).start();
-                    });
-                }
+                            int KernelSize = multiThreadBlur.calculateKernelSize(sizeOperate.getPercent());
+                            BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(KernelSize);
+                            if (KernelSize == 1) {
+                                BlurBufferedImage = multiThreadBlur.getSrc();
+                            }
+                            isNeedBlurToView = true;
+                            LastPercent.set(sizeOperate.getPercent());
+                            LastPicture_hashcode.set(picture_hashcode);
+                            repaint();
+                        }
+                    }).start();
+                });
             }).start();
         }
 
@@ -528,6 +528,7 @@ public class PaintPicture extends JPanel {
             if (path.startsWith("\"") && path.endsWith("\"")) {
                 path = path.substring(1, path.length() - 1);
             }
+            isEnableHardware = isEnableHardwareAcceleration;
             setPictureInformationOnComponent(path);
             //若这两个文件父目录不相同
             loadPictureInTheParent(path);
@@ -539,25 +540,21 @@ public class PaintPicture extends JPanel {
             if (image != null) image.flush();
             if (BlurBufferedImage != null) BlurBufferedImage.flush();
             try {
-                BlurBufferedImage = ImageIO.read(new File(path));
-                image = GetImageInformation.CastToTYPE_INT_RGB(BlurBufferedImage);
-                if (isEnableHardwareAcceleration) {
-                    BlurBufferedImage = (BufferedImage) image;
-                    image = GetImageInformation.convert(BlurBufferedImage);
-                } else {
-                    BlurBufferedImage.flush();
-                    BlurBufferedImage = null;
-                }
-
+                image = ImageIO.read(new File(path));
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                logger.error("Error loading image \"{}\"", path);
+                return;
+            }
+            if (isEnableHardware) {
+                BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB((BufferedImage) image);
+                image.flush();
+                image = GetImageInformation.convert(BlurBufferedImage);
             }
             sizeOperate.changeCanvas(this);
         }
 
         public void close() {
             removeAll();
-            g = null;
             image = BlurBufferedImage = null;
             path = lastPath = picture_hashcode = null;
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = lastRotationDegrees = RotationDegrees = 0;
@@ -631,8 +628,9 @@ public class PaintPicture extends JPanel {
             if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0 || (LastPercent == sizeOperate.getPercent() && RotationDegrees == LastPercent && !isMove && lastPath.equals(path))) {
                 return;
             }
+            // 获取当前图形环境配置
             if (timer != null) timer.stop();
-            this.g = g;
+
             double FinalX = X, FinalY = Y;
             var graphics2D = (Graphics2D) g;
             graphics2D.rotate(Math.toRadians(RotationDegrees * 90));
@@ -713,7 +711,7 @@ public class PaintPicture extends JPanel {
                 lastRotationDegrees = RotationDegrees;
                 isMove = false;
                 lastPath = path;
-                if (isEnableHardwareAcceleration && timer != null) {
+                if (isEnableHardware && timer != null) {
                     timer.start();
                 }
                 return;
@@ -832,9 +830,25 @@ public class PaintPicture extends JPanel {
             this.lastRotationDegrees = RotationDegrees;
             mouseX = mouseY = 0;
             lastPath = path;
-            if (isEnableHardwareAcceleration && timer != null) {
+            if (isEnableHardware && timer != null) {
                 timer.start();
             }
+        }
+
+        public void CheckImageIsUsual() {
+            if (!isEnableHardware) return;
+            VolatileImage volatileImage = (VolatileImage) image;
+            GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+            while (volatileImage.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE) {
+                volatileImage.flush();
+                volatileImage = gc.createCompatibleVolatileImage(
+                        multiThreadBlur.getSrc().getWidth(),
+                        multiThreadBlur.getSrc().getHeight(),
+                        VolatileImage.OPAQUE // 根据需求选择透明度模式
+                );
+                gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+            }
+            image = volatileImage;
         }
 
         //设置是否图片移动（不应该改变图片大小）
@@ -880,22 +894,18 @@ public class PaintPicture extends JPanel {
             if (PicturePath.startsWith("\"") && PicturePath.endsWith("\"")) {
                 PicturePath = PicturePath.substring(1, PicturePath.length() - 1);
             }
-            if (image != null) image.flush();
-            if (BlurBufferedImage != null) BlurBufferedImage.flush();
+            isEnableHardware = isEnableHardwareAcceleration;
             this.path = PicturePath;
             try {
-                BlurBufferedImage = ImageIO.read(new File(path));
-                image = GetImageInformation.CastToTYPE_INT_RGB(BlurBufferedImage);
+                image = ImageIO.read(new File(path));
             } catch (IOException e) {
                 logger.error("Error loading image \"{}\"", path);
                 return;
             }
-            if (isEnableHardwareAcceleration) {
-                BlurBufferedImage = (BufferedImage) image;
+            if (isEnableHardware) {
+                BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB((BufferedImage) image);
+                image.flush();
                 image = GetImageInformation.convert(BlurBufferedImage);
-            } else {
-                BlurBufferedImage.flush();
-                BlurBufferedImage = null;
             }
         }
 

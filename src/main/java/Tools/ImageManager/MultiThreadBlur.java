@@ -61,6 +61,7 @@ public class MultiThreadBlur {
     }
 
     public MultiThreadBlur(BufferedImage src) {
+        if (src == null) return;
         // 初始化颜色分量查表
         for (int i = 0; i < 0x1000000; i++) {
             RED_TABLE[i] = (i >> 16) & 0xFF;
@@ -76,8 +77,10 @@ public class MultiThreadBlur {
             src.flush();
             src = null;
         }
+        if (srcPath != null) srcPath = null;
     }
-    public void flushDest(){
+
+    public void flushDest() {
         if (dest != null) {
             dest.getGraphics().dispose();
             dest.flush();
@@ -138,7 +141,8 @@ public class MultiThreadBlur {
             horizontalBlur(srcPixels, tempPixels, width, height, kernelSize);
             verticalBlur(tempPixels, destPixels, width, height, kernelSize);
 
-            dest = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            if (dest == null)
+                dest = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             System.arraycopy(destPixels, 0, ((DataBufferInt) dest.getRaster().getDataBuffer()).getData(), 0, destPixels.length);
             if (srcPath != null) {
                 src.flush();
