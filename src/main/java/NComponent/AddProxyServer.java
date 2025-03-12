@@ -19,6 +19,7 @@ public class AddProxyServer extends JDialog {
     private JButton buttonCancel;
     public JTextField ProxyServerNameTextField;
     public JTextField ProxyServerAddressTextField;
+    private int index;
 
     public AddProxyServer(ProxyServerChooser proxyServerChooser) {
         this.proxyServerChooser = proxyServerChooser;
@@ -56,20 +57,22 @@ public class AddProxyServer extends JDialog {
     }
 
     private void onOK() {
-        proxyServerChooser.addNewProxyServer(ProxyServerNameTextField.getText(), ProxyServerAddressTextField.getText());
-        dispose();
+        proxyServerChooser.addNewProxyServer(ProxyServerNameTextField.getText(), ProxyServerAddressTextField.getText(), index);
+        onCancel();
     }
 
     private void onCancel() {
-        dispose();
+        setVisible(false);
     }
 
     public void clear() {
         ProxyServerNameTextField.setText("");
         ProxyServerAddressTextField.setText("");
+        index = 0;
     }
 
-    public void setVisible(boolean visible) {
+    public void setVisible(boolean visible, int index) {
+        this.index = index;
         setLocation(WindowLocation.ComponentCenter(proxyServerChooser, getWidth(), getHeight()));
         super.setVisible(true);
     }

@@ -397,7 +397,7 @@ public class PaintPicture extends JPanel {
         //上次图片高度
         private double lastHeight;
         //当前图片
-        private Image image;
+        private BufferedImage image;
 
         //模糊后的bufferedImage
         private BufferedImage BlurBufferedImage;
@@ -546,9 +546,8 @@ public class PaintPicture extends JPanel {
                 return;
             }
             if (isEnableHardware) {
-                BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB((BufferedImage) image);
+                BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
                 image.flush();
-                image = GetImageInformation.convert(BlurBufferedImage);
             }
             sizeOperate.changeCanvas(this);
         }
@@ -835,22 +834,6 @@ public class PaintPicture extends JPanel {
             }
         }
 
-        public void CheckImageIsUsual() {
-            if (!isEnableHardware) return;
-            VolatileImage volatileImage = (VolatileImage) image;
-            GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
-            while (volatileImage.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE) {
-                volatileImage.flush();
-                volatileImage = gc.createCompatibleVolatileImage(
-                        multiThreadBlur.getSrc().getWidth(),
-                        multiThreadBlur.getSrc().getHeight(),
-                        VolatileImage.OPAQUE // 根据需求选择透明度模式
-                );
-                gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
-            }
-            image = volatileImage;
-        }
-
         //设置是否图片移动（不应该改变图片大小）
         public void setIsMove(boolean isMove) {
             this.isMove = isMove;
@@ -903,9 +886,9 @@ public class PaintPicture extends JPanel {
                 return;
             }
             if (isEnableHardware) {
-                BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB((BufferedImage) image);
+                BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
                 image.flush();
-                image = GetImageInformation.convert(BlurBufferedImage);
+                image = BlurBufferedImage;
             }
         }
 

@@ -318,7 +318,6 @@ public class Main extends JFrame {
         } else if (tabbedPane1.getSelectedIndex() == 1) {
             //让图片渲染器获取焦点
             if (paintPicture != null && paintPicture.imageCanvas != null) {
-                paintPicture.imageCanvas.CheckImageIsUsual();
                 paintPicture.imageCanvas.requestFocusInWindow();
             }
         } else if (tabbedPane1.getSelectedIndex() == 2) {
