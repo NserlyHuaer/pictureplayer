@@ -20,7 +20,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
-import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -361,6 +360,7 @@ public class PaintPicture extends JPanel {
 
     //显示图片大小、分辨率等信息
     private void setPictureInformationOnComponent(String path) {
+        if (PictureSize == null) return;
         File PictureFile = new File(path);
         Dimension dimension = null;
         try {
@@ -423,7 +423,7 @@ public class PaintPicture extends JPanel {
         //构造方法初始化
         public ImageCanvas(String path) {
             //加载图片
-            loadImage(path);
+            changePicturePath(path);
             setDoubleBuffered(true);
             new Thread(() -> {
                 //初始化监听器
@@ -465,7 +465,7 @@ public class PaintPicture extends JPanel {
 
         public ImageCanvas(String path, String picture_hashcode) {
             //加载图片
-            loadImage(path);
+            changePicturePath(path);
             //初始化监听器
             init_listener();
             //添加图片hashcode
@@ -547,9 +547,12 @@ public class PaintPicture extends JPanel {
             }
             if (isEnableHardware) {
                 BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
+                if (multiThreadBlur != null)
+                    multiThreadBlur.flushSrc();
                 image.flush();
+                image = BlurBufferedImage;
             }
-            sizeOperate.changeCanvas(this);
+            if (sizeOperate != null) sizeOperate.changeCanvas(this);
         }
 
         public void close() {
@@ -624,213 +627,209 @@ public class PaintPicture extends JPanel {
 
         @Override
         public synchronized void paint(Graphics g) {
-            if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0 || (LastPercent == sizeOperate.getPercent() && RotationDegrees == LastPercent && !isMove && lastPath.equals(path))) {
-                return;
-            }
-            // 获取当前图形环境配置
-            if (timer != null) timer.stop();
-
-            double FinalX = X, FinalY = Y;
-            var graphics2D = (Graphics2D) g;
-            graphics2D.rotate(Math.toRadians(RotationDegrees * 90));
-            // 1. 启用图形抗锯齿（对线条、形状有效）
-            graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-            // 2. 启用图像插值（对缩放后的图像有效）
-            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-
-            //消除字体锯齿
-//            graphics2D.setRenderingHint(
-//                    RenderingHints.KEY_TEXT_ANTIALIASING,
-//                    RenderingHints.VALUE_TEXT_ANTIALIAS_ON
-//            );
-
-            if (isNeedBlurToView && BlurBufferedImage != null) {
-                // 3. 可选：更高质量但更慢的插值
-                graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                graphics2D.drawImage(BlurBufferedImage, (int) X, (int) Y, (int) lastWidth, (int) lastHeight, null);
-                isNeedBlurToView = false;
-                return;
-            }
-            //如果转动角度为0或180度，请无使用此值，此值为旋转其他度数的设计
-            double tempHeight = 0, tempWidth = 0;
-            tempWidth = lastHeight;
-            tempHeight = lastWidth;
-            //如果旋转角度不为0度，则转换x,y值（因为坐标轴）
-            if (RotationDegrees == 1) {
-                double temp = mouseX;
-                mouseX = mouseY;
-                mouseY = -temp;
-            } else if (RotationDegrees == 2) {
-                mouseX = -mouseX;
-                mouseY = -mouseY;
-            } else if (RotationDegrees == 3) {
-                double temp = mouseX;
-                mouseX = -mouseY;
-                mouseY = temp;
-            }
-
-            double width;
-            double WindowHeight = 0, WindowWidth = 0, LastWindowHeight = 0, LastWindowWidth = 0;
-            //尝试获取之前和现在的组件大小信息
-            WindowWidth = NewWindow.getWidth();
-            WindowHeight = NewWindow.getHeight();
-            if (LastWindow == null || LastWindow.width == 0 || LastWindow.height == 0) {
-                LastWindow = NewWindow;
-            }
-            LastWindowWidth = LastWindow.getWidth();
-            LastWindowHeight = LastWindow.getHeight();
-            //判断是否为移动（若移动，则执行本代码）;窗体、图片缩放比例相比于之前是否存在改变（如果没有，则执行本代码）
-            if (isMove && RotationDegrees == lastRotationDegrees && LastPercent == sizeOperate.getPercent() && LastWindow != null && LastWindow.equals(NewWindow)) {
-                X += mouseX;
-                Y += mouseY;
-                if (RotationDegrees == 0) {
-                    if (X > WindowWidth) X = WindowWidth;
-                    if (Y > WindowHeight) Y = WindowHeight;
-                    if (X + lastWidth < 0) X = -lastWidth;
-                    if (Y + lastHeight < 0) Y = -lastHeight;
-                } else if (RotationDegrees == 1) {
-                    if (X > WindowHeight) X = WindowHeight;
-                    if (Y > 0) Y = 0;
-                    if (X + tempHeight < 0) X = -tempHeight;
-                    if (Y + tempWidth < -WindowWidth) Y = (-WindowWidth - tempWidth);
-                } else if (RotationDegrees == 2) {
-                    if (X + lastWidth < -WindowWidth) X = (-WindowWidth - lastWidth);
-                    if (Y > 0) Y = 0;
-                    if (X > 0) X = 0;
-                    if (Y + lastHeight < -WindowHeight) Y = (-WindowHeight - lastHeight);
-                } else if (RotationDegrees == 3) {
-                    if (X > 0) X = 0;
-                    if (X + tempHeight < -WindowHeight) X = (-WindowHeight - tempHeight);
-                    if (Y > WindowWidth) Y = WindowWidth;
-                    if (Y + tempWidth < 0) Y = -tempWidth;
+            {
+                if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0 || (LastPercent == sizeOperate.getPercent() && RotationDegrees == LastPercent && !isMove && lastPath.equals(path))) {
+                    return;
                 }
-                graphics2D.drawImage(image, (int) X, (int) Y, (int) lastWidth, (int) lastHeight, null);
+                // 获取当前图形环境配置
+                if (timer != null) timer.stop();
+
+                double FinalX = X, FinalY = Y;
+                var graphics2D = (Graphics2D) g;
+                graphics2D.rotate(Math.toRadians(RotationDegrees * 90));
+                // 1. 启用图形抗锯齿（对线条、形状有效）
+                graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // 2. 启用图像插值（对缩放后的图像有效）
+                graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+                if (isNeedBlurToView && BlurBufferedImage != null) {
+                    // 3. 可选：更高质量但更慢的插值
+                    graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                    graphics2D.drawImage(BlurBufferedImage, (int) X, (int) Y, (int) lastWidth, (int) lastHeight, null);
+                    isNeedBlurToView = false;
+                    return;
+                }
+                //如果转动角度为0或180度，请无使用此值，此值为旋转其他度数的设计
+                double tempHeight = 0, tempWidth = 0;
+                tempWidth = lastHeight;
+                tempHeight = lastWidth;
+                //如果旋转角度不为0度，则转换x,y值（因为坐标轴）
+                if (RotationDegrees == 1) {
+                    double temp = mouseX;
+                    mouseX = mouseY;
+                    mouseY = -temp;
+                } else if (RotationDegrees == 2) {
+                    mouseX = -mouseX;
+                    mouseY = -mouseY;
+                } else if (RotationDegrees == 3) {
+                    double temp = mouseX;
+                    mouseX = -mouseY;
+                    mouseY = temp;
+                }
+
+                double width;
+                double WindowHeight = 0, WindowWidth = 0, LastWindowHeight = 0, LastWindowWidth = 0;
+                //尝试获取之前和现在的组件大小信息
+                WindowWidth = NewWindow.getWidth();
+                WindowHeight = NewWindow.getHeight();
+                if (LastWindow == null || LastWindow.width == 0 || LastWindow.height == 0) {
+                    LastWindow = NewWindow;
+                }
+                LastWindowWidth = LastWindow.getWidth();
+                LastWindowHeight = LastWindow.getHeight();
+                //判断是否为移动（若移动，则执行本代码）;窗体、图片缩放比例相比于之前是否存在改变（如果没有，则执行本代码）
+                if (isMove && RotationDegrees == lastRotationDegrees && LastPercent == sizeOperate.getPercent() && LastWindow != null && LastWindow.equals(NewWindow)) {
+                    X += mouseX;
+                    Y += mouseY;
+                    if (RotationDegrees == 0) {
+                        if (X > WindowWidth) X = WindowWidth;
+                        if (Y > WindowHeight) Y = WindowHeight;
+                        if (X + lastWidth < 0) X = -lastWidth;
+                        if (Y + lastHeight < 0) Y = -lastHeight;
+                    } else if (RotationDegrees == 1) {
+                        if (X > WindowHeight) X = WindowHeight;
+                        if (Y > 0) Y = 0;
+                        if (X + tempHeight < 0) X = -tempHeight;
+                        if (Y + tempWidth < -WindowWidth) Y = (-WindowWidth - tempWidth);
+                    } else if (RotationDegrees == 2) {
+                        if (X + lastWidth < -WindowWidth) X = (-WindowWidth - lastWidth);
+                        if (Y > 0) Y = 0;
+                        if (X > 0) X = 0;
+                        if (Y + lastHeight < -WindowHeight) Y = (-WindowHeight - lastHeight);
+                    } else if (RotationDegrees == 3) {
+                        if (X > 0) X = 0;
+                        if (X + tempHeight < -WindowHeight) X = (-WindowHeight - tempHeight);
+                        if (Y > WindowWidth) Y = WindowWidth;
+                        if (Y + tempWidth < 0) Y = -tempWidth;
+                    }
+                    graphics2D.drawImage(image, (int) X, (int) Y, (int) lastWidth, (int) lastHeight, null);
+                    mouseX = mouseY = 0;
+                    lastRotationDegrees = RotationDegrees;
+                    isMove = false;
+                    lastPath = path;
+                    if (isEnableHardware && timer != null) {
+                        timer.start();
+                    }
+                    return;
+                }
+                //判断图片缩放比例是否与上次相同
+                if (RotationDegrees != lastRotationDegrees) {
+                    sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
+                    Point point = ImageRotationHelper.getRotatedCoord((int) FinalX, (int) FinalY, 360 - 90 * RotationDegrees, (int) lastWidth, (int) lastHeight);
+                    FinalX = point.getX();
+                    FinalY = point.getY();
+                }
+
+                if (RotationDegrees == lastRotationDegrees && mouseX == 0 && mouseY == 0) {
+                    if (RotationDegrees == 0) {
+                        mouseX = (WindowWidth / 2);
+                        mouseY = (WindowHeight / 2);
+                    } else if (RotationDegrees == 1) {
+                        mouseX = (WindowHeight / 2);
+                        mouseY = -(WindowWidth / 2);
+                    } else if (RotationDegrees == 2) {
+                        mouseX = -(WindowWidth / 2);
+                        mouseY = -(WindowHeight / 2);
+                    } else if (RotationDegrees == 3) {
+                        mouseX = -(WindowHeight / 2);
+                        mouseY = (WindowWidth / 2);
+                    }
+                }
+                double WidthRatio = 0;
+                double HeightRatio = 0;
+                double PictureChangeRatio = 1;
+                if (WindowWidth != 0 && WindowHeight != 0) {
+                    WidthRatio = LastWindowWidth / WindowWidth;
+                    HeightRatio = LastWindowHeight / WindowHeight;
+                    if (WidthRatio != 1 && HeightRatio != 1) PictureChangeRatio = (HeightRatio + WidthRatio) / 2;
+                }
+                if (PictureChangeRatio == 0) return;
+                width = (getImageWidth() * sizeOperate.getPercent() / 100 * (1 / PictureChangeRatio));
+                double height = EqualsProportion.Start(0, width, getImageHeight(), getImageWidth());
+                sizeOperate.setPercent(width * 100.0 / getImageWidth());
+
+                if (RotationDegrees % 2 == 0 && NewWindow != null && NewWindow.equals(LastWindow) && lastWidth != 0 && lastHeight != 0) {
+                    FinalX = width * (FinalX - mouseX) / lastWidth + mouseX;
+                    FinalY = height * (FinalY - mouseY) / lastHeight + mouseY;
+                } else if (RotationDegrees % 2 == 1 && NewWindow != null && NewWindow.equals(LastWindow) && lastWidth != 0 && lastHeight != 0) {
+                    FinalX = height * (FinalX - mouseX) / lastHeight + mouseX;
+                    FinalY = width * (FinalY - mouseY) / lastWidth + mouseY;
+                }
+
+                if (RotationDegrees == 0) {
+                    if (WindowWidth <= width) {
+                        if (FinalX > 0) FinalX = 0;
+                        if (FinalX + width < WindowWidth) FinalX = (WindowWidth - width);
+                    } else FinalX = ((WindowWidth - width) / 2);
+
+                    if (WindowHeight <= height) {
+                        if (FinalY > 0) FinalY = 0;
+                        if (FinalY + height < WindowHeight) FinalY = (WindowHeight - height);
+                    } else FinalY = ((WindowHeight - height) / 2);
+                } else if (RotationDegrees == 1) {
+                    if (WindowHeight <= width) {
+                        if (FinalX > 0) FinalX = 0;
+                        if (FinalX + width < WindowHeight) FinalX = (WindowHeight - width);
+                    } else FinalX = ((WindowHeight - width) / 2);
+
+                    if (WindowWidth <= height) {
+                        if (FinalY > -WindowWidth) FinalY = -WindowWidth;
+                        if (FinalY < -height) FinalY = -height;
+                    } else FinalY = ((-height - WindowWidth) / 2);
+                } else if (RotationDegrees == 2) {
+                    if (WindowWidth <= width) {
+                        if (FinalX > -WindowWidth) FinalX = -WindowWidth;
+                        if (FinalX < -width) FinalX = -width;
+                    } else FinalX = ((-width - WindowWidth) / 2);
+
+                    if (WindowHeight <= height) {
+                        if (FinalY > -WindowHeight) FinalY = -WindowHeight;
+                        if (FinalY < -height) FinalY = -height;
+                    } else FinalY = ((-height - WindowHeight) / 2);
+                } else if (RotationDegrees == 3) {
+                    if (WindowHeight <= width) {
+                        if (FinalX > -WindowHeight) FinalX = -WindowHeight;
+                        if (FinalX < -width) FinalX = -width;
+                    } else FinalX = ((-width - WindowHeight) / 2);
+
+                    if (WindowWidth <= height) {
+                        if (FinalY > 0) FinalY = 0;
+                        if (FinalY + height < WindowWidth) FinalY = (WindowWidth - height);
+                    } else FinalY = ((WindowWidth - height) / 2);
+
+                }
+
+                //显示图像
+                graphics2D.drawImage(image, (int) FinalX, (int) FinalY, (int) width, (int) height, null);
+                //检查比例是否为最大值，如果为最大就把放大按钮禁用
+                if (paintPicture.biggest != null) {
+                    paintPicture.biggest.setEnabled(!paintPicture.sizeOperate.isTheBiggestRatio());
+                    if (!paintPicture.biggest.isEnabled()) imageCanvas.requestFocus();
+                }
+                //检查比例是否为最小值，如果为最小就把放大按钮禁用
+                if (paintPicture.smallest != null) {
+                    paintPicture.smallest.setEnabled(!paintPicture.sizeOperate.isTheSmallestRatio());
+                    if (!paintPicture.smallest.isEnabled()) imageCanvas.requestFocus();
+                }
+
+                //设置文本中显示的图片缩放比例
+                percentLabel.set((int) sizeOperate.getPercent());
+                //设置图片缩放滑动条
+                if (PercentSlider != null)
+                    PercentSlider.setValue((int) sizeOperate.getPercent());
+                this.X = FinalX;
+                this.Y = FinalY;
+                this.LastWindow = this.NewWindow;
+                this.LastPercent = sizeOperate.getPercent();
+                this.lastWidth = width;
+                this.lastHeight = height;
+                this.lastRotationDegrees = RotationDegrees;
                 mouseX = mouseY = 0;
-                lastRotationDegrees = RotationDegrees;
-                isMove = false;
                 lastPath = path;
                 if (isEnableHardware && timer != null) {
                     timer.start();
                 }
-                return;
-            }
-            //判断图片缩放比例是否与上次相同
-            if (RotationDegrees != lastRotationDegrees) {
-                sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
-                Point point = ImageRotationHelper.getRotatedCoord((int) FinalX, (int) FinalY, 360 - 90 * RotationDegrees, (int) lastWidth, (int) lastHeight);
-                FinalX = point.getX();
-                FinalY = point.getY();
-            }
-
-            if (RotationDegrees == lastRotationDegrees && mouseX == 0 && mouseY == 0) {
-                if (RotationDegrees == 0) {
-                    mouseX = (WindowWidth / 2);
-                    mouseY = (WindowHeight / 2);
-                } else if (RotationDegrees == 1) {
-                    mouseX = (WindowHeight / 2);
-                    mouseY = -(WindowWidth / 2);
-                } else if (RotationDegrees == 2) {
-                    mouseX = -(WindowWidth / 2);
-                    mouseY = -(WindowHeight / 2);
-                } else if (RotationDegrees == 3) {
-                    mouseX = -(WindowHeight / 2);
-                    mouseY = (WindowWidth / 2);
-                }
-            }
-            double WidthRatio = 0;
-            double HeightRatio = 0;
-            double PictureChangeRatio = 1;
-            if (WindowWidth != 0 && WindowHeight != 0) {
-                WidthRatio = LastWindowWidth / WindowWidth;
-                HeightRatio = LastWindowHeight / WindowHeight;
-                if (WidthRatio != 1 && HeightRatio != 1) PictureChangeRatio = (HeightRatio + WidthRatio) / 2;
-            }
-            if (PictureChangeRatio == 0) return;
-            width = (getImageWidth() * sizeOperate.getPercent() / 100 * (1 / PictureChangeRatio));
-            double height = EqualsProportion.Start(0, width, getImageHeight(), getImageWidth());
-            sizeOperate.setPercent(width * 100.0 / getImageWidth());
-
-            if (RotationDegrees % 2 == 0 && NewWindow != null && NewWindow.equals(LastWindow) && lastWidth != 0 && lastHeight != 0) {
-                FinalX = width * (FinalX - mouseX) / lastWidth + mouseX;
-                FinalY = height * (FinalY - mouseY) / lastHeight + mouseY;
-            } else if (RotationDegrees % 2 == 1 && NewWindow != null && NewWindow.equals(LastWindow) && lastWidth != 0 && lastHeight != 0) {
-                FinalX = height * (FinalX - mouseX) / lastHeight + mouseX;
-                FinalY = width * (FinalY - mouseY) / lastWidth + mouseY;
-            }
-
-            if (RotationDegrees == 0) {
-                if (WindowWidth <= width) {
-                    if (FinalX > 0) FinalX = 0;
-                    if (FinalX + width < WindowWidth) FinalX = (WindowWidth - width);
-                } else FinalX = ((WindowWidth - width) / 2);
-
-                if (WindowHeight <= height) {
-                    if (FinalY > 0) FinalY = 0;
-                    if (FinalY + height < WindowHeight) FinalY = (WindowHeight - height);
-                } else FinalY = ((WindowHeight - height) / 2);
-            } else if (RotationDegrees == 1) {
-                if (WindowHeight <= width) {
-                    if (FinalX > 0) FinalX = 0;
-                    if (FinalX + width < WindowHeight) FinalX = (WindowHeight - width);
-                } else FinalX = ((WindowHeight - width) / 2);
-
-                if (WindowWidth <= height) {
-                    if (FinalY > -WindowWidth) FinalY = -WindowWidth;
-                    if (FinalY < -height) FinalY = -height;
-                } else FinalY = ((-height - WindowWidth) / 2);
-            } else if (RotationDegrees == 2) {
-                if (WindowWidth <= width) {
-                    if (FinalX > -WindowWidth) FinalX = -WindowWidth;
-                    if (FinalX < -width) FinalX = -width;
-                } else FinalX = ((-width - WindowWidth) / 2);
-
-                if (WindowHeight <= height) {
-                    if (FinalY > -WindowHeight) FinalY = -WindowHeight;
-                    if (FinalY < -height) FinalY = -height;
-                } else FinalY = ((-height - WindowHeight) / 2);
-            } else if (RotationDegrees == 3) {
-                if (WindowHeight <= width) {
-                    if (FinalX > -WindowHeight) FinalX = -WindowHeight;
-                    if (FinalX < -width) FinalX = -width;
-                } else FinalX = ((-width - WindowHeight) / 2);
-
-                if (WindowWidth <= height) {
-                    if (FinalY > 0) FinalY = 0;
-                    if (FinalY + height < WindowWidth) FinalY = (WindowWidth - height);
-                } else FinalY = ((WindowWidth - height) / 2);
-
-            }
-
-            //显示图像
-            graphics2D.drawImage(image, (int) FinalX, (int) FinalY, (int) width, (int) height, null);
-            //检查比例是否为最大值，如果为最大就把放大按钮禁用
-            if (paintPicture.biggest != null) {
-                paintPicture.biggest.setEnabled(!paintPicture.sizeOperate.isTheBiggestRatio());
-                if (!paintPicture.biggest.isEnabled()) imageCanvas.requestFocus();
-            }
-            //检查比例是否为最小值，如果为最小就把放大按钮禁用
-            if (paintPicture.smallest != null) {
-                paintPicture.smallest.setEnabled(!paintPicture.sizeOperate.isTheSmallestRatio());
-                if (!paintPicture.smallest.isEnabled()) imageCanvas.requestFocus();
-            }
-
-            //设置文本中显示的图片缩放比例
-            percentLabel.set((int) sizeOperate.getPercent());
-            //设置图片缩放滑动条
-            if (PercentSlider != null)
-                PercentSlider.setValue((int) sizeOperate.getPercent());
-            this.X = FinalX;
-            this.Y = FinalY;
-            this.LastWindow = this.NewWindow;
-            this.LastPercent = sizeOperate.getPercent();
-            this.lastWidth = width;
-            this.lastHeight = height;
-            this.lastRotationDegrees = RotationDegrees;
-            mouseX = mouseY = 0;
-            lastPath = path;
-            if (isEnableHardware && timer != null) {
-                timer.start();
             }
         }
 

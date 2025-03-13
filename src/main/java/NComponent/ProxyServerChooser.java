@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class ProxyServerChooser extends JDialog {
     public Handle handle;
@@ -31,8 +32,6 @@ public class ProxyServerChooser extends JDialog {
     //表格的列
     public static final String[] columnNames = {Bundle.getMessage("ProxyServer_TableFirst"), Bundle.getMessage("ProxyServer_TableSecond")};
 
-    private HashMap<String, JPanel> ProxyServer = new HashMap<>();
-
     public ProxyServerChooser() {
         $$$setupUI$$$();
         setContentPane(contentPane);
@@ -40,7 +39,6 @@ public class ProxyServerChooser extends JDialog {
         getRootPane().setDefaultButton(ChooseThisProxyServerButton);
         handle = new Handle("data\\ProxyServerMenu.pxs");
         addProxyServer = new AddProxyServer(this);
-        refresh();
 
         ChooseThisProxyServerButton.addActionListener(e -> {
             choice();
@@ -60,8 +58,10 @@ public class ProxyServerChooser extends JDialog {
             //获取被选中的行号
             int[] rows = ProxyServerTable.getSelectedRows();
             if (rows.length > 0) {
-                for (int i = 0; i < rows.length; i++) {
-                    delete(rows[i]);
+                if (JOptionPane.showConfirmDialog(this, Bundle.getMessage("ProxyServer_Delete_Content"), Bundle.getMessage("ProxyServer_Delete_Title"), JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
+                    for (int row : rows) {
+                        delete(row);
+                    }
                 }
 
             }
@@ -72,7 +72,7 @@ public class ProxyServerChooser extends JDialog {
         });
 
         RefreshProxyServerButton.addActionListener(e -> {
-            refresh();
+            refresh(true);
         });
 
         // 点击 X 时调用 onCancel()
@@ -91,50 +91,87 @@ public class ProxyServerChooser extends JDialog {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
+    /**
+     * 选择代理服务器
+     */
+
     private void choice() {
         //获取被选中的行号
         int row = ProxyServerTable.getSelectedRow();
         if (row != -1) {
             String str = (String) tableModel.getValueAt(row, 0);
             if (str != null && !str.trim().isEmpty()) {
+                setVisible(false);
+                handle.setCurrentSelectionProxyServerName(str);
                 Main.main.setProxyServerOfInit(handle.getProxyServerAddress(str));
-                dispose();
+                handle.save();
             }
         }
-
     }
 
-
+    /**
+     * 关闭界面
+     */
     private void cancel() {
-        dispose();
+        setVisible(false);
     }
 
-    public void refresh() {
+    /**
+     * 刷新代理服务器列表
+     *
+     * @param isSetRowSelectionInterval 是否选中当前已配置代理服务器的那一行
+     */
+
+    public void refresh(boolean isSetRowSelectionInterval) {
         handle.refresh();
         tableModel.setRowCount(0);
         handle.getAllProxyServerNames().forEach(this::addElement);
+        if (isSetRowSelectionInterval) {
+            String ProxyServerName = handle.getCurrentSelectionProxyServerName();
+            if (handle.containsProxyServerName(ProxyServerName)) {
+                setRowSelectionInterval(findRowIndexByColumnContent(0, ProxyServerName));
+            }
+        }
     }
+
+    /**
+     * 添加服务器列表
+     * 自动从handle中获取服务器地址（位于第二列）
+     *
+     * @param ProxyServerName 服务器名称（位于第一列）
+     */
 
     private void addElement(String ProxyServerName) {
         tableModel.addRow(new String[]{ProxyServerName, handle.getProxyServerAddress(ProxyServerName)});
     }
 
+    /**
+     * 添加服务器列表
+     *
+     * @param ProxyServerName    服务器名称（位于第一列）
+     * @param ProxyServerAddress 服务器地址（位于第二列）
+     */
+
     private void addElement(String ProxyServerName, String ProxyServerAddress) {
         tableModel.addRow(new String[]{ProxyServerName, ProxyServerAddress});
     }
+
+    /**
+     * 添加代理服务器（运行添加界面）
+     */
 
     private void add() {
         addProxyServer.pack();
         addProxyServer.setVisible(true, -1);
     }
 
-    private void edit(int index) {
-        if (index == -1) return;
-        String ProxyServerName = (String) tableModel.getValueAt(index, 0);
+    private void edit(int rowIndex) {
+        if (rowIndex == -1) return;
+        String ProxyServerName = (String) tableModel.getValueAt(rowIndex, 0);
         addProxyServer.ProxyServerNameTextField.setText(ProxyServerName);
         addProxyServer.ProxyServerAddressTextField.setText(handle.getProxyServerAddress(ProxyServerName));
         addProxyServer.pack();
-        addProxyServer.setVisible(true, index);
+        addProxyServer.setVisible(true, rowIndex);
     }
 
     /**
@@ -142,32 +179,73 @@ public class ProxyServerChooser extends JDialog {
      *
      * @param ProxyServerName    服务器名称
      * @param ProxyServerAddress 服务器地址
-     * @param index              表格中的行号
+     * @param rowIndex           表格中的行号（若行数小于0则代表是添加新的行）
      */
-    public void addNewProxyServer(String ProxyServerName, String ProxyServerAddress, int index) {
+    public void addNewProxyServer(String ProxyServerName, String ProxyServerAddress, int rowIndex) {
         if (ProxyServerAddress.isBlank()) return;
         boolean isExist = handle.containsProxyServerName(ProxyServerName);
         ProxyServerName = ProxyServerName.isBlank() ? ProxyServerAddress : ProxyServerName;
-        handle.add(ProxyServerName, ProxyServerAddress);
-        if (index < 0 && !isExist)
+        if (rowIndex < 0 && !isExist) {
             addElement(ProxyServerName, ProxyServerAddress);
-        else {
-            tableModel.setValueAt(ProxyServerName, index, 0);
-            tableModel.setValueAt(ProxyServerAddress, index, 1);
+        } else {
+            handle.delete((String) tableModel.getValueAt(rowIndex, 0));
+            tableModel.setValueAt(ProxyServerName, rowIndex, 0);
+            tableModel.setValueAt(ProxyServerAddress, rowIndex, 1);
         }
-
+        handle.add(ProxyServerName, ProxyServerAddress);
         handle.save();
         addProxyServer.clear();
     }
 
-    private void delete(int index) {
-        handle.delete((String) tableModel.getValueAt(index, 0));
-        tableModel.removeRow(index);
+    /**
+     * 删除行
+     *
+     * @param rowIndex 表格中的行
+     */
+
+    private void delete(int rowIndex) {
+        handle.delete((String) tableModel.getValueAt(rowIndex, 0));
+        tableModel.removeRow(rowIndex);
         handle.save();
     }
 
+
+    /**
+     * 查找指定列（列索引为columnIndex）中内容等于content的行索引
+     *
+     * @param columnIndex 目标列的索引
+     * @param content     要匹配的内容
+     * @return 找到匹配内容的行索引，未找到返回-1
+     */
+    public int findRowIndexByColumnContent(int columnIndex, String content) {
+        Vector<Vector> dataVector = tableModel.getDataVector();
+        if (columnIndex < 0 || dataVector.isEmpty()) return -1;
+
+        for (int rowIdx = 0; rowIdx < dataVector.size(); rowIdx++) {
+            Vector<Object> rowData = dataVector.get(rowIdx);
+            // 检查列索引是否在有效范围内
+            if (columnIndex >= rowData.size()) continue;
+            Object cellValue = rowData.get(columnIndex);
+            if (content.equals(cellValue)) {
+                return rowIdx;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * 设置选中哪一行
+     *
+     * @param rowIndex 行
+     */
+    private void setRowSelectionInterval(int rowIndex) {
+        if (rowIndex < 0 || rowIndex < ProxyServerTable.getRowCount() - 1) return;
+        ProxyServerTable.setRowSelectionInterval(rowIndex, rowIndex); // 单选模式
+        ProxyServerTable.scrollRectToVisible(ProxyServerTable.getCellRect(rowIndex, 0, true));
+    }
+
     public void setVisible(boolean visible) {
-        refresh();
+        if (visible) refresh(true);
         setLocation(WindowLocation.ComponentCenter(Main.main, getWidth(), getHeight()));
         super.setVisible(visible);
     }
@@ -277,7 +355,13 @@ public class ProxyServerChooser extends JDialog {
     }
 
     private void createUIComponents() {
-        tableModel = new DefaultTableModel(new String[0][], columnNames);
+        //重写isCellEditable方法，设置为不可编辑
+        tableModel = new DefaultTableModel(new String[0][], columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         ProxyServerTable = new JTable(tableModel);
         RowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         ProxyServerTable.setRowSorter(sorter);

@@ -37,6 +37,25 @@ public class Handle {
 
     }
 
+    /**
+     * 获取当前选中的代理服务器名称
+     *
+     * @return 代理服务器名称
+     */
+    public String getCurrentSelectionProxyServerName() {
+        return fileManager.currentSelectedProxyServerName;
+    }
+
+    /**
+     * 设置当前选中的代理服务器名称
+     *
+     * @param ProxyServerName 代理服务器名称
+     */
+    public void setCurrentSelectionProxyServerName(String ProxyServerName) {
+        if (containsProxyServerName(ProxyServerName))
+            fileManager.currentSelectedProxyServerName = ProxyServerName;
+    }
+
     public void delete(String ProxyServerName) {
         fileManager.treemap.remove(ProxyServerName);
     }
@@ -73,6 +92,8 @@ public class Handle {
     }
 
     public void save() {
+        if (!containsProxyServerName(fileManager.currentSelectedProxyServerName))
+            fileManager.currentSelectedProxyServerName = "";
         try {
             FileOutputStream fileOut = new FileOutputStream(savePath);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
