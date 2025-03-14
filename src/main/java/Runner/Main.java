@@ -189,6 +189,7 @@ public class Main extends JFrame {
             setSize((int) (dimension.getWidth() * 0.5), (int) (dimension.getHeight() * 0.6));
             setLocation(WindowLocation.ComponentCenter(null, getWidth(), getHeight()));
             setMinimumSize(new Dimension(680, 335));
+            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         }).start();
         changeFocusListener = new ChangeFocusListener(this);
         init.Run();
@@ -877,7 +878,7 @@ public class Main extends JFrame {
                 CloseInformation();
                 logger.info("Program Termination!");
                 System.exit(0);
-            } else if (choose == JOptionPane.CANCEL_OPTION || choose == JOptionPane.CLOSED_OPTION) {
+            } else {
                 return;
             }
         }

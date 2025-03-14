@@ -34,9 +34,9 @@ public class DownloadUpdateFrame extends JFrame {
         downloadUpdateFrame = this;
         setContentPane(Main);
         Formation formation = new Formation(Title.getText());
-        formation.Change("Version", update.NewVersionName);
-        formation.Change("VersionID", String.valueOf(update.NewVersionID));
-        Title.setText(formation.getResult().toString());
+        formation.change("Version", update.NewVersionName);
+        formation.change("VersionID", String.valueOf(update.NewVersionID));
+        Title.setText(formation.getProcessingString().toString());
         downloadUpdate = update;
         DownloadCounting.setText(DownloadCounting.getText() + "\n{current}/{total}");
         pack();

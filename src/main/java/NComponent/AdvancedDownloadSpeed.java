@@ -23,10 +23,10 @@ public class AdvancedDownloadSpeed {
     private JProgressBar currentFileProgress;
     private JLabel speedLabel;
     private JLabel DownloadCountings;
-    public static String speedPrefix = "{Speed} - {FinishedSize}/{TotalSize},{NeedTime}";
-    public static String totalPrefix;
-    private Formation Totalformation;
+    private final Formation TotalFormation1 = new Formation("{Speed} - {FinishedSize}/{TotalSize},{NeedTime}");
+    private final Formation TotalFormation2 = new Formation("{Speed} - {FinishedSize}/0B");
     private Formation currentFormation;
+    private Formation totalFormation;
     private DownloadUpdate downloadUpdate;
     private static final Logger logger = LoggerFactory.getLogger(AdvancedDownloadSpeed.class);
 
@@ -41,8 +41,8 @@ public class AdvancedDownloadSpeed {
         totalProgress.setValue(0);
         totalProgress.setStringPainted(true);
         Formation formation = new Formation(DownloadCountings.getText());
-        formation.Change("total", String.valueOf(downloadUpdate.getUpdateWebSide().size()));
-        totalPrefix = String.valueOf(formation.getResult());
+        formation.change("total", String.valueOf(downloadUpdate.getUpdateWebSide().size()));
+        totalFormation = new Formation(formation.getProcessingString());
 
         // 初始另一个进度条，用于显示当前文件的进度
         currentFileProgress.setMaximum(100);
@@ -89,22 +89,21 @@ public class AdvancedDownloadSpeed {
                 int totalFile = downloadUpdate.TotalDownloadingFile;
                 int currentProgressFile = downloadUpdate.HaveDownloadedFile;
                 totalProgress.setMaximum(downloadUpdate.getUpdateWebSide().size() * 100);
-                if (downloadUpdate.CurrentDownloadingFile.isGettingFileSize)
-                    speedPrefix = "{Speed} - {FinishedSize}/{TotalSize},{NeedTime}";
-                else
-                    speedPrefix = "{Speed} - {FinishedSize}/0B";
                 if (downloadUpdate.CurrentDownloadingFile.isCompleted) {
-                    Totalformation = new Formation(totalPrefix);
-                    Totalformation.Change("current", String.valueOf(totalFile));
-                    DownloadCountings.setText(Totalformation.getResult().toString());
+                    if (downloadUpdate.CurrentDownloadingFile.isGettingFileSize) {
+                        currentFormation = TotalFormation1;
+                    } else {
+                        currentFormation = TotalFormation2;
+                    }
+                    currentFormation.change("current", String.valueOf(totalFile));
+                    DownloadCountings.setText(currentFormation.getProcessingString());
                     totalProgress.setValue(totalProgress.getMaximum());
                     ((Timer) actionEvent.getSource()).stop(); // 停止计时器
                 } else {
                     // 更新总进度
                     totalProgress.setValue((100 * currentProgressFile + (int) downloadUpdate.CurrentDownloadingFile.progress));
-                    Totalformation = new Formation(totalPrefix);
-                    Totalformation.Change("current", String.valueOf(currentProgressFile + 1));
-                    DownloadCountings.setText(Totalformation.getResult().toString());
+                    totalFormation.change("current", String.valueOf(currentProgressFile + 1));
+                    DownloadCountings.setText(totalFormation.getProcessingString());
                 }
             }
         });
@@ -116,14 +115,14 @@ public class AdvancedDownloadSpeed {
                 if (downloadUpdate.CurrentDownloadingFile.progress < 100) {
                     // 更新当前文件进度
                     currentFileProgress.setValue((int) downloadUpdate.CurrentDownloadingFile.progress);
-                    currentFormation = new Formation(speedPrefix);
-                    currentFormation.Change("Speed", formatSpeed(downloadUpdate.CurrentDownloadingFile.BytesPerSecond));
-                    currentFormation.Change("FinishedSize", formatBytes(downloadUpdate.CurrentDownloadingFile.CurrentCompletedBytesRead));
+                    if (currentFormation == null) currentFormation = TotalFormation1;
+                    currentFormation.change("Speed", formatSpeed(downloadUpdate.CurrentDownloadingFile.BytesPerSecond));
+                    currentFormation.change("FinishedSize", formatBytes(downloadUpdate.CurrentDownloadingFile.CurrentCompletedBytesRead));
                     if (downloadUpdate.CurrentDownloadingFile.isGettingFileSize) {
-                        currentFormation.Change("TotalSize", formatBytes(downloadUpdate.CurrentDownloadingFile.fileSize));
-                        currentFormation.Change("NeedTime", formatTimes(downloadUpdate.CurrentDownloadingFile.NeedDownloadTime));
+                        currentFormation.change("TotalSize", formatBytes(downloadUpdate.CurrentDownloadingFile.fileSize));
+                        currentFormation.change("NeedTime", formatTimes(downloadUpdate.CurrentDownloadingFile.NeedDownloadTime));
                     }
-                    speedLabel.setText(currentFormation.getResult().toString());
+                    speedLabel.setText(currentFormation.getProcessingString());
                 } else {
                     currentFileProgress.setValue(100);
                     speedLabel.setText("0B/s - " + formatBytes(downloadUpdate.CurrentDownloadingFile.CurrentCompletedBytesRead));

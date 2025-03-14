@@ -1,16 +1,16 @@
 package Tools.String;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
  * 本类适用于格式化（格式{sth}{sth}）
  */
 public class Formation {
-    private List<String> Name = null;//名称
-    private final StringPro string;//修改的变量
+    //第一个：sth集合  第二个：将其设置的值
+    private HashMap<String, String> information;//名称
+    private List<String> keys;
+    public final String originalString;
 
     /**
      * 初始化，改变有效值格式为{sth}{sth}
@@ -18,15 +18,18 @@ public class Formation {
      * @param CastString 被转换字符串
      */
     public Formation(String CastString) {
-        // 初始化 string 和 Name
-        string = new StringPro(CastString);
-        Name = new ArrayList<>();
-
+        originalString = CastString;
+        // 初始化
+        information = new HashMap<>();
+        keys = new ArrayList<>();
         // 使用正则表达式分割字符串，并提取以 "{" 开头并以 "}" 结尾的子字符串
         var pattern = Pattern.compile("\\{(.*?)}");
         var matcher = pattern.matcher(CastString);
         while (matcher.find()) {
-            Name.add(matcher.group());
+            String string = matcher.group();
+            string = string.substring(1, string.length() - 1);
+            information.put(string, "");
+            keys.add(string);
         }
     }
 
@@ -47,31 +50,32 @@ public class Formation {
     /**
      * 获取结果
      *
-     * @return 获取结果，返回StringPro对象
+     * @return 获取结果，返回String对象
      */
 
-    public StringPro getResult() {
-        return (StringPro) string.clone();
-    }
-
-    /**
-     * 改变字符串
-     *
-     * @param revalued 改变其中文本（非{sth}格式）
-     * @param value    改变它的值
-     * @return
-     */
-    public void Change(String revalued, String value) {//revalued文本,value改变值
-        if (Name == null & Name.isEmpty()) return;
+    public String getProcessingString() {
+        if (information == null || information.isEmpty()) return originalString;
+        String result = originalString;
         String cache;
-        cache = string.toString();
-        if (Name.contains("{" + revalued + "}")) {
-            cache = cache.toString().replaceAll("\\{" + revalued + "\\}", value);
+        for (String key : keys) {
+            cache = information.get(key);
+            if (cache != null && !cache.isEmpty()) {
+                result = result.replaceAll("\\{" + key + "}", cache);
+            }
         }
-        string.clear();
-        string.append(cache);
-
+        return result;
     }
+
+    /**
+     * 重置
+     */
+    public void reset() {
+        for (String string : keys) {
+            information.remove(string);
+            information.put(string, "");
+        }
+    }
+
 
     /**
      * 改变字符串
@@ -80,27 +84,15 @@ public class Formation {
      * @param value    改变它的值
      * @return
      */
-    public void Change(String[] revalued, String value) {//revalued文本,value改变值
-        if (Name == null & Name.isEmpty()) return;
-        var iterable = StringPro.StringToList(revalued).iterator();
-        var cache = "";
-        while (iterable.hasNext()) {
-            StringPro cache1 = null;
-            cache = iterable.next();
-            if (Name.contains("{" + cache + "}")) {
-                cache1 = new StringPro(string.toString().replaceAll("\\{" + revalued + "\\}", value));
-                string.clear();
-                string.append(cache1);
-            }
+    public void change(String revalued, String value) {//revalued文本,value改变值
+        if (keys.contains(revalued)) {
+            information.remove(revalued);
+            information.put(revalued, value);
         }
     }
 
     public List<String> getArray() {
-        List<String> list = new ArrayList<>();
-        for (String string1 : Name) {
-            list.add(string1.substring(1, string1.length() - 1));
-        }
-        return list;
+        return keys;
     }
 
     /**

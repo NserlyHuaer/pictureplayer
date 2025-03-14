@@ -4,21 +4,21 @@ import Loading.Bundle;
 import Runner.Main;
 import Tools.Component.WindowLocation;
 import Tools.ProxyServer.Handle;
+import Tools.String.Formation;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableRowSorter;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class ProxyServerChooser extends JDialog {
     public Handle handle;
-    private AddProxyServer addProxyServer;
+    private final AddProxyServer addProxyServer;
     private JPanel contentPane;
     private JButton ChooseThisProxyServerButton;
     private JButton AddProxyServerButton;
@@ -32,6 +32,8 @@ public class ProxyServerChooser extends JDialog {
     //表格的列
     public static final String[] columnNames = {Bundle.getMessage("ProxyServer_TableFirst"), Bundle.getMessage("ProxyServer_TableSecond")};
 
+    private Formation formation = new Formation(Bundle.getMessage("AddProxyServer_ErrorMessage_Content"));
+
     public ProxyServerChooser() {
         $$$setupUI$$$();
         setContentPane(contentPane);
@@ -39,6 +41,7 @@ public class ProxyServerChooser extends JDialog {
         getRootPane().setDefaultButton(ChooseThisProxyServerButton);
         handle = new Handle("data\\ProxyServerMenu.pxs");
         addProxyServer = new AddProxyServer(this);
+        refresh(false);
 
         ChooseThisProxyServerButton.addActionListener(e -> {
             choice();
@@ -59,9 +62,7 @@ public class ProxyServerChooser extends JDialog {
             int[] rows = ProxyServerTable.getSelectedRows();
             if (rows.length > 0) {
                 if (JOptionPane.showConfirmDialog(this, Bundle.getMessage("ProxyServer_Delete_Content"), Bundle.getMessage("ProxyServer_Delete_Title"), JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
-                    for (int row : rows) {
-                        delete(row);
-                    }
+                    delete(rows);
                 }
 
             }
@@ -123,14 +124,22 @@ public class ProxyServerChooser extends JDialog {
      */
 
     public void refresh(boolean isSetRowSelectionInterval) {
+        ProxyServerTable.getSelectionModel().clearSelection();
         handle.refresh();
         tableModel.setRowCount(0);
         handle.getAllProxyServerNames().forEach(this::addElement);
         if (isSetRowSelectionInterval) {
-            String ProxyServerName = handle.getCurrentSelectionProxyServerName();
-            if (handle.containsProxyServerName(ProxyServerName)) {
-                setRowSelectionInterval(findRowIndexByColumnContent(0, ProxyServerName));
-            }
+            setProxyServerSelected();
+        }
+    }
+
+    /**
+     * 选中当前选择代理服务器的行
+     */
+    public void setProxyServerSelected() {
+        String ProxyServerName = handle.getCurrentSelectionProxyServerName();
+        if (handle.containsProxyServerName(ProxyServerName)) {
+            setRowSelectionInterval(findRowIndexByColumnContent(0, ProxyServerName));
         }
     }
 
@@ -162,7 +171,7 @@ public class ProxyServerChooser extends JDialog {
 
     private void add() {
         addProxyServer.pack();
-        addProxyServer.setVisible(true, -1);
+        addProxyServer.loadInformationAndVisible(-1);
     }
 
     private void edit(int rowIndex) {
@@ -171,7 +180,7 @@ public class ProxyServerChooser extends JDialog {
         addProxyServer.ProxyServerNameTextField.setText(ProxyServerName);
         addProxyServer.ProxyServerAddressTextField.setText(handle.getProxyServerAddress(ProxyServerName));
         addProxyServer.pack();
-        addProxyServer.setVisible(true, rowIndex);
+        addProxyServer.loadInformationAndVisible(rowIndex);
     }
 
     /**
@@ -185,8 +194,18 @@ public class ProxyServerChooser extends JDialog {
         if (ProxyServerAddress.isBlank()) return;
         boolean isExist = handle.containsProxyServerName(ProxyServerName);
         ProxyServerName = ProxyServerName.isBlank() ? ProxyServerAddress : ProxyServerName;
-        if (rowIndex < 0 && !isExist) {
-            addElement(ProxyServerName, ProxyServerAddress);
+        if (rowIndex < 0) {
+            if (!isExist)
+                addElement(ProxyServerName, ProxyServerAddress);
+            else {
+                if (handle.getProxyServerAddress(ProxyServerName).equals(ProxyServerAddress)) return;
+                formation.change("originalProxyServerAddress", handle.getProxyServerAddress(ProxyServerName));
+                formation.change("newProxyServerAddress", ProxyServerAddress);
+                if (JOptionPane.showConfirmDialog(this, formation.getProcessingString(), Bundle.getMessage("AddProxyServer_ErrorMessage_Title"), JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
+                    handle.delete(ProxyServerName);
+                    tableModel.setValueAt(ProxyServerAddress, findRowIndexByColumnContent(0, ProxyServerName), 1);
+                } else return;
+            }
         } else {
             handle.delete((String) tableModel.getValueAt(rowIndex, 0));
             tableModel.setValueAt(ProxyServerName, rowIndex, 0);
@@ -203,10 +222,32 @@ public class ProxyServerChooser extends JDialog {
      * @param rowIndex 表格中的行
      */
 
-    private void delete(int rowIndex) {
+    public void delete(int rowIndex) {
+        if (rowIndex >= tableModel.getRowCount()) return;
         handle.delete((String) tableModel.getValueAt(rowIndex, 0));
         tableModel.removeRow(rowIndex);
         handle.save();
+    }
+
+    /**
+     * 删除当前所需删除的行
+     *
+     * @param rowIndex 表格中的行
+     */
+    public void delete(int[] rowIndex) {
+        int temp = 0;
+        for (int i = 0; i < rowIndex.length - 1; i++) {
+            for (int j = 0; j < rowIndex.length - 1 - i; j++) {
+                if (rowIndex[j] < rowIndex[j + 1]) {
+                    temp = rowIndex[j];
+                    rowIndex[j] = rowIndex[j + 1];
+                    rowIndex[j + 1] = temp;
+                }
+            }
+        }
+        for (int i : rowIndex) {
+            delete(i);
+        }
     }
 
 
@@ -245,7 +286,7 @@ public class ProxyServerChooser extends JDialog {
     }
 
     public void setVisible(boolean visible) {
-        if (visible) refresh(true);
+        if (visible) setProxyServerSelected();
         setLocation(WindowLocation.ComponentCenter(Main.main, getWidth(), getHeight()));
         super.setVisible(visible);
     }
@@ -298,6 +339,7 @@ public class ProxyServerChooser extends JDialog {
         panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         contentPane.add(panel3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JScrollPane scrollPane1 = new JScrollPane();
+        scrollPane1.setRequestFocusEnabled(false);
         scrollPane1.setToolTipText("");
         panel3.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         scrollPane1.setViewportView(ProxyServerTable);
@@ -363,7 +405,32 @@ public class ProxyServerChooser extends JDialog {
             }
         };
         ProxyServerTable = new JTable(tableModel);
-        RowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
-        ProxyServerTable.setRowSorter(sorter);
+//        RowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+//        ProxyServerTable.setRowSorter(sorter);
+        // 覆盖 JTable 默认的 Enter 键行为（非编辑状态）
+        KeyStroke enterKey = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+        ProxyServerTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enterKey, "none");
+
+        // 覆盖编辑状态下的 Enter 键行为（通过监听编辑器）
+        ProxyServerTable.addPropertyChangeListener("tableCellEditor", evt -> {
+            if (ProxyServerTable.isEditing()) {
+                Component editorComp = ProxyServerTable.getEditorComponent();
+                if (editorComp instanceof JTextComponent textComp) {
+                    // 移除原本 Enter 键的提交动作，替换为新的Enter动作
+                    textComp.getInputMap().put(enterKey, new KeyAdapter() {
+                        @Override
+                        public void keyPressed(KeyEvent e) {
+                            choice();
+                        }
+                    });
+                }
+            }
+        });
+        ProxyServerTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) choice();
+            }
+        });
     }
 }
