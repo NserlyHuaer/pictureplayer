@@ -99,7 +99,10 @@ public class AddProxyServer extends JDialog {
         if (visible) {
             if (index == -1) {
                 setTitle(Bundle.getMessage("AddProxyServer_Title_Add"));
-                ProxyServerNameTextField.requestFocusInWindow();
+                if (ProxyServerNameTextField.getText().isBlank())
+                    ProxyServerNameTextField.requestFocusInWindow();
+                else
+                    ProxyServerAddressTextField.requestFocusInWindow();
             } else {
                 setTitle(Bundle.getMessage("AddProxyServer_Title_Revise"));
                 ProxyServerAddressTextField.requestFocusInWindow();

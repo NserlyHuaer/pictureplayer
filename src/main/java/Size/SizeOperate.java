@@ -159,12 +159,12 @@ public class SizeOperate {
 
     //是否当前图片显示比例是否是最大比例
     public boolean isTheBiggestRatio() {
-        return (short) getPercent() >= MaxPercent - 2;
+        return getPercent() >= MaxPercent;
     }
 
     //是否当前图片显示比例是否是最小比例
     public boolean isTheSmallestRatio() {
-        return (short) getPercent() <= MinPercent + 2;
+        return getPercent() <= MinPercent;
     }
 
     //获取缩放比例

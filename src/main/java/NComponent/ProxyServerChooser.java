@@ -280,7 +280,7 @@ public class ProxyServerChooser extends JDialog {
      * @param rowIndex 行
      */
     private void setRowSelectionInterval(int rowIndex) {
-        if (rowIndex < 0 || rowIndex < ProxyServerTable.getRowCount() - 1) return;
+        if (rowIndex < 0 || rowIndex > ProxyServerTable.getRowCount() - 1) return;
         ProxyServerTable.setRowSelectionInterval(rowIndex, rowIndex); // 单选模式
         ProxyServerTable.scrollRectToVisible(ProxyServerTable.getCellRect(rowIndex, 0, true));
     }
