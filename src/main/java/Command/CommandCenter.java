@@ -3,12 +3,16 @@ package Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Base64;
 
 public class CommandCenter {
     private static final String CURRENT_JAR_PATH; // 当前JAR文件路径
@@ -41,11 +45,11 @@ public class CommandCenter {
         }
     }
 
-    public static void executeOSSpecificCommands(String osType, String DownloadFilePath) {
+    public static void executeOSSpecificCommands(String osType, String DownloadFilePath, String OpenedPicturePath) {
         switch (osType) {
             case "windows":
                 try {
-                    createAndRunWindowsBatchFile(DownloadFilePath);
+                    createAndRunWindowsBatchFile(DownloadFilePath, OpenedPicturePath);
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                     logger.error("Automatic update failed");
@@ -53,7 +57,7 @@ public class CommandCenter {
                 break;
             case "linux":
                 try {
-                    createAndRunLinuxShellScript(DownloadFilePath);
+                    createAndRunLinuxShellScript(DownloadFilePath, OpenedPicturePath);
                 } catch (IOException e) {
                     logger.error(e.getMessage());
                     logger.error("Automatic update failed");
@@ -64,31 +68,55 @@ public class CommandCenter {
         }
     }
 
+    public static void executeOSSpecificCommands(String osType, String DownloadFilePath) {
+        executeOSSpecificCommands(osType, DownloadFilePath, null);
+    }
+
     public static void createAndRunWindowsBatchFile(String DownloadFilePath) throws IOException {
-        String batchContent = "echo @off\n" +
-                "timeout /t 1\n"
-                + "del \".\\" + CURRENT_JAR_NAME + "\"\n"
-                + "ren \"" + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + "\" \"" + CURRENT_JAR_NAME + "\"\n" +
-                "cls\n"
-                + "\"" + System.getProperty("sun.boot.library.path") + "\\java.exe\" -jar \".\\" + CURRENT_JAR_NAME + "\"";
+        createAndRunWindowsBatchFile(DownloadFilePath, null);
+    }
+
+    public static void createAndRunWindowsBatchFile(String DownloadFilePath, String OpenedPicturePath) throws IOException {
+        String batchContent =
+                "echo @off\n" +
+                        "timeout /t 1\n"
+                        + "del \".\\" + CURRENT_JAR_NAME + "\"\n"
+                        + "ren \"" + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + "\" \"" + CURRENT_JAR_NAME + "\"\n" +
+                        "cls\n"
+                        + "\"" + System.getProperty("sun.boot.library.path") + "\\java.exe\" -jar -Dsun.java2d.opengl=true \".\\" + CURRENT_JAR_NAME + "\" ";
+        if (OpenedPicturePath != null && !OpenedPicturePath.isBlank()) {
+            batchContent = batchContent + "\"" + OpenedPicturePath + "\"";
+        }
+
         Path batchPath = Path.of("./replace.bat");
-        Files.write(batchPath, batchContent.getBytes());
+        Files.write(batchPath, batchContent.getBytes(StandardCharsets.US_ASCII));
+
         batchContent = "start replace.bat";
         batchPath = Path.of("./runnable.bat");
         Files.write(batchPath, batchContent.getBytes());
+
         logger.info("The script file is created!");
         logger.info("Start running the script file and end the current software...");
+
         Runtime.getRuntime().exec("runnable.bat");
         logger.info("Program Termination!");
+
         System.exit(0);
     }
 
     public static void createAndRunLinuxShellScript(String DownloadFilePath) throws IOException {
+        createAndRunLinuxShellScript(DownloadFilePath, null);
+    }
+
+    public static void createAndRunLinuxShellScript(String DownloadFilePath, String OpenedPicturePath) throws IOException {
         String shellContent =
                 "sleep 1\n"
                         + "rm " + CURRENT_JAR_NAME + "\n"
                         + "mv " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + " " + CURRENT_JAR_NAME + "\n"
-                        + "java -jar " + CURRENT_JAR_NAME;
+                        + "java -jar " + CURRENT_JAR_NAME + " ";
+        if (OpenedPicturePath != null && !OpenedPicturePath.isBlank()) {
+            shellContent = shellContent + OpenedPicturePath;
+        }
         Path shellPath = Path.of("./replace.sh");
         Files.write(shellPath, shellContent.getBytes());
         Files.setPosixFilePermissions(shellPath, PosixFilePermissions.fromString("rwx------"));

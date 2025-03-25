@@ -67,7 +67,12 @@ public class AdvancedDownloadSpeed {
                 if (!isFound) return;
                 CommandCenter.moveFileToDirectory((String) map.get(website).getFirst());
                 String osType = CommandCenter.detectOSType();
-                CommandCenter.executeOSSpecificCommands(osType, (String) map.get(website).getFirst());
+                String OpenedPicturePath = null;
+                if (Main.main != null && Main.main.paintPicture != null && Main.main.paintPicture.imageCanvas != null) {
+                    OpenedPicturePath = Main.main.paintPicture.imageCanvas.getPath();
+                }
+
+                CommandCenter.executeOSSpecificCommands(osType, (String) map.get(website).getFirst(), OpenedPicturePath);
             } catch (IOException | NoClassDefFoundError | ExceptionInInitializerError e) {
                 logger.error(e.toString());
                 JOptionPane.showMessageDialog(DownloadUpdateFrame.downloadUpdateFrame, Bundle.getMessage("UpdateError_Content") + "\nCaused by:" + e, Bundle.getMessage("UpdateError_Title"), JOptionPane.ERROR_MESSAGE);
