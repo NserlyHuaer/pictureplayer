@@ -131,7 +131,7 @@ public class Main extends JFrame {
                     }
                 }
             } catch (IOException | UnsupportedFlavorException e) {
-                logger.error(e.toString());
+                logger.error(getExceptionMessage(e));
             }
         }
     };
@@ -181,7 +181,7 @@ public class Main extends JFrame {
                 UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
             } catch (ClassNotFoundException | IllegalAccessException | UnsupportedLookAndFeelException |
                      InstantiationException e) {
-                logger.error(e.getMessage());
+                logger.error(getExceptionMessage(e));
             }
             setContentPane(this.panel1);
             setVisible(true);
@@ -448,7 +448,7 @@ public class Main extends JFrame {
                     return;
                 }
             } catch (IOException e1) {
-                logger.error(e1.getMessage());
+                logger.error(getExceptionMessage(e1));
                 JOptionPane.showMessageDialog(Main.main, "Error: " + e1 + "\n" + Bundle.getMessage("CantGetUpdate_Content"), Bundle.getMessage("CantGetUpdate_Title"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
