@@ -504,6 +504,7 @@ public class PaintPicture extends JPanel {
             //初始化监听器
             new Thread(this::init_listener).start();
             new Thread(() -> {
+                isEnableHardware = isEnableHardwareAcceleration;
                 if (!isEnableHardware) return;
                 AtomicReference<Double> LastPercent = new AtomicReference<>((double) -9999999);
                 AtomicReference<String> LastPicture_hashcode = new AtomicReference<>("");
@@ -523,9 +524,10 @@ public class PaintPicture extends JPanel {
                                 return;
                             }
                             int KernelSize = multiThreadBlur.calculateKernelSize(sizeOperate.getPercent());
-                            BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(KernelSize);
                             if (KernelSize == 1) {
                                 BlurBufferedImage = multiThreadBlur.getSrc();
+                            } else {
+                                BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(KernelSize);
                             }
                             isNeedBlurToView = true;
                             LastPercent.set(sizeOperate.getPercent());
@@ -660,7 +662,6 @@ public class PaintPicture extends JPanel {
                 //若这两个文件父目录不相同
                 loadPictureInTheParent(finalPath);
             }).start();
-            isEnableHardware = isEnableHardwareAcceleration;
             RotationDegrees = lastRotationDegrees = 0;
             this.path = finalPath;
             this.picture_hashcode = picture_hashcode;
