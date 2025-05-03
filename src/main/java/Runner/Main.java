@@ -34,6 +34,7 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
@@ -136,6 +137,16 @@ public class Main extends JFrame {
         }
     };
 
+    private Thread init_PaintPicture = new Thread(() -> {
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        } catch (ClassNotFoundException | IllegalAccessException | UnsupportedLookAndFeelException |
+                 InstantiationException e) {
+            logger.error(getExceptionMessage(e));
+        }
+        paintPicture = new PaintPicture();
+    });
+
     //静态代码块
     static {
         //初始化Init
@@ -174,15 +185,10 @@ public class Main extends JFrame {
     public Main(String title) {
         super(title);
         $$$setupUI$$$();
+        init_PaintPicture.start();
         new Thread(() -> {
             setUncaughtExceptionHandler(logger);
             setDefaultLookAndFeelDecorated(false);
-            try {
-                UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-            } catch (ClassNotFoundException | IllegalAccessException | UnsupportedLookAndFeelException |
-                     InstantiationException e) {
-                logger.error(getExceptionMessage(e));
-            }
             setContentPane(this.panel1);
             setVisible(true);
             Dimension dimension = SizeOperate.FreeOfScreenSize;
@@ -350,17 +356,27 @@ public class Main extends JFrame {
 
     //打开图片
     public void openPicture(String path) {
-        if (path == null) return;
-        if (paintPicture == null) {
-            paintPicture = new PaintPicture(path);
-            new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
-        } else if (path.endsWith("???")) {
-            return;
-        } else {
-            paintPicture.changePicturePath(path);
-        }
-        tabbedPane1.setComponentAt(1, paintPicture);
-        tabbedPane1.setSelectedIndex(1);
+        new Thread(() -> {
+            if (path == null || path.endsWith("???")) return;
+            try {
+                init_PaintPicture.join();
+            } catch (InterruptedException ignored) {
+
+            }
+            if (paintPicture.isOnlyInit) {
+                tabbedPane1.setComponentAt(1, paintPicture);
+                new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
+            }
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    paintPicture.setSize(tabbedPane1.getSize());
+                    paintPicture.changePicturePath(path);
+                    tabbedPane1.setSelectedIndex(1);
+                });
+            } catch (InterruptedException | InvocationTargetException e) {
+                logger.error(getExceptionMessage(e));
+            }
+        }).start();
     }
 
 
@@ -1038,7 +1054,7 @@ public class Main extends JFrame {
         if (checkFileIsRightPictureType.getImageCount() == 1) {
             choose = checkFileIsRightPictureType.getImageList().getFirst();
             String choose_hashcode = GetImageInformation.getHashcode(choose);
-            if (Main.main.paintPicture != null) {
+            if (Main.main.paintPicture != null && !Main.main.paintPicture.isOnlyInit) {
                 if (choose_hashcode == null && paintPicture.imageCanvas.getPicture_hashcode() == null) {
                     logger.warn("Couldn't get current or opening picture hashcode,this will fake the judgment file path");
                     if (!new File(Main.main.paintPicture.imageCanvas.getPath()).equals(choose)) return null;
@@ -1069,8 +1085,7 @@ public class Main extends JFrame {
             }
         }
         Throwable throwable = e.getCause();
-        if (throwable == null) return stringBuilder.toString();
-        stringBuilder.append("Caused by:").append(getExceptionMessage(throwable));
+        if (throwable != null) stringBuilder.append("Caused by:").append(getExceptionMessage(throwable));
         return stringBuilder.toString();
     }
 }

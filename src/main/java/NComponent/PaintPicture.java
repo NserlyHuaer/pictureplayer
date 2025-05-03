@@ -68,7 +68,7 @@ public class PaintPicture extends JPanel {
     //打开下一个图片
     private static final int NextSign = 0x27;
     //创建鼠标坐标管理对象
-    OperatingCoordinate op = null;
+    OperatingCoordinate op;
     //鼠标最小移动坐标位
     Point MinPoint;
     //鼠标最大移动坐标位
@@ -86,7 +86,7 @@ public class PaintPicture extends JPanel {
     //移动图片时，鼠标最开始的坐标（对于桌面）
     Point mouseLocation;
     //当前图片路径下所有图片
-    ArrayList<String> CurrentPathOfPicture = null;
+    ArrayList<String> CurrentPathOfPicture;
     //是否启用硬件加速
     public static boolean isEnableHardwareAcceleration;
     // 定义边缘范围为5像素
@@ -95,214 +95,150 @@ public class PaintPicture extends JPanel {
     private MouseEvent lastMouseEvent;
     private MouseAdapter mouseAdapter;
     private File lastPicturePathParent;
-    private static boolean isMousePressed = false; // 标记鼠标是否按下
+    private static boolean isMousePressed; // 标记鼠标是否按下
     private static final Logger logger = LoggerFactory.getLogger(PaintPicture.class);
 
-    //构造方法（函数）
-    public PaintPicture(String path) {
-        setLayout(new BorderLayout());
+    public boolean isOnlyInit = true;
+
+    private Thread init;
+
+    //构造方法（无参函数）（用于初始化）
+    public PaintPicture() {
         paintPicture = this;
-        percentLabel = new PercentLabel();
-        fullScreenWindow = new FullScreenWindow();
-        //创建画布
-        imageCanvas = new NComponent.PaintPicture.ImageCanvas(path);
-        //添加画布至组件中
-        add(imageCanvas, BorderLayout.CENTER);
-        sizeOperate = new SizeOperate(imageCanvas, imageCanvas.getSize());
+        AtomicReference<ChangeFocusListener> changeFocusListener = new AtomicReference<>();
+        init = new Thread(() -> {
+            changeFocusListener.set(new ChangeFocusListener(imageCanvas));
+            setLayout(new BorderLayout());
+            fullScreenWindow = new FullScreenWindow();
+            //创建画布
+            imageCanvas = new ImageCanvas();
+            sizeOperate = new SizeOperate(imageCanvas, null);
+            setUnderPanel();
+            setOnPanel(changeFocusListener.get());
+        });
+        init.start();
         new Thread(() -> {
             Last = new JButton("<");
             Next = new JButton(">");
-            smallest = new JButton(Bundle.getMessage("Display_reduce"));
-            PercentSlider = new JSlider(sizeOperate.MinPercent, sizeOperate.MaxPercent);
-            biggest = new JButton(Bundle.getMessage("Display_enlarge"));
-            PictureResolution = new JLabel();
-            PictureSize = new JLabel();
             Font font = new Font("", Font.PLAIN, 15);
+            try {
+                init.join();
+            } catch (InterruptedException ignored) {
+
+            }
+
+            smallest.setText(Bundle.getMessage("Display_reduce"));
+            biggest.setText(Bundle.getMessage("Display_enlarge"));
             PictureResolution.setFont(font);
             PictureSize.setFont(font);
-            //显示图片信息
-            setPictureInformationOnComponent(path);
-            smallest.addMouseListener(new MouseAdapter() {
-                //判断是否鼠标释放
-                boolean isReleased = false;
-
-                //点击、长按触发
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    //设置鼠标没有释放
-                    isReleased = false;
-                    //创建线程
-                    new Thread(() -> {
-                        //循环
-                        do {
-                            if (!smallest.isEnabled()) return;
-                            if (sizeOperate.adjustPercent(SizeOperate.Reduce)) {
-                                sizeOperate.update(false);
-                            }
-
-                            //抛出异常
-                            try {
-                                //线程休眠
-                                Thread.sleep(16);
-                            } catch (InterruptedException ex) {
-                                break;
-                            }
-                        } while (!isReleased);
-                        imageCanvas.requestFocus();
-                    }).start();
-
-                }
-
-                //鼠标放出触发
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    isReleased = true;
-                }
-            });
-            //添加面板大小改变监听器
-            addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentResized(ComponentEvent e) {
-                    if (fullScreenWindow.isShowing()) return;
-                    sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-                    sizeOperate.update(false);
-                }
-            });
-
-            PercentSlider.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    isMousePressed = true;
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    isMousePressed = false;
-                }
-            });
-
-            PercentSlider.addChangeListener(e -> {
-                if (isMousePressed) {
-                    percentLabel.set(PercentSlider.getValue());
-                    sizeOperate.setPercent(PercentSlider.getValue());
-                    sizeOperate.update(false);
-                }
-            });
-            biggest.addMouseListener(new MouseAdapter() {
-                boolean isDown = false;
-
-                @Override
-                public void mousePressed(MouseEvent e) {//点击、长按触发
-                    isDown = false;
-                    new Thread(() -> {
-                        do {
-                            if (!biggest.isEnabled()) return;
-                            if (sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
-                                sizeOperate.update(false);
-                            }
-                            try {
-                                Thread.sleep(16);
-                            } catch (InterruptedException ex) {
-                                break;
-                            }
-                        } while (!isDown);
-                        imageCanvas.requestFocus();
-                    }).start();
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {//鼠标放出触发
-                    isDown = true;
-                }
-            });
-            ChangeFocusListener changeFocusListener = new ChangeFocusListener(imageCanvas);
-            PercentSlider.addMouseListener(changeFocusListener);
-            Last.addMouseListener(changeFocusListener);
-            Next.addMouseListener(changeFocusListener);
-            Last.addActionListener(e -> {
-                imageCanvas.openLONPicture(LastSign);
-                if (lastMouseEvent != null) {
-                    mouseAdapter.mouseMoved(lastMouseEvent);
-                }
-            });
-            Next.addActionListener(e -> {
-                imageCanvas.openLONPicture(NextSign);
-                if (lastMouseEvent != null) {
-                    mouseAdapter.mouseMoved(lastMouseEvent);
-                }
-            });
-            //初始化面板
-            Under = new JPanel();
-            UnderLeft = new JPanel();
-            UnderRight = new JPanel();
-            On = getjPanel(changeFocusListener);
-            UnderLeft.setLayout(new FlowLayout(FlowLayout.LEADING));
-            UnderRight.setLayout(new FlowLayout(FlowLayout.RIGHT));
-            Under.setLayout(new GridLayout(1, 2));
-
-            //添加左组件
-            UnderLeft.add(PictureResolution);
-            UnderLeft.add(PictureSize);
-
-            //添加右组件
-            UnderRight.add(smallest);
-            UnderRight.add(PercentSlider);
-            UnderRight.add(biggest);
-            //加入下方总组件
-            Under.add(UnderLeft);
-            Under.add(UnderRight);
-            //设置菜单为面板下方并添加至组件中
-            add(Under, BorderLayout.SOUTH);
-            //设置为面板上方并添加至组件中
-            add(On, BorderLayout.NORTH);
             //设置文本中显示的图片缩放比例
             percentLabel.set((int) sizeOperate.getPercent());
             //设置图片缩放滑动条
             PercentSlider.setValue((int) sizeOperate.getPercent());
-            paintPicture.validate();
-            loadPictureInTheParent(path);
-            sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-            sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
-            sizeOperate.update(false);
-            //向控制台输出打开文件路径
-            logger.info("Opened:\"{}\"", path);
+            //设置图片顺时针按钮可见
+            clockwise.setVisible(true);
+            //设置图片逆时针按钮可见
+            clockwise.setVisible(true);
+            //设置重置按钮可见
+            Reset.setVisible(true);
+            FullScreen.setVisible(true);
+            clockwise.setText(Bundle.getMessage("Display_RotateClockwiseButton"));
+            Reset.setText(Bundle.getMessage("Display_reset"));
+            counterclockwise.setText(Bundle.getMessage("Display_RotateCounterclockwise"));
+            FullScreen.setText(Bundle.getMessage("Display_FullScreenButton"));
+            init_Listener(changeFocusListener.get());
         }).start();
     }
 
-    private void loadPictureInTheParent(String picturePath) {
-        File pictureParent = new File(picturePath).getParentFile();
-        if (!pictureParent.equals(lastPicturePathParent)) {
-            //获取当前图片路径下所有图片
-            CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(picturePath);
-            lastPicturePathParent = pictureParent;
-        }
+    //构造方法（函数）（用于直接显示图片）
+    public PaintPicture(String path) {
+        this();
+        openPicture(path);
     }
 
-    private JPanel getjPanel(ChangeFocusListener changeFocusListener) {
-        var On = new JPanel();
-        clockwise = new JButton(Bundle.getMessage("Display_RotateClockwiseButton"));
+    private void setOnPanel(ChangeFocusListener changeFocusListener) {
+        percentLabel = new PercentLabel();
+        On = new JPanel();
+        clockwise = new JButton();
         //在容器On中添加还原图片按钮
-        Reset = new JButton(Bundle.getMessage("Display_reset"));
+        Reset = new JButton();
         //顺时针
-        counterclockwise = new JButton(Bundle.getMessage("Display_RotateCounterclockwise"));
+        counterclockwise = new JButton();
         //全屏
-        FullScreen = new JButton(Bundle.getMessage("Display_FullScreenButton"));
-        //设置图片顺时针按钮可见
-        clockwise.setVisible(true);
-        //创建图片顺时针按钮监听器
-        clockwise.addActionListener(e -> {
-            imageCanvas.turnLeft();
+        FullScreen = new JButton();
+        //将图片逆时针按钮添加到组件中
+        On.add(counterclockwise);
+        //将重置按钮添加到组件中
+        On.add(Reset);
+        //将全屏按钮添加到组件中
+        On.add(FullScreen);
+        //将图片顺时针按钮添加到组件中
+        On.add(clockwise);
+        //将比例显示添加到组件中
+        On.add(percentLabel);
+    }
+
+    private void setUnderPanel() {
+        Under = new JPanel();
+        //初始化面板
+        UnderLeft = new JPanel();
+        UnderRight = new JPanel();
+
+        UnderLeft.setLayout(new FlowLayout(FlowLayout.LEADING));
+        UnderRight.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        Under.setLayout(new GridLayout(1, 2));
+
+        PictureResolution = new JLabel();
+        PictureSize = new JLabel();
+
+        smallest = new JButton();
+        biggest = new JButton();
+        PercentSlider = new JSlider(sizeOperate.MinPercent, sizeOperate.MaxPercent);
+
+        //添加左组件
+        UnderLeft.add(PictureResolution);
+        UnderLeft.add(PictureSize);
+
+        //添加右组件
+        UnderRight.add(smallest);
+        UnderRight.add(PercentSlider);
+        UnderRight.add(biggest);
+
+        //加入下方总组件
+        Under.add(UnderLeft);
+        Under.add(UnderRight);
+    }
+
+    private void init_Listener(ChangeFocusListener changeFocusListener) {
+        PercentSlider.addMouseListener(changeFocusListener);
+        Last.addMouseListener(changeFocusListener);
+        Next.addMouseListener(changeFocusListener);
+        Last.addActionListener(e -> {
+            new Thread(() -> {
+                imageCanvas.openLONPicture(LastSign);
+                if (lastMouseEvent != null) {
+                    mouseAdapter.mouseMoved(lastMouseEvent);
+                }
+            }).start();
         });
-        clockwise.addMouseListener(changeFocusListener);
-        //设置图片逆时针按钮可见
-        clockwise.setVisible(true);
-        //创建图片顺时针按钮监听器
-        counterclockwise.addActionListener(e -> {
-            imageCanvas.turnRight();
+        Next.addActionListener(e -> {
+            new Thread(() -> {
+                imageCanvas.openLONPicture(NextSign);
+                if (lastMouseEvent != null) {
+                    mouseAdapter.mouseMoved(lastMouseEvent);
+                }
+            }).start();
         });
-        counterclockwise.addMouseListener(changeFocusListener);
-        //设置重置按钮可见
-        Reset.setVisible(true);
+        FullScreen.addMouseListener(changeFocusListener);
+        FullScreen.addActionListener(e -> {
+            if (imageCanvas == null) return;
+            fullScreenWindow.setImageCanvas(imageCanvas);
+            Main.main.setVisible(false);
+            fullScreenWindow.setVisible(true);
+            Main.main.getGraphics().dispose();
+            sizeOperate.update(false);
+        });
+        Reset.addMouseListener(changeFocusListener);
         //点击时间
         AtomicLong ClickedTime = new AtomicLong();
         //规定时间内点击次数
@@ -343,34 +279,161 @@ public class PaintPicture extends JPanel {
             }
             ClickedTime.set(System.currentTimeMillis());
         });
-        Reset.addMouseListener(changeFocusListener);
-        FullScreen.setVisible(true);
-        FullScreen.addMouseListener(changeFocusListener);
-        FullScreen.addActionListener(e -> {
-            if (imageCanvas == null) return;
-            fullScreenWindow.setImageCanvas(imageCanvas);
-            Main.main.setVisible(false);
-            fullScreenWindow.setVisible(true);
-            Main.main.getGraphics().dispose();
-            sizeOperate.update(false);
+        //创建图片顺时针按钮监听器
+        clockwise.addActionListener(e -> {
+            imageCanvas.turnLeft();
         });
-        //将图片逆时针按钮添加到组件中
-        On.add(counterclockwise);
-        //将重置按钮添加到组件中
-        On.add(Reset);
-        //将全屏按钮添加到组件中
-        On.add(FullScreen);
-        //将图片顺时针按钮添加到组件中
-        On.add(clockwise);
-        //将比例显示添加到组件中
-        On.add(percentLabel);
-        return On;
+        clockwise.addMouseListener(changeFocusListener);
+        //创建图片顺时针按钮监听器
+        counterclockwise.addActionListener(e -> {
+            imageCanvas.turnRight();
+        });
+        counterclockwise.addMouseListener(changeFocusListener);
+        smallest.addMouseListener(new MouseAdapter() {
+            //判断是否鼠标释放
+            boolean isReleased = false;
+
+            //点击、长按触发
+            @Override
+            public void mousePressed(MouseEvent e) {
+                //设置鼠标没有释放
+                isReleased = false;
+                //创建线程
+                new Thread(() -> {
+                    //循环
+                    do {
+                        if (!smallest.isEnabled()) return;
+                        if (sizeOperate.adjustPercent(SizeOperate.Reduce)) {
+                            sizeOperate.update(false);
+                        }
+
+                        //抛出异常
+                        try {
+                            //线程休眠
+                            Thread.sleep(16);
+                        } catch (InterruptedException ex) {
+                            break;
+                        }
+                    } while (!isReleased);
+                    imageCanvas.requestFocus();
+                }).start();
+
+            }
+
+            //鼠标放出触发
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                isReleased = true;
+            }
+        });
+        //添加面板大小改变监听器
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if (fullScreenWindow.isShowing() || isOnlyInit) return;
+                sizeOperate.incomeWindowDimension(imageCanvas.getSize());
+                sizeOperate.update(false);
+            }
+        });
+
+        PercentSlider.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                isMousePressed = true;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                isMousePressed = false;
+            }
+        });
+
+        PercentSlider.addChangeListener(e -> {
+            if (isMousePressed) {
+                percentLabel.set(PercentSlider.getValue());
+                sizeOperate.setPercent(PercentSlider.getValue());
+                sizeOperate.update(false);
+            }
+        });
+        biggest.addMouseListener(new MouseAdapter() {
+            boolean isDown = false;
+
+            @Override
+            public void mousePressed(MouseEvent e) {//点击、长按触发
+                isDown = false;
+                new Thread(() -> {
+                    do {
+                        if (!biggest.isEnabled()) return;
+                        if (sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
+                            sizeOperate.update(false);
+                        }
+                        try {
+                            Thread.sleep(16);
+                        } catch (InterruptedException ex) {
+                            break;
+                        }
+                    } while (!isDown);
+                    imageCanvas.requestFocus();
+                }).start();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {//鼠标放出触发
+                isDown = true;
+            }
+        });
+    }
+
+    public void fitComponent() {
+        sizeOperate.incomeWindowDimension(imageCanvas.getSize());
+        sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
+        sizeOperate.update(false);
+    }
+
+    private void loadPictureInTheParent(String picturePath) {
+        File pictureParent = new File(picturePath).getParentFile();
+        if (!pictureParent.equals(lastPicturePathParent)) {
+            //获取当前图片路径下所有图片
+            CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(picturePath);
+            lastPicturePathParent = pictureParent;
+        }
+    }
+
+    public void openPicture(String path) {
+        changePicturePath(path);
     }
 
     //改变图片路径
     public void changePicturePath(String path) {
         logger.info("Opened:\"{}\"", path);
-        imageCanvas.changePicturePath(path);
+        if (isOnlyInit) {
+            BufferedImage image = null;
+            try {
+                image = ImageIO.read(new File(path));
+            } catch (IOException e) {
+                logger.error("Error loading image \"{}\"", path);
+            }
+            try {
+                init.join();
+            } catch (InterruptedException ignored) {
+
+            }
+            //添加画布至组件中
+            add(imageCanvas, BorderLayout.CENTER);
+            //设置菜单为面板下方并添加至组件中
+            add(Under, BorderLayout.SOUTH);
+            //设置为面板上方并添加至组件中
+            add(On, BorderLayout.NORTH);
+            BufferedImage finalImage = image;
+            new Thread(() -> {
+                validate();
+                sizeOperate.incomeWindowDimension(imageCanvas.getSize());
+                imageCanvas.changePicturePath(finalImage, path);
+            }).start();
+        } else {
+            imageCanvas.changePicturePath(path);
+        }
+        isOnlyInit = false;
     }
 
     //显示图片大小、分辨率等信息
@@ -435,16 +498,12 @@ public class PaintPicture extends JPanel {
         //模糊化类
         MultiThreadBlur multiThreadBlur;
 
-        //构造方法初始化
-        public ImageCanvas(String path) {
-            //加载图片
-            changePicturePath(path);
+        //构造方法初始化（用于初始化类）
+        public ImageCanvas() {
             setDoubleBuffered(true);
+            //初始化监听器
+            new Thread(this::init_listener).start();
             new Thread(() -> {
-                //初始化监听器
-                init_listener();
-                //添加图片hashcode
-                this.picture_hashcode = GetImageInformation.getHashcode(new File(path));
                 if (!isEnableHardware) return;
                 AtomicReference<Double> LastPercent = new AtomicReference<>((double) -9999999);
                 AtomicReference<String> LastPicture_hashcode = new AtomicReference<>("");
@@ -478,15 +537,17 @@ public class PaintPicture extends JPanel {
             }).start();
         }
 
-        public ImageCanvas(String path, String picture_hashcode) {
+        //构造方法初始化（用于直接显示图片）
+        public ImageCanvas(String path) {
+            this();
             //加载图片
             changePicturePath(path);
-            //初始化监听器
-            init_listener();
-            //添加图片hashcode
-            this.picture_hashcode = picture_hashcode;
-            setDoubleBuffered(true);
+        }
 
+        public ImageCanvas(String path, String picture_hashcode) {
+            this();
+            //加载图片
+            changePicturePath(path, picture_hashcode);
         }
 
         //获取图片路径
@@ -539,35 +600,75 @@ public class PaintPicture extends JPanel {
 
         //改变图片路径
         public void changePicturePath(String path) {
+            changePicturePath(path, GetImageInformation.getHashcode(new File(path)));
+        }
+
+        public void changePicturePath(String path, String picture_hashcode) {
             //如果字符串前缀与后缀包含"，则去除其中的"
             if (path.startsWith("\"") && path.endsWith("\"")) {
                 path = path.substring(1, path.length() - 1);
             }
-            isEnableHardware = isEnableHardwareAcceleration;
-            setPictureInformationOnComponent(path);
-            //若这两个文件父目录不相同
-            loadPictureInTheParent(path);
-            RotationDegrees = lastRotationDegrees = 0;
-            this.path = path;
-            picture_hashcode = GetImageInformation.getHashcode(new File(path));
-            LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
-            NewWindow = LastWindow = null;
-            if (image != null) image.flush();
-            if (BlurBufferedImage != null) BlurBufferedImage.flush();
-            try {
-                image = ImageIO.read(new File(path));
-            } catch (IOException e) {
-                logger.error("Error loading image \"{}\"", path);
-                return;
+            String finalPath = path;
+            Thread t1 = new Thread(() -> {
+                try {
+                    image = ImageIO.read(new File(finalPath));
+                } catch (IOException e) {
+                    logger.error("Error loading image \"{}\"", finalPath);
+                }
+            });
+            t1.start();
+            repeat_changePicturePath(path, picture_hashcode);
+            new Thread(() -> {
+                try {
+                    t1.join();
+                } catch (InterruptedException ignored) {
+
+                }
+                if (isEnableHardware) {
+                    BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
+                    if (multiThreadBlur != null) multiThreadBlur.flushSrc();
+                    image.flush();
+                    image = BlurBufferedImage;
+                }
+                if (sizeOperate != null) sizeOperate.changeCanvas(this);
+            }).start();
+        }
+
+        public void changePicturePath(final BufferedImage image, String path, String picture_hashcode) {
+            //如果字符串前缀与后缀包含"，则去除其中的"
+            if (path.startsWith("\"") && path.endsWith("\"")) {
+                path = path.substring(1, path.length() - 1);
             }
+            this.image = image;
+            repeat_changePicturePath(path, picture_hashcode);
             if (isEnableHardware) {
                 BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
-                if (multiThreadBlur != null)
-                    multiThreadBlur.flushSrc();
+                if (multiThreadBlur != null) multiThreadBlur.flushSrc();
                 image.flush();
-                image = BlurBufferedImage;
+                this.image = BlurBufferedImage;
             }
             if (sizeOperate != null) sizeOperate.changeCanvas(this);
+        }
+
+        public void changePicturePath(final BufferedImage image, String path) {
+            changePicturePath(image, path, GetImageInformation.getHashcode(new File(path)));
+        }
+
+        private void repeat_changePicturePath(String finalPath, String picture_hashcode) {
+            new Thread(() -> {
+                setPictureInformationOnComponent(finalPath);
+                //若这两个文件父目录不相同
+                loadPictureInTheParent(finalPath);
+            }).start();
+            isEnableHardware = isEnableHardwareAcceleration;
+            RotationDegrees = lastRotationDegrees = 0;
+            this.path = finalPath;
+            this.picture_hashcode = picture_hashcode;
+            LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
+            NewWindow = LastWindow = null;
+            if (this.image != null) this.image.flush();
+            if (BlurBufferedImage != null) BlurBufferedImage.flush();
+
         }
 
         public void close() {
@@ -642,7 +743,7 @@ public class PaintPicture extends JPanel {
 
         @Override
         public synchronized void paint(Graphics g) {
-            if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0 || (LastPercent == sizeOperate.getPercent() && RotationDegrees == LastPercent && !isMove && lastPath.equals(path))) {
+            if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0 || (LastPercent == sizeOperate.getPercent() && RotationDegrees == LastPercent && !isMove && lastPath.equals(path)) || getImageWidth() == 0 || getImageHeight() == 0) {
                 return;
             }
             // 获取当前图形环境配置
@@ -830,8 +931,7 @@ public class PaintPicture extends JPanel {
             //设置文本中显示的图片缩放比例
             percentLabel.set((int) sizeOperate.getPercent());
             //设置图片缩放滑动条
-            if (PercentSlider != null)
-                PercentSlider.setValue((int) sizeOperate.getPercent());
+            if (PercentSlider != null) PercentSlider.setValue((int) sizeOperate.getPercent());
             this.X = FinalX;
             this.Y = FinalY;
             this.LastWindow = this.NewWindow;
@@ -881,27 +981,6 @@ public class PaintPicture extends JPanel {
         //设置Y值大小
         public void setY(int y) {
             this.Y = y;
-        }
-
-        //加载图片
-        private void loadImage(String PicturePath) {
-            //如果字符串前缀与后缀包含"，则去除其中的"
-            if (PicturePath.startsWith("\"") && PicturePath.endsWith("\"")) {
-                PicturePath = PicturePath.substring(1, PicturePath.length() - 1);
-            }
-            isEnableHardware = isEnableHardwareAcceleration;
-            this.path = PicturePath;
-            try {
-                image = ImageIO.read(new File(path));
-            } catch (IOException e) {
-                logger.error("Error loading image \"{}\"", path);
-                return;
-            }
-            if (isEnableHardware) {
-                BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
-                image.flush();
-                image = BlurBufferedImage;
-            }
         }
 
         //初始化监听器
@@ -1041,18 +1120,20 @@ public class PaintPicture extends JPanel {
                     }
                 }
             });
-            addKeyListener(new KeyAdapter() {
+            imageCanvas.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE && fullScreenWindow.isShowing()) {
-                        PaintPicture.paintPicture.add(imageCanvas, BorderLayout.CENTER);
-                        fullScreenWindow.setVisible(false);
-                        Main.main.setVisible(true);
-                        sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-                        sizeOperate.update(false);
-                        return;
-                    }
-                    imageCanvas.openLONPicture(e.getKeyCode());
+                    new Thread(() -> {
+                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE && fullScreenWindow.isShowing()) {
+                            PaintPicture.paintPicture.add(imageCanvas, BorderLayout.CENTER);
+                            fullScreenWindow.setVisible(false);
+                            Main.main.setVisible(true);
+                            sizeOperate.incomeWindowDimension(imageCanvas.getSize());
+                            sizeOperate.update(false);
+                            return;
+                        }
+                        imageCanvas.openLONPicture(e.getKeyCode());
+                    }).start();
                 }
             });
         }

@@ -101,10 +101,10 @@ public class SizeOperate {
         if (window != null) {
             this.Component = window;
             FittestPercent = getPictureOptimalSize();
-            if (getPictureSize == null)
+            if (getPictureSize == null && imageCanvas != null)
                 try {
                     getPictureSize = new GetPictureSize(imageCanvas.getPath());
-                } catch (IOException e) {
+                } catch (Exception e) {
                     return;
                 }
             AdjustPercent = (int) (((Math.abs(window.getHeight() - getPictureSize.height) / 5.5 / getPictureSize.height) + (Math.abs(window.getWidth() - getPictureSize.width) / 5.5 / getPictureSize.width)) / 2);

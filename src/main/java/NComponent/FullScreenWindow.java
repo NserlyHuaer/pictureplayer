@@ -47,6 +47,13 @@ public class FullScreenWindow extends JFrame {
         setImageCanvas(imageCanvas);
     }
 
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (visible && imageCanvas != null) {
+            imageCanvas.requestFocusInWindow();
+        }
+    }
+
     public void setImageCanvas(PaintPicture.ImageCanvas imageCanvas) {
         if (imageCanvas == null) return;
         if (this.imageCanvas != null)
@@ -83,5 +90,4 @@ public class FullScreenWindow extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
-
 }

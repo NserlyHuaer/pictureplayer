@@ -11,7 +11,8 @@ public class ChangeFocusListener extends MouseAdapter {
         this.container = container;
     }
 
-    public void mouseReleased(MouseEvent e){
-        container.requestFocus();
+    public void mouseReleased(MouseEvent e) {
+        if (container != null)
+            container.requestFocus();
     }
 }
