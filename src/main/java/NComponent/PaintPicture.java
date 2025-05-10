@@ -107,12 +107,12 @@ public class PaintPicture extends JPanel {
         paintPicture = this;
         AtomicReference<ChangeFocusListener> changeFocusListener = new AtomicReference<>();
         init = new Thread(() -> {
-            changeFocusListener.set(new ChangeFocusListener(imageCanvas));
             setLayout(new BorderLayout());
             fullScreenWindow = new FullScreenWindow();
             //创建画布
             imageCanvas = new ImageCanvas();
             sizeOperate = new SizeOperate(imageCanvas, null);
+            changeFocusListener.set(new ChangeFocusListener(imageCanvas));
             setUnderPanel();
             setOnPanel(changeFocusListener.get());
         });
