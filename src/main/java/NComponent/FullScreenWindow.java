@@ -79,9 +79,6 @@ public class FullScreenWindow extends JFrame {
     private void $$$setupUI$$$() {
         panel1 = new JPanel();
         panel1.setLayout(new BorderLayout(0, 0));
-        final JPanel panel2 = new JPanel();
-        panel2.setLayout(new BorderLayout(0, 0));
-        panel1.add(panel2, BorderLayout.CENTER);
     }
 
     /**
@@ -90,4 +87,5 @@ public class FullScreenWindow extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
+
 }

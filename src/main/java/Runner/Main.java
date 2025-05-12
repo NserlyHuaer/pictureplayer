@@ -185,6 +185,7 @@ public class Main extends JFrame {
     public Main(String title) {
         super(title);
         $$$setupUI$$$();
+        init_PaintPicture.setPriority(Thread.MAX_PRIORITY);
         init_PaintPicture.start();
         new Thread(() -> {
             setUncaughtExceptionHandler(logger);

@@ -75,8 +75,8 @@ public class DownloadUpdate {
     //检查是否存在最新版本
     public boolean checkIfTheLatestVersion() throws IOException {
         StopToUpdate = false;
-        DownloadFile downloadFile = new DownloadFile(webSide, f.getPath());
         logger.info("Checking version...");
+        DownloadFile downloadFile = new DownloadFile(webSide, f.getPath());
         downloadFile.startToDownload();
 
         File path = new File(downloadFile.getSaveDir());

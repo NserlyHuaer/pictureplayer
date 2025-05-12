@@ -116,6 +116,7 @@ public class PaintPicture extends JPanel {
             setUnderPanel();
             setOnPanel(changeFocusListener.get());
         });
+        init.setPriority(Thread.MAX_PRIORITY);
         init.start();
         new Thread(() -> {
             Last = new JButton("<");

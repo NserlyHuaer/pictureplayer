@@ -1,6 +1,5 @@
 package Tools.File.ImageThumbnailManage;
 
-import Runner.Main;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

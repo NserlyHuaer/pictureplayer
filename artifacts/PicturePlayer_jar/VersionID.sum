@@ -1,17 +1,4 @@
 #此文件为更新文件，书写需一定规范
 #DDD:分割每个版本对应下载地址（每个版本之间下载地址需要隔开）（必须在开头，中间或左边没有空格）
 #*DESCRIBE*:描述本次更新内容（可以没有，须在描述文件左侧，文件格式必须是.txt或其他文本格式）（左右两边需要*,中间没有空格）
-DDD{1255}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta1.jar}
-DDD{1260}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta2.jar}
-DDD{1262}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta3.jar}
-DDD{1264}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta4.jar}
-DDD{1273}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta5.jar}
-DDD{1275}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta6.jar}
-DDD{1278}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta7.jar}
-DDD{1280}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta8.jar}
-DDD{1287/V1.0.0beta9}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta9.jar}*DESCRIBE*{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/Describe/1287.txt}
-DDD{1292/V1.0.0beta10}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta10.jar}*DESCRIBE*{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/Describe/1289.txt}
-DDD{1294/V1.0.0beta11}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta11.jar}*DESCRIBE*{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/Describe/1294.txt}
-DDD{1299/V1.0.0beta12}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta12.jar}*DESCRIBE*{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/Describe/1299.txt}
-DDD{1300/V1.0.0beta13}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta13.jar}*DESCRIBE*{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/Describe/1300.txt}
 DDD{1305/V1.0.0beta14}{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/V1.0.0beta14.jar}*DESCRIBE*{https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/Describe/1305.txt}
