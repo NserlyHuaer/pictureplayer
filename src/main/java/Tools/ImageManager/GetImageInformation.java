@@ -18,6 +18,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 public class GetImageInformation {
     public static final boolean isHardwareAccelerated;
@@ -126,27 +128,21 @@ public class GetImageInformation {
         return new Dimension(image.getWidth(null), image.getHeight(null));
     }
 
-    //算法实现：获取图片hashcode值
+    //算法实现：获取图片hashcode值（CRC32）
     public static String getHashcode(File file) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            FileInputStream fis = new FileInputStream(file);
-            byte[] buffer = new byte[1024];
+        try (FileInputStream fis = new FileInputStream(file)) {
+            Checksum crc = new CRC32();
+            byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = fis.read(buffer)) != -1) {
-                md.update(buffer, 0, bytesRead);
+                crc.update(buffer, 0, bytesRead);
             }
-            fis.close();
-            byte[] hashBytes = md.digest();
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException | IOException e) {
+            // 补零填充至 8 位，保证格式统一
+            return String.format("%08x", crc.getValue());
+        } catch (IOException e) {
             logger.error(e.getMessage());
+            return null;
         }
-        return null;
     }
 
     //算法实现：获取图片格式

@@ -38,6 +38,8 @@ public class PictureInformationStorageManagement implements Serializable {
         if (treeMap == null) treeMap = new TreeMap<>();
         File OriginalPicture = new File(OriginalPicturePath);
         if (!OriginalPicture.exists()) return OriginalPicturePath;
+        if (OriginalPicturePath.endsWith(".jpg") || OriginalPicturePath.endsWith(".png") || OriginalPicturePath.endsWith(".jpeg"))
+            return OriginalPicturePath;
         if (treeMap.containsKey(OriginalPicturePath)) {
             ArrayList<Object> pictureInformation = treeMap.get(OriginalPicturePath);
             File cachedPicture = new File(pictureInformation.get(1).toString());
@@ -52,7 +54,7 @@ public class PictureInformationStorageManagement implements Serializable {
         pictureInformation.add(savePath.getPath());
         writeImage(getImage(OriginalPicturePath), savePath.getPath(), saveType);
         pictureInformation.add(GetImageInformation.getHashcode(savePath));
-        treeMap.put(OriginalPicturePath,pictureInformation);
+        treeMap.put(OriginalPicturePath, pictureInformation);
         return savePath.getPath();
     }
 
