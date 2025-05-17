@@ -15,18 +15,29 @@ public class Init<KEY, VALUE> {
     private final File f = new File("data/configuration.ch");
     private final Properties properties = new Properties();
     private boolean EnableAutoUpdate;
-    private static final String[] createDirectory = {"data", "cache", "cache/thum", "download"};
+    private static final String[] createDirectory = {"data", "cache", "cache/PictureCache", "cache/thum", "download"};
+    private static final String[] createFile = {"data/PictureCacheManagement.obj"};
     private static final Logger logger = LoggerFactory.getLogger(Init.class);
 
     public static void init() {
         synchronized (isInit) {
             if (isInit.get()) return;
             File dire;
-            for (String directory : createDirectory) {
-                dire = new File(directory);
-                if (!dire.exists()) {
-                    dire.mkdir();
+            try {
+                for (String directory : createDirectory) {
+                    dire = new File(directory);
+                    if (!dire.exists()) {
+                        dire.mkdir();
+                    }
                 }
+                for (String file : createFile) {
+                    dire = new File(file);
+                    if (!dire.exists()) {
+                        dire.createNewFile();
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
             clearDirectory(new File("./download/"));
             clearDirectory(new File("replace.sh"));

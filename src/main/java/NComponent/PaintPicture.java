@@ -11,6 +11,7 @@ import Tools.EqualsProportion;
 import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.ImageRotationHelper;
 import Tools.ImageManager.MultiThreadBlur;
+import Tools.ImageManager.PictureInformationStorageManagement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +21,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -100,6 +100,8 @@ public class PaintPicture extends JPanel {
 
     public boolean isOnlyInit = true;
 
+    private PictureInformationStorageManagement pictureInformationStorageManagement;
+
     private Thread init;
 
     //构造方法（无参函数）（用于初始化）
@@ -107,6 +109,7 @@ public class PaintPicture extends JPanel {
         paintPicture = this;
         AtomicReference<ChangeFocusListener> changeFocusListener = new AtomicReference<>();
         init = new Thread(() -> {
+            Main.setUncaughtExceptionHandler(logger);
             setLayout(new BorderLayout());
             fullScreenWindow = new FullScreenWindow();
             //创建画布
@@ -149,6 +152,11 @@ public class PaintPicture extends JPanel {
             FullScreen.setText(Bundle.getMessage("Display_FullScreenButton"));
             init_Listener(changeFocusListener.get());
         }).start();
+        try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream("data/PictureCacheManagement.obj"))) {
+            pictureInformationStorageManagement = (PictureInformationStorageManagement) objectInputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            pictureInformationStorageManagement = new PictureInformationStorageManagement();
+        }
     }
 
     //构造方法（函数）（用于直接显示图片）
@@ -409,17 +417,7 @@ public class PaintPicture extends JPanel {
         logger.info("Opened:\"{}\"", path);
         if (isOnlyInit) {
             BufferedImage image = null;
-            try {
-                image = ImageIO.read(new File(path));
-                if (!(path.endsWith(".jpg") || path.endsWith(".png"))) {
-                    File output = new File("cache\\" + new File(path).getName() + ".png");
-                    ImageIO.write(image, "png", output);
-                    image.flush();
-                    image = ImageIO.read(output);
-                }
-            } catch (IOException e) {
-                logger.error("Error loading image \"{}\"", path);
-            }
+            image = PictureInformationStorageManagement.getImage(pictureInformationStorageManagement.getCachedPicturePath(path));
             try {
                 init.join();
             } catch (InterruptedException ignored) {
@@ -619,18 +617,7 @@ public class PaintPicture extends JPanel {
             }
             String finalPath = path;
             Thread t1 = new Thread(() -> {
-                try {
-                    image = ImageIO.read(new File(finalPath));
-                    if (!(finalPath.endsWith(".jpg") || finalPath.endsWith(".png"))) {
-                        File output = new File("cache\\" + new File(finalPath).getName() + ".png");
-                        ImageIO.write(image, "png", output);
-                        image.flush();
-                        image = ImageIO.read(output);
-                    }
-
-                } catch (IOException e) {
-                    logger.error("Error loading image \"{}\"", finalPath);
-                }
+                image = PictureInformationStorageManagement.getImage(pictureInformationStorageManagement.getCachedPicturePath(finalPath, picture_hashcode));
             });
             t1.start();
             repeat_changePicturePath(path, picture_hashcode);
@@ -688,6 +675,12 @@ public class PaintPicture extends JPanel {
 
         public void close() {
             removeAll();
+            try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream("data/PictureCacheManagement.obj"))) {
+                objectOutputStream.writeObject(pictureInformationStorageManagement);
+                objectOutputStream.flush();
+            } catch (IOException e) {
+                logger.error(Main.getExceptionMessage(e));
+            }
             image = BlurBufferedImage = null;
             path = lastPath = picture_hashcode = null;
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = lastRotationDegrees = RotationDegrees = 0;
@@ -1141,8 +1134,8 @@ public class PaintPicture extends JPanel {
                     new Thread(() -> {
                         if (e.getKeyCode() == KeyEvent.VK_ESCAPE && fullScreenWindow.isShowing()) {
                             PaintPicture.paintPicture.add(imageCanvas, BorderLayout.CENTER);
-                            fullScreenWindow.setVisible(false);
                             Main.main.setVisible(true);
+                            fullScreenWindow.setVisible(false);
                             sizeOperate.incomeWindowDimension(imageCanvas.getSize());
                             sizeOperate.update(false);
                             return;
