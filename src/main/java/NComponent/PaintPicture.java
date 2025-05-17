@@ -411,6 +411,12 @@ public class PaintPicture extends JPanel {
             BufferedImage image = null;
             try {
                 image = ImageIO.read(new File(path));
+                if (!(path.endsWith(".jpg") || path.endsWith(".png"))) {
+                    File output = new File("cache\\" + new File(path).getName() + ".png");
+                    ImageIO.write(image, "png", output);
+                    image.flush();
+                    image = ImageIO.read(output);
+                }
             } catch (IOException e) {
                 logger.error("Error loading image \"{}\"", path);
             }
@@ -615,6 +621,13 @@ public class PaintPicture extends JPanel {
             Thread t1 = new Thread(() -> {
                 try {
                     image = ImageIO.read(new File(finalPath));
+                    if (!(finalPath.endsWith(".jpg") || finalPath.endsWith(".png"))) {
+                        File output = new File("cache\\" + new File(finalPath).getName() + ".png");
+                        ImageIO.write(image, "png", output);
+                        image.flush();
+                        image = ImageIO.read(output);
+                    }
+
                 } catch (IOException e) {
                     logger.error("Error loading image \"{}\"", finalPath);
                 }
