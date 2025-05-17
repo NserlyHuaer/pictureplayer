@@ -1,6 +1,7 @@
 package NComponent;
 
 import Runner.Main;
+import Size.SizeOperate;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +11,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class FullScreenWindow extends JFrame {
-
     private JPanel panel1;
     private PaintPicture.ImageCanvas imageCanvas;
 
@@ -19,9 +19,9 @@ public class FullScreenWindow extends JFrame {
     }
 
     private void init() {
-//        setUndecorated(true);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        add(panel1);
+        setUndecorated(true);
+        setSize(SizeOperate.FreeOfScreenSize);
+        getContentPane().add(panel1);
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -50,6 +50,8 @@ public class FullScreenWindow extends JFrame {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         if (visible && imageCanvas != null) {
+            Main.main.paintPicture.sizeOperate.incomeWindowDimension(getSize());
+            Main.main.paintPicture.sizeOperate.update(false);
             imageCanvas.requestFocusInWindow();
         }
     }
