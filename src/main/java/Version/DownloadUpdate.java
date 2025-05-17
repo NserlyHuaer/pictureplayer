@@ -40,6 +40,8 @@ public class DownloadUpdate {
     private boolean StopToUpdate;
     private static final Logger logger = LoggerFactory.getLogger(DownloadUpdate.class);
 
+    private List<String> LastCheckForDownloadFileWebSide;
+
     public DownloadUpdate(String DownloadPath, String webSide) {
         this.webSide = webSide;
         f = new File(DownloadPath);
@@ -79,7 +81,7 @@ public class DownloadUpdate {
         DownloadFile downloadFile = new DownloadFile(webSide, f.getPath());
         downloadFile.startToDownload();
 
-        File path = new File(downloadFile.getSaveDir());
+        File path = new File(downloadFile.getSavePath());
         String lastLine = null;
         lastLine = ReverseSearch.get(path.getPath(), "DDD");
         logger.info("Version Configuration file is downloaded");
@@ -103,15 +105,23 @@ public class DownloadUpdate {
             //描述文件不下载
             list.remove(DescribeFileWebSide);
         }
+        path.delete();
+        list.removeFirst();
+        LastCheckForDownloadFileWebSide = list;
         if (NewVersionID <= Long.parseLong(Version.getVersionID())) {
-            path.delete();
             return false;
         }
-        list.removeFirst();
         downloadFileWebSide = list;
-        path.delete();
         logger.info("Discover a new version");
         return true;
+    }
+
+    //强制获取更新
+    public void ForceToGetUpdates() throws IOException {
+        if (LastCheckForDownloadFileWebSide == null) {
+            checkIfTheLatestVersion();
+        }
+        downloadFileWebSide = LastCheckForDownloadFileWebSide;
     }
 
     //一键下载所有文件(Map(Key:下载网站,Value:List[0]:文件存放路径;[1]下载类))[调用此方法时，推进使用新线程，否则窗体可能会无相应]
@@ -152,7 +162,7 @@ public class DownloadUpdate {
             if (isTry) CurrentDownloadingFile.retryToDownload();
             else CurrentDownloadingFile.startToDownload();
             List list = new ArrayList();
-            String cache = CurrentDownloadingFile.getSaveDir();
+            String cache = CurrentDownloadingFile.getSavePath();
             if (StopToUpdate) {
                 throw new UpdateException("Update ended,cause of User terminated software update");
             }

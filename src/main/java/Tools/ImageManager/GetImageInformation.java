@@ -168,6 +168,14 @@ public class GetImageInformation {
         return image.getColorModel().getPixelSize();
     }
 
+    //判断图片是否是java原本支持的（一般java原本支持的打开、操作image通常比较快，不需要进行图片转换）
+    public static boolean isOriginalJavaSupportedPictureType(String path) {
+        if (path.endsWith(".png") || path.endsWith(".jpeg") || path.endsWith(".jpg")) {
+            return true;
+        }
+        return false;
+    }
+
 
     //算法实现：获取最佳大小、坐标
     public static Rectangle getBestSize(String path) {

@@ -8,8 +8,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class DownloadFile {
     private static final int BUFFER_SIZE = 524288;//增加缓冲区大小（512KB缓冲区）
@@ -17,8 +15,14 @@ public class DownloadFile {
     public static final int ConnectionTimeout = 5000;
     //设置读取超时时间
     public static final int ReadTimeout = 5000;
+    //下载文件夹
+    final String saveDir;
+    //下载文件地址
     String fileURL;
-    String saveDir;
+    //下载时的文件路径
+    String downloadingPath;
+    //下载好后保存的文件路径
+    String savePath;
     Thread download;
     //当前下载文件总大小
     public long CurrentCompletedBytesRead;
@@ -43,17 +47,18 @@ public class DownloadFile {
 
     public DownloadFile(String fileURL, String saveDir) throws IOException {
         this.fileURL = fileURL;
+        saveDir = saveDir.replace("\\", "/");
+        if (!saveDir.endsWith("/")) saveDir += "/";
         this.saveDir = saveDir;
         File f = new File(saveDir);
         if (!f.exists()) {
             f.mkdir();
         }
-
     }
 
     //返回保存路径
-    public String getSaveDir() {
-        return saveDir;
+    public String getSavePath() {
+        return savePath;
     }
 
 
@@ -94,22 +99,20 @@ public class DownloadFile {
                     }
                 }
             }
-            String WA = saveDir;
+            downloadingPath = saveDir + RandomString.getRandomString(8);
             if (fileName != null) {
                 //如果Content-Disposition中有文件名，则使用它
-                saveDir = saveDir + "/" + fileName;
+                savePath = saveDir + fileName;
             } else {
                 String cache = fileURL;
                 if (cache.contains("?")) cache = cache.substring(0, cache.indexOf("?"));
-                saveDir = saveDir + "/" + cache.substring(fileURL.lastIndexOf("/") + 1);
+                savePath = saveDir + cache.substring(fileURL.lastIndexOf("/") + 1);
             }
-            File file = new File(saveDir);
-            if (file.exists()) saveDir = WA + "/" + RandomString.getRandomString(8);
             responseCode = httpURLConnection.getResponseCode();
             // 检查响应状态码是否为200（HTTP OK）
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 inputStream = new BufferedInputStream(httpURLConnection.getInputStream(), BUFFER_SIZE);
-                outputStream = new FileOutputStream(saveDir);
+                outputStream = new FileOutputStream(downloadingPath);
                 byte[] dataBuffer = new byte[BUFFER_SIZE];
                 int bytesRead;
                 CurrentCompletedBytesRead = 0;
@@ -123,6 +126,7 @@ public class DownloadFile {
 
                 while ((bytesRead = inputStream.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
                     if (stop) {
+                        stop = false;
                         httpURLConnection.disconnect();
                         return;
                     }
@@ -136,6 +140,7 @@ public class DownloadFile {
             } else {
                 logger.error("Invalid HTTP response code:{}", responseCode);
             }
+            if (outputStream != null) outputStream.flush();
             progress = 100;
         } catch (IOException e) {
             ioException = e;
@@ -155,6 +160,7 @@ public class DownloadFile {
             }
         }
         if (ioException != null) throw ioException;
+        new File(downloadingPath).renameTo(new File(savePath));
         isCompleted = true;
     }
 
@@ -168,7 +174,7 @@ public class DownloadFile {
                 startToDownload();
                 return;
             }
-            File outputFile = new File(saveDir);
+            File outputFile = new File(downloadingPath);
             connection = null;
             outputStream = null;
 
@@ -210,6 +216,7 @@ public class DownloadFile {
 
             while ((bytesRead = inputStream.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
                 if (stop) {
+                    stop = false;
                     connection.disconnect();
                     return;
                 }
@@ -234,6 +241,7 @@ public class DownloadFile {
                 connection.disconnect();
             }
             if (ioException != null) throw ioException;
+            new File(downloadingPath).renameTo(new File(savePath));
             isCompleted = true;
         }
     }

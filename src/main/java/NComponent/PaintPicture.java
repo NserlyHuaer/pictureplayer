@@ -15,7 +15,6 @@ import Tools.ImageManager.PictureInformationStorageManagement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -100,13 +99,18 @@ public class PaintPicture extends JPanel {
 
     public boolean isOnlyInit = true;
 
-    private PictureInformationStorageManagement pictureInformationStorageManagement;
+    public PictureInformationStorageManagement pictureInformationStorageManagement;
 
     private Thread init;
 
     //构造方法（无参函数）（用于初始化）
     public PaintPicture() {
         paintPicture = this;
+        try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream("data/PictureCacheManagement.obj"))) {
+            pictureInformationStorageManagement = (PictureInformationStorageManagement) objectInputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            pictureInformationStorageManagement = new PictureInformationStorageManagement();
+        }
         AtomicReference<ChangeFocusListener> changeFocusListener = new AtomicReference<>();
         init = new Thread(() -> {
             Main.setUncaughtExceptionHandler(logger);
@@ -152,11 +156,6 @@ public class PaintPicture extends JPanel {
             FullScreen.setText(Bundle.getMessage("Display_FullScreenButton"));
             init_Listener(changeFocusListener.get());
         }).start();
-        try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream("data/PictureCacheManagement.obj"))) {
-            pictureInformationStorageManagement = (PictureInformationStorageManagement) objectInputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            pictureInformationStorageManagement = new PictureInformationStorageManagement();
-        }
     }
 
     //构造方法（函数）（用于直接显示图片）
@@ -513,12 +512,11 @@ public class PaintPicture extends JPanel {
                 if (!isEnableHardware) return;
                 AtomicReference<Double> LastPercent = new AtomicReference<>((double) -9999999);
                 AtomicReference<String> LastPicture_hashcode = new AtomicReference<>("");
-                multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
                 timer = new Timer(400, e -> {
                     if (!isEnableHardware) return;
                     ((Timer) e.getSource()).stop(); // 停止计时器
                     new Thread(() -> {
-                        if (image != null) {
+                        if (image != null && multiThreadBlur != null && multiThreadBlur.getSrc() != null) {
                             if (!LastPicture_hashcode.get().equals(picture_hashcode)) {
                                 multiThreadBlur.flushSrc();
                                 multiThreadBlur.flushDest();
@@ -632,6 +630,7 @@ public class PaintPicture extends JPanel {
                     if (multiThreadBlur != null) multiThreadBlur.flushSrc();
                     image.flush();
                     image = BlurBufferedImage;
+                    multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
                 }
                 if (sizeOperate != null) sizeOperate.changeCanvas(this);
             }).start();
@@ -649,6 +648,7 @@ public class PaintPicture extends JPanel {
                 if (multiThreadBlur != null) multiThreadBlur.flushSrc();
                 image.flush();
                 this.image = BlurBufferedImage;
+                multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
             }
             if (sizeOperate != null) sizeOperate.changeCanvas(this);
         }
@@ -709,6 +709,10 @@ public class PaintPicture extends JPanel {
 
         //打开上一个/下一个图片
         public void openLONPicture(int sign) {
+            for (String path : CurrentPathOfPicture) {
+                File file = new File(path);
+                if (!file.exists()) CurrentPathOfPicture.remove(path);
+            }
             int CurrentIndex = CurrentPathOfPicture.indexOf(imageCanvas.path);
             switch (sign) {
                 case LastSign -> {

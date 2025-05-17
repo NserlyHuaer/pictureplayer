@@ -197,6 +197,13 @@ public class Main extends JFrame {
             setLocation(WindowLocation.ComponentCenter(null, getWidth(), getHeight()));
             setMinimumSize(new Dimension(680, 335));
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+            try {
+                init_PaintPicture.join();
+            } catch (InterruptedException e) {
+                logger.error(Main.getExceptionMessage(e));
+            }
+            paintPicture.pictureInformationStorageManagement.optimize();
         }).start();
         changeFocusListener = new ChangeFocusListener(this);
         init.Run();
@@ -461,8 +468,11 @@ public class Main extends JFrame {
             downloadUpdate.setWebSide(UPDATE_WEBSITE);
             try {
                 if (!downloadUpdate.checkIfTheLatestVersion()) {
-                    JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("NoAnyUpdate_Content"), Bundle.getMessage("NoAnyUpdate_Title"), JOptionPane.YES_NO_OPTION);
-                    return;
+                    int choice = JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("NoAnyUpdate_Content_First") + "\n" + Bundle.getMessage("NoAnyUpdate_Content_Second"), Bundle.getMessage("NoAnyUpdate_Title"), JOptionPane.YES_NO_OPTION);
+                    if (choice != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                    downloadUpdate.ForceToGetUpdates();
                 }
             } catch (IOException e1) {
                 logger.error(getExceptionMessage(e1));
