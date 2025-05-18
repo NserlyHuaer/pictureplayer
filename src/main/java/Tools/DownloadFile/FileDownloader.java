@@ -1,5 +1,6 @@
 package Tools.DownloadFile;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,8 @@ public class FileDownloader implements Runnable {
     private final AtomicBoolean isStopped = new AtomicBoolean(false);
     private final AtomicBoolean isCompleted = new AtomicBoolean(false);
     private final AtomicLong bytesRead = new AtomicLong(0);
+    // 状态获取方法
+    @Getter
     private volatile long fileSize = -1;
     private volatile double downloadProgress = 0;
     private volatile double bytesPerSecond = 0;
@@ -184,8 +187,13 @@ public class FileDownloader implements Runnable {
 
                 return connection;
             } catch (IOException e) {
-                if (retry == 3) throw e;
-                logger.warn("Connection failed, retrying... ({}/3)", retry);
+                if (downloadErrorHandler != null)
+                    downloadErrorHandler.handler(e, this);
+                else {
+                    if (retry == 3) throw e;
+                    logger.warn("Connection failed, retrying... ({}/3)", retry);
+
+                }
             }
         }
         throw new IOException("Failed to establish connection after 3 attempts");
@@ -397,7 +405,10 @@ public class FileDownloader implements Runnable {
             int slashIndex = path.lastIndexOf('/');
             return slashIndex == -1 ? path : path.substring(slashIndex + 1);
         } catch (MalformedURLException e) {
-            logger.error("Invalid URL format: {}", sourceUrl, e);
+            if (downloadErrorHandler != null)
+                downloadErrorHandler.handler(e, this);
+            else
+                logger.error("Invalid URL format: {}", sourceUrl, e);
             return "unknown_file";
         }
     }
@@ -412,11 +423,6 @@ public class FileDownloader implements Runnable {
         downloadProgress = 0;
         bytesPerSecond = 0;
         remainingTime = -1;
-    }
-
-    // 状态获取方法
-    public long getFileSize() {
-        return fileSize;
     }
 
     public double getProgress() {

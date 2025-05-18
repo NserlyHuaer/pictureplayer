@@ -3,6 +3,7 @@ package NComponent;
 import Command.CommandCenter;
 import Loading.Bundle;
 import Runner.Main;
+import Tools.DownloadFile.FileDownloader;
 import Tools.String.Formation;
 import Version.DownloadUpdate;
 import org.slf4j.Logger;
@@ -99,7 +100,7 @@ public class AdvancedDownloadSpeed {
                 int currentProgressFile = downloadUpdate.HaveDownloadedFile;
                 totalProgress.setMaximum(downloadUpdate.getUpdateWebSide().size() * 100);
                 if (downloadUpdate.CurrentFileDownloader.isCompleted()) {
-                    if (downloadUpdate.CurrentFileDownloader.getRemainingSeconds() != -1) {
+                    if (downloadUpdate.CurrentFileDownloader.getFileSize() != -1) {
                         currentFormation = TotalFormation1;
                     } else {
                         currentFormation = TotalFormation2;
@@ -127,7 +128,7 @@ public class AdvancedDownloadSpeed {
                     if (currentFormation == null) currentFormation = TotalFormation1;
                     currentFormation.add("Speed", formatSpeed(downloadUpdate.CurrentFileDownloader.getSpeedBytesPerSecond()));
                     currentFormation.add("FinishedSize", formatBytes(downloadUpdate.CurrentFileDownloader.getBytesRead()));
-                    if (downloadUpdate.CurrentFileDownloader.getRemainingSeconds() != -1) {
+                    if (downloadUpdate.CurrentFileDownloader.getFileSize() != -1) {
                         currentFormation.add("TotalSize", formatBytes(downloadUpdate.CurrentFileDownloader.getFileSize()));
                         currentFormation.add("NeedTime", formatTimes(downloadUpdate.CurrentFileDownloader.getRemainingSeconds()));
                     }
