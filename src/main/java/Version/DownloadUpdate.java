@@ -7,6 +7,7 @@ import Tools.DownloadFile.FileDownloader;
 import Tools.File.ReverseSearch;
 import Tools.String.Formation;
 import Exception.UpdateException;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ import java.util.regex.Pattern;
 
 public class DownloadUpdate {
     File f;
+    @Setter
     String webSide;
     public List<String> downloadFileWebSide;
     public int TotalDownloadingFile;
@@ -52,10 +54,6 @@ public class DownloadUpdate {
     public DownloadUpdate(String webSide) {
         this.webSide = webSide;
         setDefaultDownloadPath();
-    }
-
-    public void setWebSide(String webSide) {
-        this.webSide = webSide;
     }
 
     public void setDefaultDownloadPath() {

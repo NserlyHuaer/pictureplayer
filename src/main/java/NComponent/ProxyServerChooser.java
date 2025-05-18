@@ -199,8 +199,8 @@ public class ProxyServerChooser extends JDialog {
                 addElement(ProxyServerName, ProxyServerAddress);
             else {
                 if (handle.getProxyServerAddress(ProxyServerName).equals(ProxyServerAddress)) return;
-                formation.change("originalProxyServerAddress", handle.getProxyServerAddress(ProxyServerName));
-                formation.change("newProxyServerAddress", ProxyServerAddress);
+                formation.add("originalProxyServerAddress", handle.getProxyServerAddress(ProxyServerName));
+                formation.add("newProxyServerAddress", ProxyServerAddress);
                 if (JOptionPane.showConfirmDialog(this, formation.getProcessingString(), Bundle.getMessage("AddProxyServer_ErrorMessage_Title"), JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
                     handle.delete(ProxyServerName);
                     tableModel.setValueAt(ProxyServerAddress, findRowIndexByColumnContent(0, ProxyServerName), 1);

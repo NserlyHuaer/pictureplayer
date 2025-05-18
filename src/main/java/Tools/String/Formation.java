@@ -84,11 +84,29 @@ public class Formation {
      * @param value    改变它的值
      * @return
      */
-    public void change(String revalued, String value) {//revalued文本,value改变值
-        if (keys.contains(revalued)) {
-            information.remove(revalued);
-            information.put(revalued, value);
-        }
+    public void add(String revalued, String value) {//revalued文本,value改变值
+        information.remove(revalued);
+        information.put(revalued, value);
+    }
+
+    /**
+     * 改变字符串
+     *
+     * @param hashMap 添加整个到information
+     * @return
+     */
+    public void add(HashMap<String, String> hashMap) {//revalued文本,value改变值
+        information.putAll(hashMap);
+    }
+
+    /**
+     * 改变字符串
+     *
+     * @param hashMap 删除information并且添加整个hashMap到information
+     * @return
+     */
+    public void RemoveAndAdd(HashMap<String, String> hashMap) {//revalued文本,value改变值
+        information = (HashMap<String, String>) hashMap.clone();
     }
 
     public List<String> getArray() {

@@ -61,8 +61,8 @@ public class ConfirmUpdateDialog extends JDialog {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
         Formation formation = new Formation(Title.getText());
-        formation.change("version", update.NewVersionName);
-        formation.change("versionID", String.valueOf(update.NewVersionID));
+        formation.add("version", update.NewVersionName);
+        formation.add("versionID", String.valueOf(update.NewVersionID));
         Title.setText(formation.getProcessingString().toString());
         List map = update.downloadDescribe();
         if (!(map == null || map.isEmpty())) {
