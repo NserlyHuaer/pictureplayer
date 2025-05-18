@@ -187,13 +187,10 @@ public class FileDownloader implements Runnable {
 
                 return connection;
             } catch (IOException e) {
-                if (downloadErrorHandler != null)
-                    downloadErrorHandler.handler(e, this);
-                else {
-                    if (retry == 3) throw e;
-                    logger.warn("Connection failed, retrying... ({}/3)", retry);
+                if (retry == 3) throw e;
+                logger.warn("Connection failed, retrying... ({}/3)", retry);
 
-                }
+
             }
         }
         throw new IOException("Failed to establish connection after 3 attempts");
@@ -405,10 +402,7 @@ public class FileDownloader implements Runnable {
             int slashIndex = path.lastIndexOf('/');
             return slashIndex == -1 ? path : path.substring(slashIndex + 1);
         } catch (MalformedURLException e) {
-            if (downloadErrorHandler != null)
-                downloadErrorHandler.handler(e, this);
-            else
-                logger.error("Invalid URL format: {}", sourceUrl, e);
+            logger.error("Invalid URL format: {}", sourceUrl, e);
             return "unknown_file";
         }
     }

@@ -2,6 +2,8 @@ package Version;
 
 
 import Loading.Bundle;
+import NComponent.DownloadUpdateFrame;
+import Runner.Main;
 import Tools.DownloadFile.FileDownloader;
 import Tools.File.FileContents;
 import Exception.UpdateException;
@@ -18,6 +20,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DownloadUpdate {
     File f;
@@ -96,9 +99,14 @@ public class DownloadUpdate {
         StopToUpdate = false;
         isChecked = true;
         logger.info("Checking version...");
-        FileDownloader fileDownloader = new FileDownloader(webSide, f.getPath());
-        fileDownloader.startDownload();
 
+        AtomicReference<IOException> exception = new AtomicReference<>();
+        FileDownloader fileDownloader = new FileDownloader(webSide, f.getPath());
+        fileDownloader.setDownloadErrorHandler((e, f) -> {
+            exception.set(e);
+        });
+        fileDownloader.startDownload();
+        if (exception.get() != null) throw exception.get();
         versionID = VersionID.gson.fromJson(FileContents.read(fileDownloader.getFinalPath()), VersionID.class);
         new File(fileDownloader.getFinalPath()).delete();
         if (versionID != null) {
@@ -108,7 +116,9 @@ public class DownloadUpdate {
             NewVersionName = VersionID.getString(versionID.getNormalVersion(), versionID.getSpecialFields());
         }
 
-        MainFileWebSite = VersionID.getString(versionID.getNormalVersionMainFile(), versionID.getSpecialFields());
+        if (versionID != null) {
+            MainFileWebSite = VersionID.getString(versionID.getNormalVersionMainFile(), versionID.getSpecialFields());
+        }
         DependenciesWebSite = new ArrayList<>();
         TreeMap<String, String> cache = versionID.getNormalDependencies();
         if (cache != null)
@@ -173,6 +183,9 @@ public class DownloadUpdate {
                     download(down, finalA, true);
                 } else {
                     CurrentFileDownloader.stopDownload();
+                    DownloadUpdateFrame.downloadUpdateFrame.dispose();
+                    Main.main.setVisible(true);
+                    stopToUpdate();
                 }
             });
             logger.info("Downloading " + down);
