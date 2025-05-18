@@ -15,7 +15,7 @@ public class Init<KEY, VALUE> {
     private final File f = new File("data/configuration.ch");
     private final Properties properties = new Properties();
     private boolean EnableAutoUpdate;
-    private static final String[] createDirectory = {"data", "cache", "cache/PictureCache", "cache/thum", "download"};
+    private static final String[] createDirectory = {"data", "lib", "cache", "cache/PictureCache", "cache/thum", "download"};
     private static final String[] createFile = {"data/PictureCacheManagement.obj"};
     private static final Logger logger = LoggerFactory.getLogger(Init.class);
 

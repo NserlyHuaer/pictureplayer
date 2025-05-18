@@ -106,7 +106,8 @@ public class Formation {
      * @return
      */
     public void RemoveAndAdd(HashMap<String, String> hashMap) {//revalued文本,value改变值
-        information = (HashMap<String, String>) hashMap.clone();
+        if (hashMap != null)
+            information = (HashMap<String, String>) hashMap.clone();
     }
 
     public List<String> getArray() {

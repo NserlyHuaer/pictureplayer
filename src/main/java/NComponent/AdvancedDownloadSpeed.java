@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AdvancedDownloadSpeed {
     private static DecimalFormat decimalFormat = new DecimalFormat("#.##");
@@ -50,7 +50,7 @@ public class AdvancedDownloadSpeed {
         currentFileProgress.setStringPainted(true);
 
         DaemonUpdate = new Thread(() -> {
-            Map<String, List> map = downloadUpdate.download();
+            Map<String, ArrayList> map = downloadUpdate.download();
             if (map == null) {
                 DownloadUpdateFrame.downloadUpdateFrame.dispose();
                 return;
@@ -65,7 +65,13 @@ public class AdvancedDownloadSpeed {
                     }
                 }
                 if (!isFound) return;
-                CommandCenter.moveFileToDirectory((String) map.get(website).getFirst());
+                ArrayList<String> arrayList = new ArrayList<>();
+                for (String s : map.keySet()) {
+                    arrayList.add((String) map.get(s).getFirst());
+                }
+                arrayList.remove((String) map.get(downloadUpdate.MainFileWebSite).getFirst());
+                CommandCenter.moveFileToLibDirectory(arrayList);
+                CommandCenter.moveFileToDirectory((String) map.get(downloadUpdate.MainFileWebSite).getFirst());
                 String osType = CommandCenter.detectOSType();
                 String OpenedPicturePath = null;
                 if (Main.main != null && Main.main.paintPicture != null && Main.main.paintPicture.imageCanvas != null) {
@@ -74,16 +80,14 @@ public class AdvancedDownloadSpeed {
 
                 CommandCenter.executeOSSpecificCommands(osType, (String) map.get(website).getFirst(), OpenedPicturePath);
             } catch (IOException | NoClassDefFoundError | ExceptionInInitializerError e) {
-                logger.error(e.toString());
+                logger.error(Main.getExceptionMessage(e));
                 JOptionPane.showMessageDialog(DownloadUpdateFrame.downloadUpdateFrame, Bundle.getMessage("UpdateError_Content") + "\nCaused by:" + e, Bundle.getMessage("UpdateError_Title"), JOptionPane.ERROR_MESSAGE);
                 DownloadUpdateFrame.downloadUpdateFrame.dispose();
                 Main.main.setVisible(true);
             }
         });
         DaemonUpdate.start();
-        new Thread(() -> {
-            simulateDownload();
-        }).start();
+        simulateDownload();
     }
 
 

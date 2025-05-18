@@ -9,11 +9,17 @@ import java.io.IOException;
 
 public class FileContents {
     private static final Logger logger = LoggerFactory.getLogger(FileContents.class);
+
     public static String read(String path) {
+        StringBuilder stringBuilder = new StringBuilder();
+        char[] buffer = new char[102400];
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(path))) {
-            char[] buffer = new char[102400];
-            int complete = bufferedReader.read(buffer);
-            return new String(buffer, 0, complete);
+            while (true) {
+                int index = bufferedReader.read(buffer);
+                if (index == -1)
+                    return stringBuilder.toString();
+                stringBuilder.append(new String(buffer, 0, index));
+            }
         } catch (IOException e) {
             logger.error(e.getMessage());
         }

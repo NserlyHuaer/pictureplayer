@@ -1,5 +1,6 @@
 package Command;
 
+import Version.DownloadUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
 import java.util.Base64;
 
 public class CommandCenter {
@@ -27,11 +29,30 @@ public class CommandCenter {
     }
 
 
-    public static void moveFileToDirectory(String DownloadFilePath) throws IOException {
-        Path sourcePath = Path.of(DownloadFilePath);
-        Path destinationPath = Path.of("./" + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1));
+    public static void moveFileToDirectory(String DownloadMainFilePath) throws IOException {
+        DownloadMainFilePath = DownloadMainFilePath.replace("\\", "/");
+        Path sourcePath = Path.of(DownloadMainFilePath);
+        Path destinationPath = Path.of("./" + DownloadMainFilePath.substring(DownloadMainFilePath.lastIndexOf("/") + 1));
         Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-        logger.info("File moved successfully.");
+        logger.info("Main File moved successfully.");
+    }
+
+    public static void moveFileToLibDirectory(ArrayList<String> DownloadLibFilePath) throws IOException {
+        for (String string : DownloadLibFilePath) {
+            string = string.replace("\\", "/");
+            String fileName = new File(string).getName();
+            int LastIndex1 = fileName.lastIndexOf("-");
+            if (LastIndex1 == -1) {
+                LastIndex1 = fileName.lastIndexOf(".jar");
+            }
+            if (DownloadUpdate.DependenciesName.contains(fileName.substring(0, LastIndex1))) {
+                new File(string).delete();
+            }
+            Path sourcePath = Path.of(string);
+            Path destinationPath = Path.of("./lib/" + string.substring(string.lastIndexOf("/") + 1));
+            Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+        }
+        logger.info("Lib File moved successfully.");
     }
 
     public static String detectOSType() {
@@ -83,7 +104,7 @@ public class CommandCenter {
                         + "del \".\\" + CURRENT_JAR_NAME + "\"\n"
                         + "ren \"" + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + "\" \"" + CURRENT_JAR_NAME + "\"\n" +
                         "cls\n"
-                        + "\"" + System.getProperty("sun.boot.library.path") + "\\java.exe\" -jar -Dsun.java2d.opengl=true \".\\" + CURRENT_JAR_NAME + "\" ";
+                        + "\"" + System.getProperty("sun.boot.library.path") + "\\java.exe\" -cp \"" + CURRENT_JAR_NAME + ";lib\\*\" Runner.Main -Dsun.java2d.opengl=true ";
         if (OpenedPicturePath != null && !OpenedPicturePath.isBlank()) {
             batchContent = batchContent + "\"" + OpenedPicturePath + "\"";
         }

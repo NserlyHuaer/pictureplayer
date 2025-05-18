@@ -1,6 +1,10 @@
 package Version;
 
 import Tools.String.Formation;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +14,13 @@ import java.util.TreeMap;
 @Getter
 @Setter
 public class VersionID {
+    @Expose(serialize = false, deserialize = false) // 既不能序列化，也不能反序列化
+    public static final Gson gson = new GsonBuilder()
+            .serializeNulls()
+            .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY) // 字段名直接匹配 JSON key
+            .enableComplexMapKeySerialization()
+            .create();
+
     //最新外部版本（稳定）
     private String NormalVersion;
 
@@ -19,8 +30,12 @@ public class VersionID {
     //最新稳定版本描述文件网址
     private String NormalVersionDescribe;
 
+    //最新稳定版本主文件网址（xxx.jar）
+    private String NormalVersionMainFile;
+
     //最新稳定版依赖（key:依赖名 ; value:依赖下载地址）
     private TreeMap<String, String> NormalDependencies;
+
 
     //最新外部版本（测试）
     private String TestVersion;
@@ -29,7 +44,10 @@ public class VersionID {
     private String TestVersionID;
 
     //最新测试版本描述文件网址
-    private TreeMap<String, String> TestVersionDescribe;
+    private String TestVersionDescribe;
+
+    //最新稳定版本主文件网址（xxx.jar）
+    private String TestVersionMainFile;
 
     //最新测试版依赖（key:依赖名 ; value:依赖下载地址）
     private TreeMap<String, String> TestDependencies;

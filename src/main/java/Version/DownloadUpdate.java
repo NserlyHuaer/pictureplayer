@@ -4,8 +4,7 @@ package Version;
 import Loading.Bundle;
 import Tools.DownloadFile.DownloadFile;
 import Tools.DownloadFile.FileDownloader;
-import Tools.File.ReverseSearch;
-import Tools.String.Formation;
+import Tools.File.FileContents;
 import Exception.UpdateException;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -20,14 +19,16 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DownloadUpdate {
     File f;
     @Setter
     String webSide;
-    public List<String> downloadFileWebSide;
+    public List<String> downloadFileWebSite;
+
+    public String MainFileWebSite;
+
+    public ArrayList<String> DependenciesWebSite;
     public int TotalDownloadingFile;
     public int HaveDownloadedFile;
     public FileDownloader CurrentFileDownloader;
@@ -37,13 +38,31 @@ public class DownloadUpdate {
     private static boolean EnableSecureConnection = true;
     public long NewVersionID = 0;
     public String NewVersionName = "";
-    public String DescribeFileWebSide = "";
+    public VersionID versionID;
     // 定义选项内容
     private Object[] options = {Bundle.getMessage("DownloadUpdateOptions_1st"), Bundle.getMessage("DownloadUpdateOptions_2nd"), Bundle.getMessage("DownloadUpdateOptions_3rd")};
     private boolean StopToUpdate;
     private static final Logger logger = LoggerFactory.getLogger(DownloadUpdate.class);
 
-    private List<String> LastCheckForDownloadFileWebSide;
+    private static boolean isChecked = false;
+
+    public static final ArrayList<String> DependenciesName = new ArrayList<>();
+
+
+    static {
+        File[] files = new File("lib").listFiles();
+        if (files != null)
+            for (File file : files) {
+                String fileName = file.getName();
+                if (file.isFile() && fileName.endsWith(".jar")) {
+                    int LastIndex1 = fileName.lastIndexOf("-");
+                    if (LastIndex1 == -1) {
+                        LastIndex1 = fileName.lastIndexOf(".jar");
+                    }
+                    DependenciesName.add(fileName.substring(0, LastIndex1));
+                }
+            }
+    }
 
     public DownloadUpdate(String DownloadPath, String webSide) {
         this.webSide = webSide;
@@ -63,70 +82,63 @@ public class DownloadUpdate {
     //更新最新版本
     public List<String> getUpdateWebSide() {
         StopToUpdate = false;
-        if (!(downloadFileWebSide != null && !downloadFileWebSide.isEmpty())) {
+        if (!isChecked) {
             try {
-                checkIfTheLatestVersion();
+                return checkIfTheLatestVersion() ? downloadFileWebSite : null;
             } catch (IOException e) {
                 logger.error(e.getMessage());
             }
         }
-        return downloadFileWebSide;
+        return downloadFileWebSite;
     }
 
     //检查是否存在最新版本
     public boolean checkIfTheLatestVersion() throws IOException {
         StopToUpdate = false;
+        isChecked = true;
         logger.info("Checking version...");
         DownloadFile downloadFile = new DownloadFile(webSide, f.getPath());
         downloadFile.startToDownload();
 
-        File path = new File(downloadFile.getSavePath());
-        String lastLine = null;
-        lastLine = ReverseSearch.get(path.getPath(), "DDD");
-        logger.info("Version Configuration file is downloaded");
-        if (lastLine == null) {
-            logger.error("You can't query the latest version from the version profile");
-            return false;
+        versionID = VersionID.gson.fromJson(FileContents.read(downloadFile.getSavePath()), VersionID.class);
+        new File(downloadFile.getSavePath()).delete();
+        if (versionID != null) {
+            NewVersionID = Long.parseLong(VersionID.getString(versionID.getNormalVersionID(), versionID.getSpecialFields()));
         }
-        lastLine = lastLine.substring(3);
-        Formation formation = new Formation(lastLine);
-        List<String> list = formation.getArray();
-        String version = list.getFirst();
-        NewVersionID = Long.parseLong(version.substring(0, version.indexOf("/")));
-        NewVersionName = version.substring(version.indexOf("/") + 1);
-        logger.info("The latest version in the version configuration file:{}({})", NewVersionName, NewVersionID);
-        //判断描述文件是否存在，如果存在就在下载列表中删除
-        Pattern pattern = Pattern.compile("\\*DESCRIBE\\*\\{(.*?)\\}");
-        Matcher matcher = pattern.matcher(lastLine);
-        if (matcher.find()) {
-            logger.info("Describe Version File was found");
-            DescribeFileWebSide = matcher.group(1);
-            //描述文件不下载
-            list.remove(DescribeFileWebSide);
+        if (versionID != null) {
+            NewVersionName = VersionID.getString(versionID.getNormalVersion(), versionID.getSpecialFields());
         }
-        path.delete();
-        list.removeFirst();
-        LastCheckForDownloadFileWebSide = list;
+
+        MainFileWebSite = VersionID.getString(versionID.getNormalVersionMainFile(), versionID.getSpecialFields());
+        DependenciesWebSite = new ArrayList<>();
+        TreeMap<String, String> cache = versionID.getNormalDependencies();
+        if (cache != null)
+            for (String key : cache.keySet()) {
+                String dependenciesName = VersionID.getString(key, versionID.getSpecialFields());
+                if (!DependenciesName.contains(dependenciesName))
+                    DependenciesWebSite.add(VersionID.getString(cache.get(key), versionID.getSpecialFields()));
+            }
+        downloadFileWebSite = (ArrayList<String>) DependenciesWebSite.clone();
+        downloadFileWebSite.add(MainFileWebSite);
+
         if (NewVersionID <= Long.parseLong(Version.getVersionID())) {
             return false;
         }
-        downloadFileWebSide = list;
         logger.info("Discover a new version");
         return true;
     }
 
     //强制获取更新
     public void ForceToGetUpdates() throws IOException {
-        if (LastCheckForDownloadFileWebSide == null) {
+        if (!isChecked) {
             checkIfTheLatestVersion();
         }
-        downloadFileWebSide = LastCheckForDownloadFileWebSide;
     }
 
     //一键下载所有文件(Map(Key:下载网站,Value:List[0]:文件存放路径;[1]下载类))[调用此方法时，推进使用新线程，否则窗体可能会无相应]
-    public Map<String, List> download(List<String> downloadWebSide) {
+    public Map<String, ArrayList> download(List<String> downloadWebSide) {
         StopToUpdate = false;
-        Map<String, List> finalA = new HashMap<>();
+        Map<String, ArrayList> finalA = new HashMap<>();
         if (downloadWebSide == null) return null;
         int index = 0;
         TotalDownloadingFile = downloadWebSide.size();
@@ -151,7 +163,7 @@ public class DownloadUpdate {
     }
 
     //返回值：0.下载完成 1.跳过当前文件 2.取消下载
-    private int download(String down, Map<String, List> finalA, boolean isTry) {
+    private int download(String down, Map<String, ArrayList> finalA, boolean isTry) {
         try {
             if (StopToUpdate) {
                 throw new UpdateException("Update ended,cause of User terminated software update");
@@ -167,7 +179,7 @@ public class DownloadUpdate {
             logger.info("Downloading " + down);
             if (!EnableSecureConnection) logger.warn("The connection is not secure from {}!", down);
             CurrentFileDownloader.startDownload();
-            List list = new ArrayList();
+            ArrayList list = new ArrayList();
             String cache = CurrentFileDownloader.getFinalPath();
             if (StopToUpdate) {
                 throw new UpdateException("Update ended,cause of User terminated software update");
@@ -195,7 +207,7 @@ public class DownloadUpdate {
     }
 
     //一键下载所有文件(Map(Key:下载网站,Value:List[0]:文件存放路径;[1]下载类))[调用此方法时，推进使用新线程，否则窗体可能会无相应]
-    public Map<String, List> download() {
+    public Map<String, ArrayList> download() {
         StopToUpdate = false;
         return download(getUpdateWebSide());
     }
@@ -204,6 +216,7 @@ public class DownloadUpdate {
     public List downloadDescribe() {
         logger.info("Start downloading describe version file...");
         StopToUpdate = false;
+        String DescribeFileWebSide = VersionID.getString(versionID.getNormalVersionDescribe(), versionID.getSpecialFields());
         if (!(DescribeFileWebSide == null) && !DescribeFileWebSide.isEmpty()) {
             return download(Collections.singletonList(DescribeFileWebSide)).get(DescribeFileWebSide);
         }
