@@ -2,7 +2,6 @@ package Version;
 
 
 import Loading.Bundle;
-import Tools.DownloadFile.DownloadFile;
 import Tools.DownloadFile.FileDownloader;
 import Tools.File.FileContents;
 import Exception.UpdateException;
@@ -97,11 +96,11 @@ public class DownloadUpdate {
         StopToUpdate = false;
         isChecked = true;
         logger.info("Checking version...");
-        DownloadFile downloadFile = new DownloadFile(webSide, f.getPath());
-        downloadFile.startToDownload();
+        FileDownloader fileDownloader = new FileDownloader(webSide, f.getPath());
+        fileDownloader.startDownload();
 
-        versionID = VersionID.gson.fromJson(FileContents.read(downloadFile.getSavePath()), VersionID.class);
-        new File(downloadFile.getSavePath()).delete();
+        versionID = VersionID.gson.fromJson(FileContents.read(fileDownloader.getFinalPath()), VersionID.class);
+        new File(fileDownloader.getFinalPath()).delete();
         if (versionID != null) {
             NewVersionID = Long.parseLong(VersionID.getString(versionID.getNormalVersionID(), versionID.getSpecialFields()));
         }
