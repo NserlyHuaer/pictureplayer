@@ -99,7 +99,7 @@ public class DownloadFile {
                     }
                 }
             }
-            downloadingPath = saveDir + RandomString.getRandomString(8);
+            downloadingPath = saveDir + RandomString.getRandomString(8)+".download";
             if (fileName != null) {
                 //如果Content-Disposition中有文件名，则使用它
                 savePath = saveDir + fileName;

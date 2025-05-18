@@ -94,8 +94,8 @@ public class AdvancedDownloadSpeed {
                 int totalFile = downloadUpdate.TotalDownloadingFile;
                 int currentProgressFile = downloadUpdate.HaveDownloadedFile;
                 totalProgress.setMaximum(downloadUpdate.getUpdateWebSide().size() * 100);
-                if (downloadUpdate.CurrentDownloadingFile.isCompleted) {
-                    if (downloadUpdate.CurrentDownloadingFile.isGettingFileSize) {
+                if (downloadUpdate.CurrentFileDownloader.isCompleted()) {
+                    if (downloadUpdate.CurrentFileDownloader.getRemainingSeconds() != -1) {
                         currentFormation = TotalFormation1;
                     } else {
                         currentFormation = TotalFormation2;
@@ -106,7 +106,7 @@ public class AdvancedDownloadSpeed {
                     ((Timer) actionEvent.getSource()).stop(); // 停止计时器
                 } else {
                     // 更新总进度
-                    totalProgress.setValue((100 * currentProgressFile + (int) downloadUpdate.CurrentDownloadingFile.progress));
+                    totalProgress.setValue((100 * currentProgressFile + (int) downloadUpdate.CurrentFileDownloader.getProgress()));
                     totalFormation.change("current", String.valueOf(currentProgressFile + 1));
                     DownloadCountings.setText(totalFormation.getProcessingString());
                 }
@@ -116,21 +116,21 @@ public class AdvancedDownloadSpeed {
         final Timer fileTimer = new Timer(350, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (downloadUpdate.CurrentDownloadingFile == null) return;
-                if (downloadUpdate.CurrentDownloadingFile.progress < 100) {
+                if (downloadUpdate.CurrentFileDownloader == null) return;
+                if (downloadUpdate.CurrentFileDownloader.getProgress() < 100) {
                     // 更新当前文件进度
-                    currentFileProgress.setValue((int) downloadUpdate.CurrentDownloadingFile.progress);
+                    currentFileProgress.setValue((int) downloadUpdate.CurrentFileDownloader.getProgress());
                     if (currentFormation == null) currentFormation = TotalFormation1;
-                    currentFormation.change("Speed", formatSpeed(downloadUpdate.CurrentDownloadingFile.BytesPerSecond));
-                    currentFormation.change("FinishedSize", formatBytes(downloadUpdate.CurrentDownloadingFile.CurrentCompletedBytesRead));
-                    if (downloadUpdate.CurrentDownloadingFile.isGettingFileSize) {
-                        currentFormation.change("TotalSize", formatBytes(downloadUpdate.CurrentDownloadingFile.fileSize));
-                        currentFormation.change("NeedTime", formatTimes(downloadUpdate.CurrentDownloadingFile.NeedDownloadTime));
+                    currentFormation.change("Speed", formatSpeed(downloadUpdate.CurrentFileDownloader.getSpeedBytesPerSecond()));
+                    currentFormation.change("FinishedSize", formatBytes(downloadUpdate.CurrentFileDownloader.getBytesRead()));
+                    if (downloadUpdate.CurrentFileDownloader.getRemainingSeconds() != -1) {
+                        currentFormation.change("TotalSize", formatBytes(downloadUpdate.CurrentFileDownloader.getFileSize()));
+                        currentFormation.change("NeedTime", formatTimes(downloadUpdate.CurrentFileDownloader.getRemainingSeconds()));
                     }
                     speedLabel.setText(currentFormation.getProcessingString());
                 } else {
                     currentFileProgress.setValue(100);
-                    speedLabel.setText("0B/s - " + formatBytes(downloadUpdate.CurrentDownloadingFile.CurrentCompletedBytesRead));
+                    speedLabel.setText("0B/s - " + formatBytes(downloadUpdate.CurrentFileDownloader.getBytesRead()));
                     ((Timer) actionEvent.getSource()).stop(); // 停止计时器
                 }
             }
@@ -142,7 +142,7 @@ public class AdvancedDownloadSpeed {
 
 
     private String formatSpeed(double bytesPerSecond) {
-        return formatBytes(bytesPerSecond) + "/s";
+        return formatBytes(bytesPerSecond) + "B/s";
     }
 
     public static String formatBytes(double bytes) {
@@ -155,7 +155,7 @@ public class AdvancedDownloadSpeed {
         } else if (bytes >= 1024) {
             return decimalFormat.format(bytes / 1024) + "KB";
         } else {
-            return decimalFormat.format(bytes);
+            return decimalFormat.format(bytes) + "B";
         }
     }
 

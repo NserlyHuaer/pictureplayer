@@ -3,6 +3,7 @@ package Version;
 
 import Loading.Bundle;
 import Tools.DownloadFile.DownloadFile;
+import Tools.DownloadFile.FileDownloader;
 import Tools.File.ReverseSearch;
 import Tools.String.Formation;
 import Exception.UpdateException;
@@ -27,7 +28,7 @@ public class DownloadUpdate {
     public List<String> downloadFileWebSide;
     public int TotalDownloadingFile;
     public int HaveDownloadedFile;
-    public DownloadFile CurrentDownloadingFile;
+    public FileDownloader CurrentFileDownloader;
     private final static long startTime = System.currentTimeMillis();
     public List<String> FilePath = new ArrayList<>();
     //启用安全连接模式
@@ -131,6 +132,7 @@ public class DownloadUpdate {
         if (downloadWebSide == null) return null;
         int index = 0;
         TotalDownloadingFile = downloadWebSide.size();
+
         for (String down : downloadWebSide) {
             FilePath.add(down);
             HaveDownloadedFile = index;
@@ -156,38 +158,35 @@ public class DownloadUpdate {
             if (StopToUpdate) {
                 throw new UpdateException("Update ended,cause of User terminated software update");
             }
-            if (!isTry) CurrentDownloadingFile = new DownloadFile(down, f.getPath());
+            if (!isTry) CurrentFileDownloader = new FileDownloader(down, f.getPath());
+            CurrentFileDownloader.setDownloadErrorHandler((e, fileDownloader) -> {
+                if (ExceptionHandling(e) == 0) {
+                    download(down, finalA, true);
+                } else {
+                    CurrentFileDownloader.stopDownload();
+                }
+            });
             logger.info("Downloading " + down);
             if (!EnableSecureConnection) logger.warn("The connection is not secure from {}!", down);
-            if (isTry) CurrentDownloadingFile.retryToDownload();
-            else CurrentDownloadingFile.startToDownload();
+            CurrentFileDownloader.startDownload();
             List list = new ArrayList();
-            String cache = CurrentDownloadingFile.getSavePath();
+            String cache = CurrentFileDownloader.getFinalPath();
             if (StopToUpdate) {
                 throw new UpdateException("Update ended,cause of User terminated software update");
             }
             if (cache != null) {
                 list.add(cache);
-                list.add(CurrentDownloadingFile);
+                list.add(CurrentFileDownloader);
                 finalA.put(down, list);
-            }
-        } catch (IOException e) {
-            switch (ExceptionHandling(e)) {
-                case 0 -> {
-                    return download(down, finalA, true);
-                }
-                case 1 -> {
-                    return 1;
-                }
-                case 2 -> {
-                    return 2;
-                }
             }
         } catch (UpdateException e) {
             logger.error(e.getMessage());
             return 2;
         }
-        return 0;
+        if (CurrentFileDownloader.isCompleted())
+            return 0;
+        else
+            return 1;
 
     }
 
@@ -216,7 +215,7 @@ public class DownloadUpdate {
     //终止更新
     public void stopToUpdate() {
         StopToUpdate = true;
-        CurrentDownloadingFile.stopToDownload();
+        CurrentFileDownloader.stopDownload();
     }
 
     public static boolean isEnableSecureConnection() {

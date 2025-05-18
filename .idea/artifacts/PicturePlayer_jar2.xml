@@ -1,0 +1,28 @@
+<component name="ArtifactManager">
+  <artifact name="PicturePlayer:jar2">
+    <output-path>$PROJECT_DIR$/out/artifacts/PicturePlayer_jar2</output-path>
+    <root id="root">
+      <element id="archive" name="PicturePlayer.jar">
+        <element id="module-output" name="PicturePlayer" />
+      </element>
+      <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:2.0.17" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.imageio:imageio-jpeg:3.12.0" />
+      <element id="library" level="project" name="Maven: net.java.dev.jna:jna:5.17.0" />
+      <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.13.1" />
+      <element id="library" level="project" name="Maven: org.apache.logging.log4j:log4j-api:2.24.3" />
+      <element id="library" level="project" name="Maven: net.java.dev.jna:jna-platform:5.17.0" />
+      <element id="library" level="project" name="Maven: org.apache.logging.log4j:log4j-core:2.24.3" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.imageio:imageio-metadata:3.12.0" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.common:common-image:3.12.0" />
+      <element id="library" level="project" name="Maven: com.github.oshi:oshi-core:6.8.1" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.common:common-lang:3.12.0" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.imageio:imageio-webp:3.12.0" />
+      <element id="library" level="project" name="Maven: org.apache.logging.log4j:log4j-slf4j2-impl:2.24.3" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.imageio:imageio-tiff:3.12.0" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.common:common-io:3.12.0" />
+      <element id="library" level="project" name="Maven: com.github.adedayo.intellij.sdk:forms_rt:142.1" />
+      <element id="library" level="project" name="Maven: com.google.errorprone:error_prone_annotations:2.38.0" />
+      <element id="library" level="project" name="Maven: com.twelvemonkeys.imageio:imageio-core:3.12.0" />
+    </root>
+  </artifact>
+</component>
