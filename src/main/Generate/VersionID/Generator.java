@@ -11,7 +11,7 @@ public class Generator {
         versionID.setNormalVersion("{version}");
         versionID.setNormalVersionID("{versionID}");
         versionID.setNormalVersionDescribe("{MDWebsite}Describe/{versionID}.txt");
-        versionID.setNormalVersionMainFile("{MDWebsite}/{version}.jar");
+        versionID.setNormalVersionMainFile("{MDWebsite}/{versionID}.jar");
 
 //        versionID.setTestVersion("{version}");
 //        versionID.setTestVersionID("{versionID}");
