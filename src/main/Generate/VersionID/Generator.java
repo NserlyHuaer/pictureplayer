@@ -11,12 +11,12 @@ public class Generator {
         versionID.setNormalVersion("{version}");
         versionID.setNormalVersionID("{versionID}");
         versionID.setNormalVersionDescribe("{MDWebsite}Describe/{versionID}.txt");
-        versionID.setNormalVersionMainFile("{MDWebsite}Software/{version}.jar");
+        versionID.setNormalVersionMainFile("{MDWebsite}/{version}.jar");
 
 //        versionID.setTestVersion("{version}");
 //        versionID.setTestVersionID("{versionID}");
 //        versionID.setTestVersionDescribe("{MDWebsite}Describe/{versionID}.txt");
-//        versionID.setTestVersionMainFile("{MDWebsite}Software/{version}.jar");
+//        versionID.setTestVersionMainFile("{MDWebsite}/{version}.jar");
 
 
         HashMap<String, String> SpecialFields = new HashMap<>();
