@@ -12,6 +12,7 @@ import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.ImageRotationHelper;
 import Tools.ImageManager.MultiThreadBlur;
 import Tools.ImageManager.PictureInformationStorageManagement;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +85,7 @@ public class PaintPicture extends JPanel {
     public ImageCanvas imageCanvas;
     //移动图片时，鼠标最开始的坐标（对于桌面）
     Point mouseLocation;
+    @Getter
     //当前图片路径下所有图片
     ArrayList<String> CurrentPathOfPicture;
     //是否启用硬件加速
@@ -404,6 +406,7 @@ public class PaintPicture extends JPanel {
             //获取当前图片路径下所有图片
             CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(picturePath);
             lastPicturePathParent = pictureParent;
+            Main.main.reviewPictureList(CurrentPathOfPicture);
         }
     }
 
@@ -456,13 +459,17 @@ public class PaintPicture extends JPanel {
     }
 
     public class ImageCanvas extends JComponent {
+        //获取图片路径
         //图片路径
+        @Getter
         String path;
         //判断是否启用硬件加速（针对本图片渲染）
         private boolean isEnableHardware;
         //上次图片路径
         String lastPath;
+        //获取图片hashcode值
         //图片hashcode
+        @Getter
         String picture_hashcode;
         //当前图片X坐标
         private double X;
@@ -510,7 +517,7 @@ public class PaintPicture extends JPanel {
             new Thread(() -> {
                 isEnableHardware = isEnableHardwareAcceleration;
                 if (!isEnableHardware) return;
-                AtomicReference<Double> LastPercent = new AtomicReference<>((double) -9999999);
+                AtomicReference<Double> LastPercent = new AtomicReference<>(-1.0);
                 AtomicReference<String> LastPicture_hashcode = new AtomicReference<>("");
                 timer = new Timer(400, e -> {
                     if (!isEnableHardware) return;
@@ -553,16 +560,6 @@ public class PaintPicture extends JPanel {
             this();
             //加载图片
             changePicturePath(path, picture_hashcode);
-        }
-
-        //获取图片路径
-        public String getPath() {
-            return path;
-        }
-
-        //获取图片hashcode值
-        public String getPicture_hashcode() {
-            return picture_hashcode;
         }
 
         //图片左转
@@ -609,31 +606,8 @@ public class PaintPicture extends JPanel {
         }
 
         public void changePicturePath(String path, String picture_hashcode) {
-            //如果字符串前缀与后缀包含"，则去除其中的"
-            if (path.startsWith("\"") && path.endsWith("\"")) {
-                path = path.substring(1, path.length() - 1);
-            }
-            String finalPath = path;
-            Thread t1 = new Thread(() -> {
-                image = PictureInformationStorageManagement.getImage(pictureInformationStorageManagement.getCachedPicturePath(finalPath, picture_hashcode));
-            });
-            t1.start();
-            repeat_changePicturePath(path, picture_hashcode);
-            new Thread(() -> {
-                try {
-                    t1.join();
-                } catch (InterruptedException ignored) {
-
-                }
-                if (isEnableHardware) {
-                    BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
-                    if (multiThreadBlur != null) multiThreadBlur.flushSrc();
-                    image.flush();
-                    image = BlurBufferedImage;
-                    multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
-                }
-                if (sizeOperate != null) sizeOperate.changeCanvas(this);
-            }).start();
+            BufferedImage image = PictureInformationStorageManagement.getImage(pictureInformationStorageManagement.getCachedPicturePath(path, picture_hashcode));
+            changePicturePath(image, path, picture_hashcode);
         }
 
         public void changePicturePath(final BufferedImage image, String path, String picture_hashcode) {
@@ -641,13 +615,27 @@ public class PaintPicture extends JPanel {
             if (path.startsWith("\"") && path.endsWith("\"")) {
                 path = path.substring(1, path.length() - 1);
             }
+
+            RotationDegrees = lastRotationDegrees = 0;
+            this.path = path;
+            this.picture_hashcode = picture_hashcode;
+            LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
+            NewWindow = LastWindow = null;
+            if (this.image != null) this.image.flush();
+            if (BlurBufferedImage != null) BlurBufferedImage.flush();
+
             this.image = image;
-            repeat_changePicturePath(path, picture_hashcode);
+            String finalPath = path;
+            new Thread(() -> {
+                setPictureInformationOnComponent(finalPath);
+                //若这两个文件父目录不相同
+                loadPictureInTheParent(finalPath);
+            }).start();
+
+
             if (isEnableHardware) {
                 BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
                 if (multiThreadBlur != null) multiThreadBlur.flushSrc();
-                image.flush();
-                this.image = BlurBufferedImage;
                 multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
             }
             if (sizeOperate != null) sizeOperate.changeCanvas(this);
@@ -657,21 +645,6 @@ public class PaintPicture extends JPanel {
             changePicturePath(image, path, GetImageInformation.getHashcode(new File(path)));
         }
 
-        private void repeat_changePicturePath(String finalPath, String picture_hashcode) {
-            new Thread(() -> {
-                setPictureInformationOnComponent(finalPath);
-                //若这两个文件父目录不相同
-                loadPictureInTheParent(finalPath);
-            }).start();
-            RotationDegrees = lastRotationDegrees = 0;
-            this.path = finalPath;
-            this.picture_hashcode = picture_hashcode;
-            LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = 0;
-            NewWindow = LastWindow = null;
-            if (this.image != null) this.image.flush();
-            if (BlurBufferedImage != null) BlurBufferedImage.flush();
-
-        }
 
         public void close() {
             removeAll();

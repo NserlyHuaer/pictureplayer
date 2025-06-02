@@ -49,6 +49,8 @@ public class DownloadUpdate {
     private static boolean isChecked = false;
 
     public static final ArrayList<String> DependenciesName = new ArrayList<>();
+    //key:依赖名 value:依赖路径
+    public static final TreeMap<String, String> DependenciesFilePath = new TreeMap<>();
 
 
     static {
@@ -57,11 +59,9 @@ public class DownloadUpdate {
             for (File file : files) {
                 String fileName = file.getName();
                 if (file.isFile() && fileName.endsWith(".jar")) {
-                    int LastIndex1 = fileName.lastIndexOf("-");
-                    if (LastIndex1 == -1) {
-                        LastIndex1 = fileName.lastIndexOf(".jar");
-                    }
-                    DependenciesName.add(fileName.substring(0, LastIndex1));
+                    String DependencyName = fileName.substring(0, fileName.lastIndexOf(".jar"));
+                    DependenciesName.add(DependencyName);
+                    DependenciesFilePath.put(DependencyName, file.getPath());
                 }
             }
     }
@@ -120,12 +120,18 @@ public class DownloadUpdate {
             MainFileWebSite = VersionID.getString(versionID.getNormalVersionMainFile(), versionID.getSpecialFields());
         }
         DependenciesWebSite = new ArrayList<>();
-        TreeMap<String, String> cache = versionID.getNormalDependencies();
+        TreeMap<String, String> cache = null;
+        if (versionID != null) {
+            cache = versionID.getNormalDependencies();
+        }
+
         if (cache != null)
-            for (String key : cache.keySet()) {
-                String dependenciesName = VersionID.getString(key, versionID.getSpecialFields());
+            for (String value : cache.values()) {
+                String dependenciesWebsite = VersionID.getString(value, versionID.getSpecialFields());
+                String dependenciesName = dependenciesWebsite.replace("\\", "/");
+                dependenciesName = dependenciesName.substring(dependenciesName.lastIndexOf("/") + 1, dependenciesName.lastIndexOf(".jar"));
                 if (!DependenciesName.contains(dependenciesName))
-                    DependenciesWebSite.add(VersionID.getString(cache.get(key), versionID.getSpecialFields()));
+                    DependenciesWebSite.add(VersionID.getString(dependenciesWebsite, versionID.getSpecialFields()));
             }
         downloadFileWebSite = (ArrayList<String>) DependenciesWebSite.clone();
         downloadFileWebSite.add(MainFileWebSite);

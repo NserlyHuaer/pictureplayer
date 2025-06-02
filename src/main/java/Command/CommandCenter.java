@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -14,7 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
-import java.util.Base64;
 
 public class CommandCenter {
     private static final String CURRENT_JAR_PATH; // 当前JAR文件路径
@@ -45,9 +43,14 @@ public class CommandCenter {
             if (LastIndex1 == -1) {
                 LastIndex1 = fileName.lastIndexOf(".jar");
             }
-            if (DownloadUpdate.DependenciesName.contains(fileName.substring(0, LastIndex1))) {
-                new File(string).delete();
+            String currentHandlerDependencyName = fileName.substring(0, LastIndex1);
+            for (String DependencyName : DownloadUpdate.DependenciesName) {
+                if (DependencyName.contains(currentHandlerDependencyName)) {
+                    String deleteFilePath = DownloadUpdate.DependenciesFilePath.get(DependencyName);
+                    new File(deleteFilePath).delete();
+                }
             }
+
             Path sourcePath = Path.of(string);
             Path destinationPath = Path.of("./lib/" + string.substring(string.lastIndexOf("/") + 1));
             Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);

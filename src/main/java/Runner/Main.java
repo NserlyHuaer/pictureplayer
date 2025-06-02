@@ -5,7 +5,6 @@ import Loading.Bundle;
 import Loading.Init;
 import Size.SizeOperate;
 import Tools.Component.WindowLocation;
-import Tools.File.ImageThumbnailManage.Center;
 import Tools.ImageManager.CheckFileIsRightPictureType;
 import Tools.ImageManager.GetImageInformation;
 import Version.DownloadUpdate;
@@ -36,10 +35,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -68,7 +65,7 @@ public class Main extends JFrame {
     private JLabel JVMVersionLabel;
     private JLabel CurrentSoftwareVersionLabel;
     private JButton CheckVersionButton;
-    private JTextField textField1;
+    public JTextField textField1;
     private JButton TurnButton;
     private JPanel SecondPanel;
     private JLabel TopLabel;
@@ -97,8 +94,6 @@ public class Main extends JFrame {
     private static ScheduledFuture<?> future;
     private ChangeFocusListener changeFocusListener;
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    //图片缩略图
-    public Center center;
     //是否启用代理服务器
     private static boolean EnableProxyServer;
     //最新版本下载地址（如果当前是最新版本，则返回null值）
@@ -111,6 +106,8 @@ public class Main extends JFrame {
     private boolean IsFreshen;
     private static final File REPEAT_PICTURE_PATH_LOGOTYPE = new File("???");
     private static ProxyServerChooser proxyServerChooser;
+
+    private final TreeMap<String, ThumbnailPreviewOfImage> thumbnailPreviewOfImages = new TreeMap<>();
     private final MouseAdapter mouseAdapter = new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
@@ -157,7 +154,7 @@ public class Main extends JFrame {
         System.setProperty("sun.java2d.opengl", "true");
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         main = new Main("Picture Player(Version:" + Version.getVersion() + ")");
         new Thread(() -> {
             for (String arg : args) {
@@ -211,7 +208,6 @@ public class Main extends JFrame {
             setUncaughtExceptionHandler(logger);
             ProxyServerPrefix = ProxyServerLabel.getText();
             MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
-            center = new Center();
             centre = new Centre();
             Init();
             if (!GetImageInformation.isHardwareAccelerated) {
@@ -247,10 +243,42 @@ public class Main extends JFrame {
     private void Init() {
         VersionView.setText(VersionView.getText() + Version.getVersion());
         TurnButton.addMouseListener(changeFocusListener);
-        TurnButton.addActionListener(e -> {
-            String path = textField1.getText().trim();
-            File file = new File(path);
-            if (GetImageInformation.isImageFile(file)) openPicture(path);
+        TurnButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String path = textField1.getText().trim();
+                //如果字符串前缀与后缀包含"，则去除其中的"
+                if (path.startsWith("\"") && path.endsWith("\"")) {
+                    path = path.substring(1, path.length() - 1);
+                }
+                File file = new File(path);
+                if (GetImageInformation.isImageFile(file)) {
+                    openPicture(path);
+                    return;
+                }
+
+                JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+                fileChooser.setCurrentDirectory(file);
+                String picturePath;
+                while (true) {
+                    int returnValue = fileChooser.showOpenDialog(Main.main);
+                    File chooseFile = fileChooser.getSelectedFile();
+                    if (chooseFile == null) return;
+                    picturePath = chooseFile.getPath();
+                    if (returnValue == JFileChooser.APPROVE_OPTION) {
+                        file = checkFileOpen(false, new File(picturePath));
+                        if (file == null) continue;
+                        String filePath = file.getAbsolutePath();
+                        if (filePath.endsWith("???")) {
+                            tabbedPane1.setSelectedIndex(1);
+                            break;
+                        }
+                        openPicture(filePath);
+                        paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
+                    }
+                    return;
+                }
+            }
         });
         SecondPanel.addMouseListener(mouseAdapter);
         // 设置SecondPanel为可接受拖放
@@ -364,6 +392,7 @@ public class Main extends JFrame {
 
     //打开图片
     public void openPicture(String path) {
+        textField1.setText(path);
         new Thread(() -> {
             if (path == null || path.endsWith("???")) return;
             try {
@@ -527,7 +556,6 @@ public class Main extends JFrame {
      * @noinspection ALL
      */
     private void $$$setupUI$$$() {
-        createUIComponents();
         panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.setRequestFocusEnabled(true);
@@ -550,7 +578,11 @@ public class Main extends JFrame {
         TurnButton.setRequestFocusEnabled(false);
         this.$$$loadButtonText$$$(TurnButton, this.$$$getMessageFromBundle$$$("messages", "TurnButton"));
         FirstPanel.add(TurnButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        FirstPanel.add(FileChoosePane, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JScrollPane scrollPane1 = new JScrollPane();
+        FirstPanel.add(scrollPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        FileChoosePane = new JPanel();
+        FileChoosePane.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        scrollPane1.setViewportView(FileChoosePane);
         SecondPanel = new JPanel();
         SecondPanel.setLayout(new GridBagLayout());
         SecondPanel.setBackground(new Color(-1643536));
@@ -644,11 +676,11 @@ public class Main extends JFrame {
         B = new JPanel();
         B.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         ThirdPanel.add(B, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, 1, 1, null, null, null, 0, false));
-        final JScrollPane scrollPane1 = new JScrollPane();
-        B.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(502, 372), null, 0, false));
+        final JScrollPane scrollPane2 = new JScrollPane();
+        B.add(scrollPane2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(502, 372), null, 0, false));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(11, 2, new Insets(0, 0, 0, 0), -1, -1, false, true));
-        scrollPane1.setViewportView(panel2);
+        scrollPane2.setViewportView(panel2);
         EnableConfirmExitCheckBox = new JCheckBox();
         EnableConfirmExitCheckBox.setRequestFocusEnabled(false);
         this.$$$loadButtonText$$$(EnableConfirmExitCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableConfirmExit"));
@@ -888,7 +920,36 @@ public class Main extends JFrame {
         if (PaintPicture.paintPicture != null && PaintPicture.paintPicture.sizeOperate != null)
             PaintPicture.paintPicture.sizeOperate.close();
         if (main != null) main.dispose();
-        if (Main.main != null) Main.main.center.save();
+    }
+
+    public void reviewPictureList(ArrayList<String> picturePath) {
+        ArrayList<String> cached = (ArrayList<String>) picturePath.clone();
+        //移走所有已在列表中的图片路径
+        cached.removeAll(thumbnailPreviewOfImages.keySet());
+
+        //移走所有当前列表中的图片路径不在当前显示列表
+        for (String currentBufferedPicturePath : thumbnailPreviewOfImages.keySet()) {
+            if (!picturePath.contains(currentBufferedPicturePath)) {
+                FileChoosePane.remove(thumbnailPreviewOfImages.get(currentBufferedPicturePath));
+                thumbnailPreviewOfImages.remove(currentBufferedPicturePath);
+            }
+
+        }
+        //创建当前显示列表没有的图片
+        for (String path : cached) {
+            ThumbnailPreviewOfImage thumbnailPreviewOfImage = null;
+            try {
+                thumbnailPreviewOfImage = new ThumbnailPreviewOfImage(path);
+            } catch (IOException e) {
+                logger.error(Main.getExceptionMessage(e));
+                picturePath.remove(path);
+                continue;
+            }
+            FileChoosePane.add(thumbnailPreviewOfImage);
+            thumbnailPreviewOfImages.put(path, thumbnailPreviewOfImage);
+        }
+        FileChoosePane.revalidate();
+        FileChoosePane.repaint();
     }
 
     //关闭
@@ -983,9 +1044,6 @@ public class Main extends JFrame {
                         init.ChangeValue("EnableConfirmExit", "false");
                         init.Update();
                     }
-                    if (Main.main != null) {
-                        Main.main.center.save();
-                    }
                     logger.info("Program Termination!");
                     System.exit(0);
                 }
@@ -1011,39 +1069,6 @@ public class Main extends JFrame {
 
     private void createUIComponents() {
         // TODO: place custom component creation code here
-        FileChoosePane = new JPanel();
-        JButton openButton = new JButton("打开文件");
-        openButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-                String lastChooseDir = "";
-                if (paintPicture != null && paintPicture.imageCanvas != null) {
-                    lastChooseDir = new File(paintPicture.imageCanvas.getPath()).getParent();
-                }
-                fileChooser.setCurrentDirectory(new File(lastChooseDir));
-                String picturePath;
-                while (true) {
-                    int returnValue = fileChooser.showOpenDialog(Main.main);
-                    File chooseFile = fileChooser.getSelectedFile();
-                    if (chooseFile == null) return;
-                    picturePath = chooseFile.getPath();
-                    if (returnValue == JFileChooser.APPROVE_OPTION) {
-                        File file = checkFileOpen(false, new File(picturePath));
-                        if (file == null) continue;
-                        String filePath = file.getAbsolutePath();
-                        if (filePath.endsWith("???")) {
-                            tabbedPane1.setSelectedIndex(1);
-                            break;
-                        }
-                        openPicture(filePath);
-                        paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
-                    }
-                    return;
-                }
-            }
-        });
-        FileChoosePane.add(openButton);
     }
 
     //检查文件打开

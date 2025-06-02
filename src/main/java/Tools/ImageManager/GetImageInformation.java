@@ -24,12 +24,20 @@ import java.util.zip.Checksum;
 public class GetImageInformation {
     public static final boolean isHardwareAccelerated;
     private static final Logger logger = LoggerFactory.getLogger(GetImageInformation.class);
+    public static final String[] readFormats = ImageIO.getReaderFormatNames();
+
+    private static final String[] SupportPictureExtension = new String[readFormats.length];
 
     static {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice gd = ge.getDefaultScreenDevice();
         GraphicsConfiguration gc = gd.getDefaultConfiguration();
         isHardwareAccelerated = gc.getBufferCapabilities().isPageFlipping();
+
+        for (int i = 0; i < readFormats.length; i++) {
+            SupportPictureExtension[i] = "." + readFormats[i].toLowerCase();
+        }
+
     }
 
     //判断文件路径是否正确、是否为文件（非文件夹）
@@ -44,32 +52,39 @@ public class GetImageInformation {
         if (file == null || !file.exists() || file.isDirectory()) {
             return false;
         }
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            byte[] buffer = new byte[8];
-            fileInputStream.read(buffer);
-            String hexString = bytesToHex(buffer);
-            // 常见图片格式的文件头十六进制标识
-            if (hexString.startsWith("FFD8FF")) {
-                // JPEG格式
-                return true;
-            } else if (hexString.startsWith("89504E47")) {
-                // PNG格式
-                return true;
-            } else if (hexString.startsWith("47494638")) {
-                // GIF格式
-                return true;
-            } else if (hexString.startsWith("49492A00")) {
-                // TIFF格式
-                return true;
-            } else if (hexString.startsWith("424D")) {
-                // BMP格式
-                return true;
-            }
-            return false;
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-            return false;
+
+        String fileName = file.getName().toLowerCase();
+        for (String type : SupportPictureExtension) {
+            if (fileName.endsWith(type)) return true;
         }
+        return false;
+
+//        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+//            byte[] buffer = new byte[8];
+//            fileInputStream.read(buffer);
+//            String hexString = bytesToHex(buffer);
+//            // 常见图片格式的文件头十六进制标识
+//            if (hexString.startsWith("FFD8FF")) {
+//                // JPEG格式
+//                return true;
+//            } else if (hexString.startsWith("89504E47")) {
+//                // PNG格式
+//                return true;
+//            } else if (hexString.startsWith("47494638")) {
+//                // GIF格式
+//                return true;
+//            } else if (hexString.startsWith("49492A00")) {
+//                // TIFF格式
+//                return true;
+//            } else if (hexString.startsWith("424D")) {
+//                // BMP格式
+//                return true;
+//            }
+//            return false;
+//        } catch (IOException e) {
+//            logger.error(e.getMessage());
+//            return false;
+//        }
     }
 
     private static String bytesToHex(byte[] bytes) {

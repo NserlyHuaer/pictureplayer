@@ -37,7 +37,7 @@ public class Generator {
 
     private static TreeMap<String, String> getTreeMap() {
         TreeMap<String, String> dependencies = new TreeMap<>();
-        dependencies.put("common-image", "{LibWebsite}common-image-3.12.0.jar");
+        dependencies.put("common-image", "{LibWebsite}common-image-3.12.01.jar");
         dependencies.put("common-io", "{LibWebsite}common-io-3.12.0.jar");
         dependencies.put("common-lang","{LibWebsite}common-lang-3.12.0.jar");
         dependencies.put("error_prone_annotations","{LibWebsite}error_prone_annotations-2.38.0.jar");
@@ -55,6 +55,7 @@ public class Generator {
         dependencies.put("log4j-slf4j2-impl","{LibWebsite}log4j-slf4j2-impl-2.24.3.jar");
         dependencies.put("oshi-core","{LibWebsite}oshi-core-6.8.1.jar");
         dependencies.put("slf4j-api","{LibWebsite}slf4j-api-2.0.17.jar");
+        dependencies.put("thumbnailator","{LibWebsite}thumbnailator-0.4.20");
 
 
 
