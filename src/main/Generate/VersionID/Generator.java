@@ -37,7 +37,7 @@ public class Generator {
 
     private static TreeMap<String, String> getTreeMap() {
         TreeMap<String, String> dependencies = new TreeMap<>();
-        dependencies.put("common-image", "{LibWebsite}common-image-3.12.01.jar");
+        dependencies.put("common-image", "{LibWebsite}common-image-3.12.0.jar");
         dependencies.put("common-io", "{LibWebsite}common-io-3.12.0.jar");
         dependencies.put("common-lang","{LibWebsite}common-lang-3.12.0.jar");
         dependencies.put("error_prone_annotations","{LibWebsite}error_prone_annotations-2.38.0.jar");
