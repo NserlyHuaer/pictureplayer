@@ -55,7 +55,7 @@ public class Generator {
         dependencies.put("log4j-slf4j2-impl","{LibWebsite}log4j-slf4j2-impl-2.24.3.jar");
         dependencies.put("oshi-core","{LibWebsite}oshi-core-6.8.1.jar");
         dependencies.put("slf4j-api","{LibWebsite}slf4j-api-2.0.17.jar");
-        dependencies.put("thumbnailator","{LibWebsite}thumbnailator-0.4.20");
+        dependencies.put("thumbnailator","{LibWebsite}thumbnailator-0.4.20.jar");
 
 
 
