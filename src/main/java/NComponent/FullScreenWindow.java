@@ -33,11 +33,7 @@ public class FullScreenWindow extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                PaintPicture.paintPicture.add(imageCanvas, BorderLayout.CENTER);
-                setVisible(false);
-                Main.main.setVisible(true);
-                PaintPicture.paintPicture.sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-                PaintPicture.paintPicture.sizeOperate.update(false);
+                PaintPicture.paintPicture.imageCanvas.setFullScreen(false);
             }
         });
     }
@@ -50,8 +46,6 @@ public class FullScreenWindow extends JFrame {
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         if (visible && imageCanvas != null) {
-            Main.main.paintPicture.sizeOperate.incomeWindowDimension(getSize());
-            Main.main.paintPicture.sizeOperate.update(false);
             imageCanvas.requestFocusInWindow();
         }
     }

@@ -241,12 +241,7 @@ public class PaintPicture extends JPanel {
         });
         FullScreen.addMouseListener(changeFocusListener);
         FullScreen.addActionListener(e -> {
-            if (imageCanvas == null) return;
-            fullScreenWindow.setImageCanvas(imageCanvas);
-            Main.main.setVisible(false);
-            fullScreenWindow.setVisible(true);
-            Main.main.getGraphics().dispose();
-            sizeOperate.update(false);
+            Main.main.paintPicture.imageCanvas.setFullScreen(true);
         });
         Reset.addMouseListener(changeFocusListener);
         //点击时间
@@ -1105,22 +1100,46 @@ public class PaintPicture extends JPanel {
                     }
                 }
             });
-            imageCanvas.addKeyListener(new KeyAdapter() {
+            addKeyListener(new KeyAdapter() {
                 @Override
-                public void keyPressed(KeyEvent e) {
-                    new Thread(() -> {
-                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE && fullScreenWindow.isShowing()) {
-                            PaintPicture.paintPicture.add(imageCanvas, BorderLayout.CENTER);
-                            Main.main.setVisible(true);
-                            fullScreenWindow.setVisible(false);
-                            sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-                            sizeOperate.update(false);
+                public synchronized void keyReleased(KeyEvent e) {
+                    int KeyCode = e.getKeyCode();
+                    switch (KeyCode) {
+                        case KeyEvent.VK_ESCAPE -> {
+                            if (fullScreenWindow.isShowing()) {
+                                setFullScreen(false);
+                                return;
+                            }
+                        }
+                        case KeyEvent.VK_F11 -> {
+                            setFullScreen(!fullScreenWindow.isShowing());
                             return;
                         }
-                        imageCanvas.openLONPicture(e.getKeyCode());
-                    }).start();
+                    }
+
+                    imageCanvas.openLONPicture(KeyCode);
                 }
             });
+        }
+
+        void setFullScreen(boolean fullScreen) {
+            if (imageCanvas == null || fullScreenWindow == null || Main.main == null || sizeOperate == null || PaintPicture.paintPicture == null)
+                return;
+            if (fullScreen == fullScreenWindow.isShowing() && fullScreen != Main.main.isShowing()) {
+                return;
+            }
+            if (fullScreen) {
+                fullScreenWindow.setImageCanvas(imageCanvas);
+                Main.main.getGraphics().dispose();
+            } else {
+                PaintPicture.paintPicture.add(imageCanvas, BorderLayout.CENTER);
+            }
+            Main.main.setVisible(!fullScreen);
+            fullScreenWindow.setVisible(fullScreen);
+            sizeOperate.incomeWindowDimension(imageCanvas.getSize());
+            sizeOperate.update(false);
+
+            setCursor(Cursor.getDefaultCursor());
         }
     }
 }
