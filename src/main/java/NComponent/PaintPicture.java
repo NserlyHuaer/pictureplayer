@@ -512,7 +512,6 @@ public class PaintPicture extends JPanel {
             new Thread(() -> {
                 isEnableHardware = isEnableHardwareAcceleration;
                 if (!isEnableHardware) return;
-                AtomicReference<Double> LastPercent = new AtomicReference<>(-1.0);
                 AtomicReference<String> LastPicture_hashcode = new AtomicReference<>("");
                 timer = new Timer(400, e -> {
                     if (!isEnableHardware) return;
@@ -520,13 +519,10 @@ public class PaintPicture extends JPanel {
                     new Thread(() -> {
                         if (image != null && multiThreadBlur != null && multiThreadBlur.getSrc() != null) {
                             if (!LastPicture_hashcode.get().equals(picture_hashcode)) {
+                                if(BlurBufferedImage == null)throw new RuntimeException("BlurBufferedImage is null");
                                 multiThreadBlur.flushSrc();
-                                multiThreadBlur.flushDest();
                                 multiThreadBlur.changeImage(BlurBufferedImage);
-                            } else if (LastPercent.get() == sizeOperate.getPercent()) {
-                                isNeedBlurToView = true;
-                                repaint();
-                                return;
+                                BlurBufferedImage = null;
                             }
                             int KernelSize = multiThreadBlur.calculateKernelSize(sizeOperate.getPercent());
                             if (KernelSize == 1) {
@@ -535,7 +531,7 @@ public class PaintPicture extends JPanel {
                                 BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(KernelSize);
                             }
                             isNeedBlurToView = true;
-                            LastPercent.set(sizeOperate.getPercent());
+                            multiThreadBlur.flushDest();
                             LastPicture_hashcode.set(picture_hashcode);
                             repaint();
                         }
@@ -559,13 +555,13 @@ public class PaintPicture extends JPanel {
 
         //图片左转
         public void turnLeft() {
-            addDegrees(1);
+            addDegrees((byte) 1);
         }
 
 
         //图片右转
         public void turnRight() {
-            addDegrees(-1);
+            addDegrees((byte) -1);
         }
 
         //重置旋转度数
@@ -576,7 +572,7 @@ public class PaintPicture extends JPanel {
 
 
         //改变度数
-        private void addDegrees(int addDegrees) {
+        private void addDegrees(byte addDegrees) {
             RotationDegrees += addDegrees;
             RotationDegrees = (byte) (RotationDegrees % 4);
             if (RotationDegrees < 0) RotationDegrees = (byte) (4 + RotationDegrees);
@@ -630,7 +626,12 @@ public class PaintPicture extends JPanel {
 
             if (isEnableHardware) {
                 BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
-                if (multiThreadBlur != null) multiThreadBlur.flushSrc();
+                image.flush();
+                this.image = BlurBufferedImage;
+                if (multiThreadBlur != null) {
+                    multiThreadBlur.flushSrc();
+                    multiThreadBlur.flushDest();
+                }
                 multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
             }
             if (sizeOperate != null) sizeOperate.changeCanvas(this);
@@ -724,6 +725,8 @@ public class PaintPicture extends JPanel {
         @Override
         public synchronized void paint(Graphics g) {
             if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0 || (LastPercent == sizeOperate.getPercent() && RotationDegrees == LastPercent && !isMove && lastPath.equals(path)) || getImageWidth() == 0 || getImageHeight() == 0) {
+                g.dispose();
+                g = null;
                 return;
             }
             // 获取当前图形环境配置
@@ -743,6 +746,8 @@ public class PaintPicture extends JPanel {
                 graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
                 graphics2D.drawImage(BlurBufferedImage, (int) X, (int) Y, (int) lastWidth, (int) lastHeight, null);
                 isNeedBlurToView = false;
+                g.dispose();
+                g = graphics2D = null;
                 return;
             }
             //如果转动角度为0或180度，请无使用此值，此值为旋转其他度数的设计
@@ -806,6 +811,8 @@ public class PaintPicture extends JPanel {
                 if (isEnableHardware && timer != null) {
                     timer.start();
                 }
+                g.dispose();
+                g = graphics2D = null;
                 return;
             }
             //判断图片缩放比例是否与上次相同
@@ -839,7 +846,11 @@ public class PaintPicture extends JPanel {
                 HeightRatio = LastWindowHeight / WindowHeight;
                 if (WidthRatio != 1 && HeightRatio != 1) PictureChangeRatio = (HeightRatio + WidthRatio) / 2;
             }
-            if (PictureChangeRatio == 0) return;
+            if (PictureChangeRatio == 0) {
+                g.dispose();
+                g = graphics2D = null;
+                return;
+            }
             width = (getImageWidth() * sizeOperate.getPercent() / 100 * (1 / PictureChangeRatio));
             double height = EqualsProportion.Start(0, width, getImageHeight(), getImageWidth());
             sizeOperate.setPercent(width * 100.0 / getImageWidth());
@@ -924,6 +935,8 @@ public class PaintPicture extends JPanel {
             if (isEnableHardware && timer != null) {
                 timer.start();
             }
+            g.dispose();
+            g = graphics2D = null;
         }
 
         //设置是否图片移动（不应该改变图片大小）
