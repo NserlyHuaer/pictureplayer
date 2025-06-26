@@ -3,10 +3,10 @@ package Runner;
 import Listener.ChangeFocusListener;
 import Loading.Bundle;
 import Loading.Init;
-import Size.SizeOperate;
 import Tools.Component.WindowLocation;
 import Tools.ImageManager.CheckFileIsRightPictureType;
 import Tools.ImageManager.GetImageInformation;
+import Tools.PaintPictureManage;
 import Version.DownloadUpdate;
 import Tools.OSInformation.SystemMonitor;
 import Version.Version;
@@ -102,7 +102,7 @@ public class Main extends JFrame {
     public static String UPDATE_WEBSITE = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum";
     String MouseMoveLabelPrefix;
     String ProxyServerPrefix;
-    public PaintPicture paintPicture;
+    public static PaintPicturePanel paintPicturePanel;
     private boolean IsFreshen;
     private static final File REPEAT_PICTURE_PATH_LOGOTYPE = new File("???");
     private static ProxyServerChooser proxyServerChooser;
@@ -141,7 +141,7 @@ public class Main extends JFrame {
                  InstantiationException e) {
             logger.error(getExceptionMessage(e));
         }
-        paintPicture = new PaintPicture();
+        paintPicturePanel = new PaintPicturePanel();
     });
 
     //静态代码块
@@ -173,7 +173,7 @@ public class Main extends JFrame {
         //获取软件版本
         logger.info("Software Version:{}({})", Version.getVersion(), Version.getVersionID());
         //程序是否启用硬件加速
-        logger.info("Enable Hardware Acceleration:{}", PaintPicture.isEnableHardwareAcceleration);
+        logger.info("Enable Hardware Acceleration:{}", PaintPicturePanel.isEnableHardwareAcceleration);
         if (!GetImageInformation.isHardwareAccelerated) {
             logger.warn("Hardware acceleration is not supported, and the image will be rendered using software!");
         }
@@ -189,7 +189,7 @@ public class Main extends JFrame {
             setDefaultLookAndFeelDecorated(false);
             setContentPane(this.panel1);
             setVisible(true);
-            Dimension dimension = SizeOperate.FreeOfScreenSize;
+            Dimension dimension = PaintPictureManage.FreeOfScreenSize;
             setSize((int) (dimension.getWidth() * 0.5), (int) (dimension.getHeight() * 0.6));
             setLocation(WindowLocation.ComponentCenter(null, getWidth(), getHeight()));
             setMinimumSize(new Dimension(680, 335));
@@ -200,7 +200,7 @@ public class Main extends JFrame {
             } catch (InterruptedException e) {
                 logger.error(Main.getExceptionMessage(e));
             }
-            paintPicture.pictureInformationStorageManagement.optimize();
+            paintPicturePanel.pictureInformationStorageManagement.optimize();
         }).start();
         changeFocusListener = new ChangeFocusListener(this);
         init.Run();
@@ -236,7 +236,7 @@ public class Main extends JFrame {
                 }).start();
             }
         }).start();
-        PaintPicture.isEnableHardwareAcceleration = Boolean.parseBoolean(init.getProperties().getProperty("EnableHardwareAcceleration")) && GetImageInformation.isHardwareAccelerated;
+        PaintPicturePanel.isEnableHardwareAcceleration = Boolean.parseBoolean(init.getProperties().getProperty("EnableHardwareAcceleration")) && GetImageInformation.isHardwareAccelerated;
     }
 
     //初始化所有组件设置
@@ -274,7 +274,7 @@ public class Main extends JFrame {
                             break;
                         }
                         openPicture(filePath);
-                        paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
+                        paintPicturePanel.paintPictureManage.getPictureViewer().getSuperPictureShower().setToOptimalResizes();
                     }
                     return;
                 }
@@ -360,8 +360,8 @@ public class Main extends JFrame {
             textField1.requestFocusInWindow();
         } else if (tabbedPane1.getSelectedIndex() == 1) {
             //让图片渲染器获取焦点
-            if (paintPicture != null && paintPicture.imageCanvas != null) {
-                paintPicture.imageCanvas.requestFocusInWindow();
+            if (paintPicturePanel != null && paintPicturePanel.paintPictureManage != null && paintPicturePanel.paintPictureManage.getPictureViewer() != null && paintPicturePanel.paintPictureManage.getPictureViewer().getSuperPictureShower() != null) {
+                PaintPicturePanel.paintPicturePanel.paintPictureManage.getPictureViewer().getHandleComponent().requestFocusInWindow();
             }
         } else if (tabbedPane1.getSelectedIndex() == 2) {
             //让窗体获取焦点
@@ -400,14 +400,14 @@ public class Main extends JFrame {
             } catch (InterruptedException ignored) {
 
             }
-            if (paintPicture.isOnlyInit) {
-                tabbedPane1.setComponentAt(1, paintPicture);
-                new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
+            if (paintPicturePanel.isOnlyInit) {
+                tabbedPane1.setComponentAt(1, paintPicturePanel);
+                new DropTarget(paintPicturePanel, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
             }
             try {
                 SwingUtilities.invokeAndWait(() -> {
-                    paintPicture.setSize(tabbedPane1.getSize());
-                    paintPicture.changePicturePath(path);
+                    paintPicturePanel.setSize(tabbedPane1.getSize());
+                    paintPicturePanel.paintPictureManage.openPicture(path);
                     tabbedPane1.setSelectedIndex(1);
                 });
             } catch (InterruptedException | InvocationTargetException e) {
@@ -917,8 +917,8 @@ public class Main extends JFrame {
     }
 
     private static void CloseInformation() {
-        if (PaintPicture.paintPicture != null && PaintPicture.paintPicture.sizeOperate != null)
-            PaintPicture.paintPicture.sizeOperate.close();
+        if (paintPicturePanel != null && paintPicturePanel.paintPictureManage != null)
+            paintPicturePanel.paintPictureManage.close();
         if (main != null) main.dispose();
     }
 
@@ -1037,8 +1037,8 @@ public class Main extends JFrame {
                     //关闭面板
                     main.dispose();
                     //判断paintPicture是否为null值（以防止出现空指针异常）
-                    if (PaintPicture.paintPicture != null && PaintPicture.paintPicture.sizeOperate != null)
-                        PaintPicture.paintPicture.sizeOperate.close();
+                    if (paintPicturePanel != null && paintPicturePanel.paintPictureManage != null)
+                        paintPicturePanel.paintPictureManage.close();
                     if (main != null) main.dispose();
                     if (jCheckBox.isSelected()) {
                         init.ChangeValue("EnableConfirmExit", "false");
@@ -1090,11 +1090,11 @@ public class Main extends JFrame {
         if (checkFileIsRightPictureType.getImageCount() == 1) {
             choose = checkFileIsRightPictureType.getImageList().getFirst();
             String choose_hashcode = GetImageInformation.getHashcode(choose);
-            if (Main.main.paintPicture != null && !Main.main.paintPicture.isOnlyInit) {
-                if (choose_hashcode == null && paintPicture.imageCanvas.getPicture_hashcode() == null) {
+            if (paintPicturePanel != null && !paintPicturePanel.isOnlyInit) {
+                if (choose_hashcode == null && paintPicturePanel.paintPictureManage.getPicture_hashcode() == null) {
                     logger.warn("Couldn't get current or opening picture hashcode,this will fake the judgment file path");
-                    if (!new File(Main.main.paintPicture.imageCanvas.getPath()).equals(choose)) return null;
-                } else if (Objects.equals(choose_hashcode, paintPicture.imageCanvas.getPicture_hashcode()))
+                    if (!new File(paintPicturePanel.paintPictureManage.getFilePath()).equals(choose)) return null;
+                } else if (Objects.equals(choose_hashcode, paintPicturePanel.paintPictureManage.getPicture_hashcode()))
                     return REPEAT_PICTURE_PATH_LOGOTYPE;
                 if (isMakeSure && JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("OpenPictureExactly_Content") + "\n\"" + choose.getPath() + "\"", Bundle.getMessage("OpenPictureExactly_Title"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
                     return REPEAT_PICTURE_PATH_LOGOTYPE;

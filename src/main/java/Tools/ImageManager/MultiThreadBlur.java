@@ -1,6 +1,7 @@
 package Tools.ImageManager;
 
-import NComponent.PaintPicture;
+import NComponent.PaintPicturePanel;
+import Tools.PaintPictureManage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,13 +42,6 @@ public class MultiThreadBlur {
 
     private int[] tempPixels;
 
-    // 动态计算kernelSize（若抗锯齿能修复则不返回1（不需要模糊））
-    public static int calculateKernelSize(int width, int height, double scaleFactor) {
-        //此代码块目前未实现
-        if (1.75 * scaleFactor < PaintPicture.paintPicture.sizeOperate.getPictureOptimalSize()) return 15;
-        if (scaleFactor > 1300) return 3;
-        return 1;
-    }
 
     public MultiThreadBlur(String srcPath) {
         this.srcPath = srcPath;
@@ -129,7 +123,8 @@ public class MultiThreadBlur {
     }
 
     public int calculateKernelSize(double scaleFactor) {
-        return calculateKernelSize(width, height, scaleFactor);
+        //该功能暂未实现
+        return 1;
     }
 
 

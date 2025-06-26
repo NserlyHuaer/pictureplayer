@@ -3,7 +3,6 @@ package NComponent;
 import Command.CommandCenter;
 import Loading.Bundle;
 import Runner.Main;
-import Tools.DownloadFile.FileDownloader;
 import Tools.String.Formation;
 import Version.DownloadUpdate;
 import org.slf4j.Logger;
@@ -75,8 +74,8 @@ public class AdvancedDownloadSpeed {
                 CommandCenter.moveFileToDirectory((String) map.get(downloadUpdate.MainFileWebSite).getFirst());
                 String osType = CommandCenter.detectOSType();
                 String OpenedPicturePath = null;
-                if (Main.main != null && Main.main.paintPicture != null && Main.main.paintPicture.imageCanvas != null) {
-                    OpenedPicturePath = Main.main.paintPicture.imageCanvas.getPath();
+                if (Main.main != null && Main.paintPicturePanel != null && Main.paintPicturePanel.paintPictureManage != null) {
+                    OpenedPicturePath = Main.paintPicturePanel.paintPictureManage.getFilePath();
                 }
 
                 CommandCenter.executeOSSpecificCommands(osType, (String) map.get(website).getFirst(), OpenedPicturePath);

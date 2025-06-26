@@ -1,13 +1,14 @@
 package Tools.Component;
 
-import Size.SizeOperate;
+import NComponent.PaintPicturePanel;
+import Tools.PaintPictureManage;
 
 import java.awt.*;
 
 public class WindowLocation {
     public static Point ComponentCenter(Window parent, int sonWidth, int sonHeight) {
-        int windowWidth = SizeOperate.FreeOfScreenSize.width;
-        int windowHeight = SizeOperate.FreeOfScreenSize.height;
+        int windowWidth = PaintPictureManage.FreeOfScreenSize.width;
+        int windowHeight = PaintPictureManage.FreeOfScreenSize.height;
         if (parent == null)
             return DesktopCenter(sonWidth, sonHeight);
         int parentWidth = parent.getSize().width;
@@ -32,8 +33,8 @@ public class WindowLocation {
     }
 
     public static Point DesktopCenter(int Width, int Height) {
-        int resultX = (SizeOperate.FreeOfScreenSize.width - Width) / 2;
-        int resultY = (SizeOperate.FreeOfScreenSize.height - Height) / 2;
+        int resultX = (PaintPictureManage.FreeOfScreenSize.width - Width) / 2;
+        int resultY = (PaintPictureManage.FreeOfScreenSize.height - Height) / 2;
         return new Point(resultX, resultY);
     }
 }

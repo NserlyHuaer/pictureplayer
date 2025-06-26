@@ -1,7 +1,7 @@
 package NComponent;
 
-import Runner.Main;
-import Size.SizeOperate;
+import Tools.PaintPictureManage;
+import Tools.PictureDraw.SuperPictureShower;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +12,7 @@ import java.awt.event.WindowEvent;
 
 public class FullScreenWindow extends JFrame {
     private JPanel panel1;
-    private PaintPicture.ImageCanvas imageCanvas;
+    private SuperPictureShower superPictureShower;
 
     public FullScreenWindow() {
         init();
@@ -20,42 +20,41 @@ public class FullScreenWindow extends JFrame {
 
     private void init() {
         setUndecorated(true);
-        setSize(SizeOperate.FreeOfScreenSize);
+        setSize(PaintPictureManage.FreeOfScreenSize);
         getContentPane().add(panel1);
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 if (!isShowing()) return;
-                PaintPicture.paintPicture.sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-                PaintPicture.paintPicture.sizeOperate.update(false);
+                PaintPicturePanel.paintPicturePanel.paintPictureManage.update();
             }
         });
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                PaintPicture.paintPicture.imageCanvas.setFullScreen(false);
+                PaintPicturePanel.paintPicturePanel.paintPictureManage.setFullScreen(false);
             }
         });
     }
 
-    public FullScreenWindow(PaintPicture.ImageCanvas imageCanvas) {
+    public FullScreenWindow(SuperPictureShower superPictureShower) {
         init();
-        setImageCanvas(imageCanvas);
+        setImageCanvas(superPictureShower);
     }
 
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-        if (visible && imageCanvas != null) {
-            imageCanvas.requestFocusInWindow();
+        if (visible && PaintPicturePanel.paintPicturePanel.paintPictureManage != null) {
+            PaintPicturePanel.paintPicturePanel.paintPictureManage.getPictureViewer().getHandleComponent().requestFocusInWindow();
         }
     }
 
-    public void setImageCanvas(PaintPicture.ImageCanvas imageCanvas) {
-        if (imageCanvas == null) return;
-        if (this.imageCanvas != null)
-            panel1.remove(this.imageCanvas);
-        this.imageCanvas = imageCanvas;
-        panel1.add(imageCanvas, BorderLayout.CENTER);
+    public void setImageCanvas(SuperPictureShower superPictureShower) {
+        if (superPictureShower == null) return;
+        if (this.superPictureShower != null)
+            panel1.remove(PaintPicturePanel.paintPicturePanel.paintPictureManage.getPictureViewer().getHandleComponent());
+        this.superPictureShower = superPictureShower;
+        panel1.add(PaintPicturePanel.paintPicturePanel.paintPictureManage.getPictureViewer().getHandleComponent(), BorderLayout.CENTER);
     }
 
     {
