@@ -2,7 +2,7 @@
 
 # PicturePlayer
 
-一个用于查看和管理图片的跨平台图像浏览器，支持高级图像处理功能和版本更新。
+一个用于查看和管理图片的跨平台图像查看器，支持高级图像处理功能和版本更新。
 
 ## 特性
 
@@ -17,9 +17,9 @@
 
 1. 下载最新版本的 `PicturePlayer.jar`
 2. 确保系统已安装Java运行环境（JRE 8或更高版本）
-3. 双击jar文件运行，或使用命令行：
+3. 使用命令行（已知程序名为PicturePlayer.jar，依赖在此程序目录下lib文件夹中）：
 ```bash
-java -jar PicturePlayer.jar
+java -cp "PicturePlayer.jar;lib/*" Runner.Main -XX:+UseG1GC
 ```
 
 ## 使用说明
@@ -40,7 +40,6 @@ java -jar PicturePlayer.jar
 - 文件下载管理
 - 系统资源监控
 - 多语言支持
-- 自定义组件（透明面板、百分比标签等）
 
 ## 版本更新
 
