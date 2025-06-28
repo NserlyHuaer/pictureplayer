@@ -1,5 +1,6 @@
 package Command;
 
+import Tools.String.RandomString;
 import Version.DownloadUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,18 +20,21 @@ public class CommandCenter {
     private static final String CURRENT_JAR_NAME;//当前JAR文件路径
     private static final Logger logger = LoggerFactory.getLogger(CommandCenter.class);
 
+    private static final String MainFileSuffix;
+
     static {
         ClassLoader classLoader = CommandCenter.class.getClassLoader();
         URL url = classLoader.getResource(CommandCenter.class.getName().replace('.', '/') + ".class");
         CURRENT_JAR_PATH = url.getPath().substring(5, url.getPath().lastIndexOf("!"));
         CURRENT_JAR_NAME = CURRENT_JAR_PATH.substring(CURRENT_JAR_PATH.lastIndexOf("/") + 1);
+        MainFileSuffix = RandomString.getRandomString(5);
     }
 
 
     public static void moveFileToDirectory(String DownloadMainFilePath) throws IOException {
         DownloadMainFilePath = DownloadMainFilePath.replace("\\", "/");
         Path sourcePath = Path.of(DownloadMainFilePath);
-        Path destinationPath = Path.of("./" + DownloadMainFilePath.substring(DownloadMainFilePath.lastIndexOf("/") + 1));
+        Path destinationPath = Path.of("./" + DownloadMainFilePath.substring(DownloadMainFilePath.lastIndexOf("/") + 1) + MainFileSuffix);
         Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
         logger.info("Main File moved successfully.");
     }
@@ -105,7 +109,7 @@ public class CommandCenter {
                 "echo @off\n" +
                         "timeout /t 3\n"
                         + "del \".\\" + CURRENT_JAR_NAME + "\"\n"
-                        + "ren \"" + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + "\" \"" + CURRENT_JAR_NAME + "\"\n" +
+                        + "ren \"" + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + MainFileSuffix + "\" \"" + CURRENT_JAR_NAME + "\"\n" +
                         "cls\n"
                         + "\"" + System.getProperty("sun.boot.library.path") + "\\java.exe\" -cp \"" + CURRENT_JAR_NAME + ";lib\\*\" Runner.Main -Dsun.java2d.opengl=true ";
         if (OpenedPicturePath != null && !OpenedPicturePath.isBlank()) {
@@ -136,7 +140,7 @@ public class CommandCenter {
         String shellContent =
                 "sleep 1\n"
                         + "rm " + CURRENT_JAR_NAME + "\n"
-                        + "mv " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + " " + CURRENT_JAR_NAME + "\n"
+                        + "mv " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + MainFileSuffix + " " + CURRENT_JAR_NAME + "\n"
                         + "java -jar " + CURRENT_JAR_NAME + " ";
         if (OpenedPicturePath != null && !OpenedPicturePath.isBlank()) {
             shellContent = shellContent + OpenedPicturePath;
