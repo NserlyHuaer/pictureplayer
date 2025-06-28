@@ -111,8 +111,9 @@ public class PaintPicture extends JPanel {
         try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream("data/PictureCacheManagement.obj"))) {
             pictureInformationStorageManagement = (PictureInformationStorageManagement) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            pictureInformationStorageManagement = new PictureInformationStorageManagement();
+            logger.error(Main.getExceptionMessage(e));
         }
+        pictureInformationStorageManagement = new PictureInformationStorageManagement();
         AtomicReference<ChangeFocusListener> changeFocusListener = new AtomicReference<>();
         init = new Thread(() -> {
             Main.setUncaughtExceptionHandler(logger);
@@ -454,7 +455,6 @@ public class PaintPicture extends JPanel {
     }
 
     public class ImageCanvas extends JComponent {
-        //获取图片路径
         //图片路径
         @Getter
         String path;
@@ -502,28 +502,22 @@ public class PaintPicture extends JPanel {
         //创建时间计时器，（图片模糊）
         private Timer timer;
         //模糊化类
-        MultiThreadBlur multiThreadBlur;
+        final MultiThreadBlur multiThreadBlur;
 
         //构造方法初始化（用于初始化类）
         public ImageCanvas() {
             setDoubleBuffered(true);
+            multiThreadBlur = new MultiThreadBlur();
             //初始化监听器
             new Thread(this::init_listener).start();
             new Thread(() -> {
                 isEnableHardware = isEnableHardwareAcceleration;
-                if (!isEnableHardware) return;
                 AtomicReference<String> LastPicture_hashcode = new AtomicReference<>("");
                 timer = new Timer(400, e -> {
                     if (!isEnableHardware) return;
                     ((Timer) e.getSource()).stop(); // 停止计时器
                     new Thread(() -> {
-                        if (image != null && multiThreadBlur != null && multiThreadBlur.getSrc() != null) {
-                            if (!LastPicture_hashcode.get().equals(picture_hashcode)) {
-                                if (BlurBufferedImage == null) throw new RuntimeException("BlurBufferedImage is null");
-                                multiThreadBlur.flushSrc();
-                                multiThreadBlur.changeImage(BlurBufferedImage);
-                                BlurBufferedImage = null;
-                            }
+                        if (image != null && multiThreadBlur.getSrc() != null) {
                             int KernelSize = multiThreadBlur.calculateKernelSize(sizeOperate.getPercent());
                             if (KernelSize == 1) {
                                 BlurBufferedImage = multiThreadBlur.getSrc();
@@ -531,7 +525,6 @@ public class PaintPicture extends JPanel {
                                 BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(KernelSize);
                             }
                             isNeedBlurToView = true;
-                            multiThreadBlur.flushDest();
                             LastPicture_hashcode.set(picture_hashcode);
                             repaint();
                         }
@@ -622,15 +615,14 @@ public class PaintPicture extends JPanel {
                 //若这两个文件父目录不相同
                 loadPictureInTheParent(finalPath);
             }).start();
-
-
             if (isEnableHardware) {
-                BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
-                if (multiThreadBlur != null) {
-                    multiThreadBlur.flushSrc();
-                    multiThreadBlur.flushDest();
-                }
-                multiThreadBlur = new MultiThreadBlur(BlurBufferedImage);
+                new Thread(() -> {
+                    BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
+                    synchronized (multiThreadBlur) {
+                        multiThreadBlur.changeImage(BlurBufferedImage);
+                    }
+                    sizeOperate.update(false);
+                }).start();
             }
             if (sizeOperate != null) sizeOperate.changeCanvas(this);
         }
@@ -728,7 +720,7 @@ public class PaintPicture extends JPanel {
                 return;
             }
             // 获取当前图形环境配置
-            if (timer != null) timer.stop();
+            timer.stop();
 
             double FinalX = X, FinalY = Y;
             var graphics2D = (Graphics2D) g;
@@ -806,7 +798,7 @@ public class PaintPicture extends JPanel {
                 lastRotationDegrees = RotationDegrees;
                 isMove = false;
                 lastPath = path;
-                if (isEnableHardware && timer != null) {
+                if (isEnableHardware) {
                     timer.start();
                 }
                 g.dispose();
@@ -930,7 +922,7 @@ public class PaintPicture extends JPanel {
             this.lastRotationDegrees = RotationDegrees;
             mouseX = mouseY = 0;
             lastPath = path;
-            if (isEnableHardware && timer != null) {
+            if (isEnableHardware) {
                 timer.start();
             }
             g.dispose();

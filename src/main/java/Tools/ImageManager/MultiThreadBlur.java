@@ -1,14 +1,17 @@
 package Tools.ImageManager;
 
 import NComponent.PaintPicture;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.TimeUnit;
@@ -21,11 +24,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class MultiThreadBlur {
     private static final Logger log = LoggerFactory.getLogger(MultiThreadBlur.class);
-    private final int TILE_SIZE = 64; // 缓存行友好的分块大小
-    private final int[] RED_TABLE = new int[0x1000000];
-    private final int[] GREEN_TABLE = new int[0x1000000];
-    private final int[] BLUE_TABLE = new int[0x1000000];
+    private static int[] RED_TABLE;
+    private static int[] GREEN_TABLE;
+    private static int[] BLUE_TABLE;
 
+    @Getter
     private BufferedImage src;
 
     private String srcPath;
@@ -41,6 +44,22 @@ public class MultiThreadBlur {
 
     private int[] tempPixels;
 
+    public MultiThreadBlur() {
+
+    }
+
+    public synchronized static void initTable() {
+        clearTable();
+        RED_TABLE = new int[0x1000000];
+        GREEN_TABLE = new int[0x1000000];
+        BLUE_TABLE = new int[0x1000000];
+        for (int i = 0; i < 0x1000000; i++) {
+            RED_TABLE[i] = (i >> 16) & 0xFF;
+            GREEN_TABLE[i] = (i >> 8) & 0xFF;
+            BLUE_TABLE[i] = i & 0xFF;
+        }
+    }
+
     // 动态计算kernelSize（若抗锯齿能修复则不返回1（不需要模糊））
     public static int calculateKernelSize(int width, int height, double scaleFactor) {
         //此代码块目前未实现
@@ -51,24 +70,30 @@ public class MultiThreadBlur {
 
     public MultiThreadBlur(String srcPath) {
         this.srcPath = srcPath;
-        for (int i = 0; i < 0x1000000; i++) {
-            RED_TABLE[i] = (i >> 16) & 0xFF;
-            GREEN_TABLE[i] = (i >> 8) & 0xFF;
-            BLUE_TABLE[i] = i & 0xFF;
-        }
         changeImage(srcPath);
 
     }
 
     public MultiThreadBlur(BufferedImage src) {
         if (src == null) return;
-        // 初始化颜色分量查表
-        for (int i = 0; i < 0x1000000; i++) {
-            RED_TABLE[i] = (i >> 16) & 0xFF;
-            GREEN_TABLE[i] = (i >> 8) & 0xFF;
-            BLUE_TABLE[i] = i & 0xFF;
-        }
         changeImage(src);
+    }
+
+    public synchronized static void clearTable() {
+        RED_TABLE = null;
+        GREEN_TABLE = null;
+        BLUE_TABLE = null;
+    }
+
+    public static BufferedImage getImageAndCastToTYPE_INT_RGB(String srcPath) {
+        // 使用try-with-resources确保流关闭
+        try (InputStream is = Files.newInputStream(Paths.get(srcPath))) {
+            BufferedImage simpleImage = ImageIO.read(is);
+            return GetImageInformation.CastToTYPE_INT_RGB(simpleImage);
+        } catch (IOException e) {
+            log.error("Image loading failed", e);
+            return null;
+        }
     }
 
     public void flushSrc() {
@@ -77,7 +102,11 @@ public class MultiThreadBlur {
             src.flush();
             src = null;
         }
-        if (srcPath != null) srcPath = null;
+        srcPath = null;
+
+        // 释放像素数组
+        srcPixels = null;
+        tempPixels = null;
     }
 
     public void flushDest() {
@@ -86,13 +115,17 @@ public class MultiThreadBlur {
             dest.flush();
             dest = null;
         }
+        destPixels = null;
     }
 
-    public BufferedImage getSrc() {
-        return src;
-    }
+    public synchronized void changeImage(BufferedImage src) {
+        flushSrc();
+        flushDest();
 
-    public void changeImage(BufferedImage src) {
+        if (RED_TABLE == null || GREEN_TABLE == null || BLUE_TABLE == null)
+            initTable();
+
+
         srcPath = null;
         this.src = src;
         width = src.getWidth();
@@ -103,7 +136,11 @@ public class MultiThreadBlur {
         tempPixels = new int[srcPixels.length];
     }
 
-    public void changeImage(String srcPath) {
+    public synchronized void changeImage(String srcPath) {
+        if (RED_TABLE == null || GREEN_TABLE == null || BLUE_TABLE == null)
+            initTable();
+
+
         src = getImageAndCastToTYPE_INT_RGB(srcPath);
         width = src.getWidth();
         height = src.getHeight();
@@ -115,25 +152,11 @@ public class MultiThreadBlur {
         src = null;
     }
 
-    public static BufferedImage getImageAndCastToTYPE_INT_RGB(String srcPath) {
-        BufferedImage src = null;
-        try {
-            BufferedImage SimpleImage = ImageIO.read(new File(srcPath));
-            src = GetImageInformation.CastToTYPE_INT_RGB(SimpleImage);
-            SimpleImage.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            return null;
-        }
-        return src;
-    }
-
     public int calculateKernelSize(double scaleFactor) {
         return calculateKernelSize(width, height, scaleFactor);
     }
 
-
-    public BufferedImage applyOptimizedBlur(int kernelSize) {
+    public synchronized BufferedImage applyOptimizedBlur(int kernelSize) {
         if (srcPath != null) src = getImageAndCastToTYPE_INT_RGB(srcPath);
         if (src != null) {
             if (kernelSize % 2 == 0) throw new IllegalArgumentException("Kernel size must be odd");
@@ -155,21 +178,15 @@ public class MultiThreadBlur {
 
     // 水平方向模糊
     private void horizontalBlur(int[] src, int[] dest, int width, int height, int kernelSize) {
-        ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
-        try {
+        try (ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors())) {
             pool.invoke(new BlurTask(src, dest, width, height, kernelSize, 0, height, true));
-        } finally {
-            pool.shutdown();
         }
     }
 
     // 垂直方向模糊
     private void verticalBlur(int[] src, int[] dest, int width, int height, int kernelSize) {
-        ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
-        try {
+        try (ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors())) {
             pool.invoke(new BlurTask(src, dest, width, height, kernelSize, 0, width, false));
-        } finally {
-            pool.shutdown();
         }
     }
 
@@ -204,19 +221,13 @@ public class MultiThreadBlur {
         private void processDirectly() {
             final int halfKernel = kernelSize / 2;
             final int bound = isHorizontal ? width : height;
-            final int cacheSize = kernelSize * 2;
-            int[][] cache = new int[cacheSize][];
+            int[] cache = null;
 
             for (int i = start; i < end; i++) {
                 // 初始化行缓存
                 if (isHorizontal) {
-                    cache[0] = new int[width];
-                    System.arraycopy(src, i * width, cache[0], 0, width);
-                } else {
-                    cache[0] = new int[height];
-                    for (int y = 0; y < height; y++) {
-                        cache[0][y] = src[y * width + i];
-                    }
+                    cache = new int[width];
+                    System.arraycopy(src, i * width, cache, 0, width);
                 }
 
                 // 滑动窗口处理
@@ -228,10 +239,15 @@ public class MultiThreadBlur {
                     int endPos = Math.min(j + halfKernel, bound - 1);
 
                     for (int k = startPos; k <= endPos; k++) {
-                        int pixel = isHorizontal ? cache[0][k] : src[k * width + i];
-                        sumR += RED_TABLE[pixel];
-                        sumG += GREEN_TABLE[pixel];
-                        sumB += BLUE_TABLE[pixel];
+                        int rawPixel = isHorizontal
+                                ? cache[k]
+                                : src[k * width + i];
+
+                        int safePixel = rawPixel & 0xFFFFFF; // 确保24位正索引
+
+                        sumR += RED_TABLE[safePixel];
+                        sumG += GREEN_TABLE[safePixel];
+                        sumB += BLUE_TABLE[safePixel];
                         count++;
                     }
 

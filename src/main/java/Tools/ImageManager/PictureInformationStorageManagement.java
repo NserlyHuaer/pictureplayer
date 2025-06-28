@@ -62,9 +62,11 @@ public class PictureInformationStorageManagement implements Serializable {
         pictureInformation.add(OriginalPictureHashCode);
         File savePath = new File(saveDir + RandomString.getRandomString(10) + FileSuffix);
         pictureInformation.add(savePath.getPath());
-        writeImage(getImage(OriginalPicturePath), savePath.getPath(), saveType);
+        BufferedImage bufferedImage = getImage(OriginalPicturePath);
+        writeImage(bufferedImage, savePath.getPath(), saveType);
         pictureInformation.add(GetImageInformation.getHashcode(savePath));
         treeMap.put(OriginalPicturePath, pictureInformation);
+        bufferedImage.flush();
         return savePath.getPath();
     }
 

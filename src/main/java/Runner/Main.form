@@ -363,152 +363,171 @@
               </grid>
             </children>
           </grid>
-          <grid id="6ed20" binding="FourthPanel" layout-manager="GridLayoutManager" row-count="10" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+          <scrollpane id="47bcc">
             <constraints>
               <tabbedpane title-resource-bundle="messages" title-key="FourthPanel"/>
             </constraints>
             <properties/>
             <border type="none"/>
             <children>
-              <component id="b2e21" class="javax.swing.JLabel" binding="JVMVersionLabel">
-                <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="JVMVersionLabel"/>
-                </properties>
-              </component>
-              <vspacer id="2584c">
-                <constraints>
-                  <grid row="9" column="0" row-span="1" col-span="7" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </vspacer>
-              <component id="ba362" class="javax.swing.JLabel" binding="CurrentSoftwareVersionLabel">
-                <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="CurrentSoftwareVersionLabel"/>
-                </properties>
-              </component>
-              <component id="e4ba5" class="javax.swing.JLabel" binding="CurrentSoftwareInteriorLabel">
-                <constraints>
-                  <grid row="7" column="2" row-span="1" col-span="5" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="CurrentSoftwareInteriorLabel"/>
-                </properties>
-              </component>
-              <component id="a000c" class="javax.swing.JButton" binding="CheckVersionButton">
-                <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="7" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <requestFocusEnabled value="false"/>
-                  <rolloverEnabled value="false"/>
-                  <text resource-bundle="messages" key="CheckVersionButton"/>
-                </properties>
-              </component>
-              <component id="e9e25" class="javax.swing.JLabel" binding="OSLabel">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="OSLabel"/>
-                </properties>
-              </component>
-              <component id="e8b8e" class="javax.swing.JLabel" binding="ProgramStartTime">
-                <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="ProgramStartTime"/>
-                </properties>
-              </component>
-              <component id="428e8" class="javax.swing.JLabel" binding="CurrentSoftwareLanguage">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <enabled value="true"/>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="CurrentSoftwareLanguage"/>
-                </properties>
-              </component>
-              <component id="f7451" class="javax.swing.JLabel" binding="CPUName">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="7" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="CPULabel"/>
-                </properties>
-              </component>
-              <component id="48ddc" class="javax.swing.JLabel" binding="TotalThread">
-                <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="TotalThread"/>
-                </properties>
-              </component>
-              <component id="b87f8" class="javax.swing.JLabel" binding="MemUsed">
-                <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="MemUsed"/>
-                </properties>
-              </component>
-              <component id="f83a5" class="javax.swing.JLabel" binding="DefaultJVMMem">
-                <constraints>
-                  <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="DefaultJVMMem"/>
-                </properties>
-              </component>
-              <hspacer id="62dde">
-                <constraints>
-                  <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </hspacer>
-              <hspacer id="5d212">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </hspacer>
-              <hspacer id="f5530">
-                <constraints>
-                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </hspacer>
-              <hspacer id="7f02d">
-                <constraints>
-                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </hspacer>
-              <component id="c8b0c" class="javax.swing.JLabel" binding="JavaPath">
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font size="16"/>
-                  <text resource-bundle="messages" key="JavaPath"/>
-                </properties>
-              </component>
+              <grid id="6ed20" binding="FourthPanel" layout-manager="GridLayoutManager" row-count="11" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints/>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="b2e21" class="javax.swing.JLabel" binding="JVMVersionLabel">
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="JVMVersionLabel"/>
+                    </properties>
+                  </component>
+                  <vspacer id="2584c">
+                    <constraints>
+                      <grid row="10" column="0" row-span="1" col-span="7" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </vspacer>
+                  <component id="ba362" class="javax.swing.JLabel" binding="CurrentSoftwareVersionLabel">
+                    <constraints>
+                      <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="CurrentSoftwareVersionLabel"/>
+                    </properties>
+                  </component>
+                  <component id="e4ba5" class="javax.swing.JLabel" binding="CurrentSoftwareInteriorLabel">
+                    <constraints>
+                      <grid row="7" column="2" row-span="1" col-span="5" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="CurrentSoftwareInteriorLabel"/>
+                    </properties>
+                  </component>
+                  <component id="a000c" class="javax.swing.JButton" binding="CheckVersionButton">
+                    <constraints>
+                      <grid row="8" column="0" row-span="1" col-span="7" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <requestFocusEnabled value="false"/>
+                      <rolloverEnabled value="false"/>
+                      <text resource-bundle="messages" key="CheckVersionButton"/>
+                    </properties>
+                  </component>
+                  <component id="e9e25" class="javax.swing.JLabel" binding="OSLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="OSLabel"/>
+                    </properties>
+                  </component>
+                  <component id="e8b8e" class="javax.swing.JLabel" binding="ProgramStartTime">
+                    <constraints>
+                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="ProgramStartTime"/>
+                    </properties>
+                  </component>
+                  <component id="428e8" class="javax.swing.JLabel" binding="CurrentSoftwareLanguage">
+                    <constraints>
+                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="true"/>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="CurrentSoftwareLanguage"/>
+                    </properties>
+                  </component>
+                  <component id="f7451" class="javax.swing.JLabel" binding="CPUName">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="7" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="CPULabel"/>
+                    </properties>
+                  </component>
+                  <component id="48ddc" class="javax.swing.JLabel" binding="TotalThread">
+                    <constraints>
+                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="TotalThread"/>
+                    </properties>
+                  </component>
+                  <component id="b87f8" class="javax.swing.JLabel" binding="MemUsed">
+                    <constraints>
+                      <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="MemUsed"/>
+                    </properties>
+                  </component>
+                  <component id="f83a5" class="javax.swing.JLabel" binding="DefaultJVMMem">
+                    <constraints>
+                      <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="DefaultJVMMem"/>
+                    </properties>
+                  </component>
+                  <hspacer id="62dde">
+                    <constraints>
+                      <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <hspacer id="5d212">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <hspacer id="f5530">
+                    <constraints>
+                      <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <hspacer id="7f02d">
+                    <constraints>
+                      <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <component id="c8b0c" class="javax.swing.JLabel" binding="JavaPath">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font size="16"/>
+                      <text resource-bundle="messages" key="JavaPath"/>
+                    </properties>
+                  </component>
+                  <component id="72fcb" class="javax.swing.JButton" binding="FreeUpMemory">
+                    <constraints>
+                      <grid row="9" column="0" row-span="1" col-span="7" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand resource-bundle="messages" key="FreeUpMemory"/>
+                      <font size="16"/>
+                      <requestFocusEnabled value="false"/>
+                      <rolloverEnabled value="false"/>
+                      <text value="释放内存"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
             </children>
-          </grid>
+          </scrollpane>
         </children>
       </tabbedpane>
       <component id="73eb6" class="javax.swing.JLabel" binding="TopLabel">

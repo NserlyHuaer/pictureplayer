@@ -3,18 +3,18 @@ package Runner;
 import Listener.ChangeFocusListener;
 import Loading.Bundle;
 import Loading.Init;
+import NComponent.*;
+import Settings.Centre;
 import Size.SizeOperate;
 import Tools.Component.WindowLocation;
 import Tools.ImageManager.CheckFileIsRightPictureType;
 import Tools.ImageManager.GetImageInformation;
-import Version.DownloadUpdate;
 import Tools.OSInformation.SystemMonitor;
+import Version.DownloadUpdate;
 import Version.Version;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import Settings.Centre;
-import NComponent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +90,7 @@ public class Main extends JFrame {
     private JLabel Display_1st;
     private JLabel Display_2nd;
     private JLabel Display_3rd;
+    private JButton FreeUpMemory;
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private static ScheduledFuture<?> future;
     private ChangeFocusListener changeFocusListener;
@@ -154,7 +155,7 @@ public class Main extends JFrame {
         System.setProperty("sun.java2d.opengl", "true");
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         main = new Main("Picture Player(Version:" + Version.getVersion() + ")");
         new Thread(() -> {
             for (String arg : args) {
@@ -516,6 +517,10 @@ public class Main extends JFrame {
             }).start();
         });
 
+        FreeUpMemory.addActionListener(e -> {
+            System.gc();
+            JOptionPane.showConfirmDialog(Main.main, Bundle.getMessage("FreeUpMemory_Content"), Bundle.getMessage("FreeUpMemory_Title"), JOptionPane.DEFAULT_OPTION);
+        });
 
     }
 
@@ -730,16 +735,18 @@ public class Main extends JFrame {
         ProxyServerButton.setRequestFocusEnabled(false);
         this.$$$loadButtonText$$$(ProxyServerButton, this.$$$getMessageFromBundle$$$("messages", "ProxyServerButton"));
         panel2.add(ProxyServerButton, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane3 = new JScrollPane();
+        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "FourthPanel"), scrollPane3);
         FourthPanel = new JPanel();
-        FourthPanel.setLayout(new GridLayoutManager(10, 7, new Insets(0, 0, 0, 0), -1, -1));
-        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "FourthPanel"), FourthPanel);
+        FourthPanel.setLayout(new GridLayoutManager(11, 7, new Insets(0, 0, 0, 0), -1, -1));
+        scrollPane3.setViewportView(FourthPanel);
         JVMVersionLabel = new JLabel();
         Font JVMVersionLabelFont = this.$$$getFont$$$(null, -1, 16, JVMVersionLabel.getFont());
         if (JVMVersionLabelFont != null) JVMVersionLabel.setFont(JVMVersionLabelFont);
         this.$$$loadLabelText$$$(JVMVersionLabel, this.$$$getMessageFromBundle$$$("messages", "JVMVersionLabel"));
         FourthPanel.add(JVMVersionLabel, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer7 = new Spacer();
-        FourthPanel.add(spacer7, new GridConstraints(9, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        FourthPanel.add(spacer7, new GridConstraints(10, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         CurrentSoftwareVersionLabel = new JLabel();
         Font CurrentSoftwareVersionLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareVersionLabel.getFont());
         if (CurrentSoftwareVersionLabelFont != null)
@@ -808,6 +815,14 @@ public class Main extends JFrame {
         if (JavaPathFont != null) JavaPath.setFont(JavaPathFont);
         this.$$$loadLabelText$$$(JavaPath, this.$$$getMessageFromBundle$$$("messages", "JavaPath"));
         FourthPanel.add(JavaPath, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        FreeUpMemory = new JButton();
+        FreeUpMemory.setActionCommand(this.$$$getMessageFromBundle$$$("messages", "FreeUpMemory"));
+        Font FreeUpMemoryFont = this.$$$getFont$$$(null, -1, 16, FreeUpMemory.getFont());
+        if (FreeUpMemoryFont != null) FreeUpMemory.setFont(FreeUpMemoryFont);
+        FreeUpMemory.setRequestFocusEnabled(false);
+        FreeUpMemory.setRolloverEnabled(false);
+        FreeUpMemory.setText("释放内存");
+        FourthPanel.add(FreeUpMemory, new GridConstraints(9, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         TopLabel = new JLabel();
         Font TopLabelFont = this.$$$getFont$$$(null, -1, 20, TopLabel.getFont());
         if (TopLabelFont != null) TopLabel.setFont(TopLabelFont);
