@@ -927,14 +927,17 @@ public class Main extends JFrame {
         //移走所有已在列表中的图片路径
         cached.removeAll(thumbnailPreviewOfImages.keySet());
 
+        ArrayList<String> removed = new ArrayList<>();
+
         //移走所有当前列表中的图片路径不在当前显示列表
         for (String currentBufferedPicturePath : thumbnailPreviewOfImages.keySet()) {
             if (!picturePath.contains(currentBufferedPicturePath)) {
                 FileChoosePane.remove(thumbnailPreviewOfImages.get(currentBufferedPicturePath));
-                thumbnailPreviewOfImages.remove(currentBufferedPicturePath);
+                removed.add(currentBufferedPicturePath);
             }
-
         }
+        removed.forEach(thumbnailPreviewOfImages::remove);
+
         //创建当前显示列表没有的图片
         for (String path : cached) {
             ThumbnailPreviewOfImage thumbnailPreviewOfImage = null;

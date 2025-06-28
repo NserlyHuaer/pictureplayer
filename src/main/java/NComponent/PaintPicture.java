@@ -519,7 +519,7 @@ public class PaintPicture extends JPanel {
                     new Thread(() -> {
                         if (image != null && multiThreadBlur != null && multiThreadBlur.getSrc() != null) {
                             if (!LastPicture_hashcode.get().equals(picture_hashcode)) {
-                                if(BlurBufferedImage == null)throw new RuntimeException("BlurBufferedImage is null");
+                                if (BlurBufferedImage == null) throw new RuntimeException("BlurBufferedImage is null");
                                 multiThreadBlur.flushSrc();
                                 multiThreadBlur.changeImage(BlurBufferedImage);
                                 BlurBufferedImage = null;
@@ -626,8 +626,6 @@ public class PaintPicture extends JPanel {
 
             if (isEnableHardware) {
                 BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
-                image.flush();
-                this.image = BlurBufferedImage;
                 if (multiThreadBlur != null) {
                     multiThreadBlur.flushSrc();
                     multiThreadBlur.flushDest();
