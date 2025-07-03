@@ -2,16 +2,16 @@ package NComponent;
 
 import Runner.Main;
 
-import java.awt.*;
+import javax.swing.*;
 
-public class PercentLabel extends Label {
+public class PercentLabel extends JLabel {
 
     public void set(int percent) {
         String text = percent + "%";
         String lastText = getText();
         super.setText(text);
-        if (text.length() != lastText.length() && Main.main.paintPicture != null && Main.main.paintPicture.On != null) {
-            Main.main.paintPicture.On.revalidate();
+        if (text.length() != lastText.length() && Main.main.paintPicture != null && Main.main.paintPicture.AboveMainPanel != null) {
+            Main.main.paintPicture.AboveMainPanel.revalidate();
         }
 
     }

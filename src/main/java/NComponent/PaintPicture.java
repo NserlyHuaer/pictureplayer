@@ -1,12 +1,9 @@
 package NComponent;//导入包
 
-import Listener.ChangeFocusListener;
-import Loading.Bundle;
 import Runner.Main;
 import Settings.Centre;
 import Size.OperatingCoordinate;
 import Size.SizeOperate;
-import Tools.Component.ComponentInJPanel;
 import Tools.EqualsProportion;
 import Tools.ImageManager.GetImageInformation;
 import Tools.ImageManager.ImageRotationHelper;
@@ -17,12 +14,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.plaf.FontUIResource;
+import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,13 +36,13 @@ public class PaintPicture extends JPanel {
     //图片全屏窗体
     FullScreenWindow fullScreenWindow;
     //上部组件
-    public JPanel On;
+    public JPanel AboveMainPanel;
     //下部总组件
-    public JPanel Under;
+    public JPanel BelowMainPanel;
     //下部左组件
-    public JPanel UnderLeft;
+    public JPanel SouthLeftPanel;
     //下部右组件
-    public JPanel UnderRight;
+    public JPanel SouthRightPanel;
     //图片分辨率
     public JLabel PictureResolution;
     //逆时针旋转按钮
@@ -53,16 +55,12 @@ public class PaintPicture extends JPanel {
     public JButton clockwise;
     //图片大小
     public JLabel PictureSize;
-    //打开上一个图片按钮
-    private JButton Last;
-    //打开下一个图片按钮
-    private JButton Next;
     //图片缩小按钮
-    public JButton smallest;
+    public JButton reduceButton;
     //图片缩放调节滑动条
     public JSlider PercentSlider;
     //图片放大按钮
-    public JButton biggest;
+    public JButton enlargeButton;
     //打开上一个图片
     private static final int LastSign = 0x25;
     //打开下一个图片
@@ -78,7 +76,7 @@ public class PaintPicture extends JPanel {
     //图片渲染器在屏幕上的坐标
     Point LocationOnScreen;
     //缩放比例标签
-    PercentLabel percentLabel;
+    JLabel percentLabel;
     //图片比例管理
     public SizeOperate sizeOperate;
     //图片渲染管理
@@ -90,10 +88,6 @@ public class PaintPicture extends JPanel {
     ArrayList<String> CurrentPathOfPicture;
     //是否启用硬件加速
     public static boolean isEnableHardwareAcceleration;
-    // 定义边缘范围为5像素
-    private static final int EDGE_THRESHOLD = 5;
-
-    private MouseEvent lastMouseEvent;
     private MouseAdapter mouseAdapter;
     private File lastPicturePathParent;
     private static boolean isMousePressed; // 标记鼠标是否按下
@@ -104,62 +98,7 @@ public class PaintPicture extends JPanel {
     public PictureInformationStorageManagement pictureInformationStorageManagement;
 
     private Thread init;
-
-    //构造方法（无参函数）（用于初始化）
-    public PaintPicture() {
-        paintPicture = this;
-        try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream("data/PictureCacheManagement.obj"))) {
-            pictureInformationStorageManagement = (PictureInformationStorageManagement) objectInputStream.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            logger.error(Main.getExceptionMessage(e));
-        }
-        pictureInformationStorageManagement = new PictureInformationStorageManagement();
-        AtomicReference<ChangeFocusListener> changeFocusListener = new AtomicReference<>();
-        init = new Thread(() -> {
-            Main.setUncaughtExceptionHandler(logger);
-            setLayout(new BorderLayout());
-            fullScreenWindow = new FullScreenWindow();
-            //创建画布
-            imageCanvas = new ImageCanvas();
-            sizeOperate = new SizeOperate(imageCanvas, null);
-            changeFocusListener.set(new ChangeFocusListener(imageCanvas));
-            setUnderPanel();
-            setOnPanel(changeFocusListener.get());
-        });
-        init.setPriority(Thread.MAX_PRIORITY);
-        init.start();
-        new Thread(() -> {
-            Last = new JButton("<");
-            Next = new JButton(">");
-            Font font = new Font("", Font.PLAIN, 15);
-            try {
-                init.join();
-            } catch (InterruptedException ignored) {
-
-            }
-
-            smallest.setText(Bundle.getMessage("Display_reduce"));
-            biggest.setText(Bundle.getMessage("Display_enlarge"));
-            PictureResolution.setFont(font);
-            PictureSize.setFont(font);
-            //设置文本中显示的图片缩放比例
-            percentLabel.set((int) sizeOperate.getPercent());
-            //设置图片缩放滑动条
-            PercentSlider.setValue((int) sizeOperate.getPercent());
-            //设置图片顺时针按钮可见
-            clockwise.setVisible(true);
-            //设置图片逆时针按钮可见
-            clockwise.setVisible(true);
-            //设置重置按钮可见
-            Reset.setVisible(true);
-            FullScreen.setVisible(true);
-            clockwise.setText(Bundle.getMessage("Display_RotateClockwiseButton"));
-            Reset.setText(Bundle.getMessage("Display_reset"));
-            counterclockwise.setText(Bundle.getMessage("Display_RotateCounterclockwise"));
-            FullScreen.setText(Bundle.getMessage("Display_FullScreenButton"));
-            init_Listener(changeFocusListener.get());
-        }).start();
-    }
+    private JPanel MainPanel;
 
     //构造方法（函数）（用于直接显示图片）
     public PaintPicture(String path) {
@@ -167,84 +106,69 @@ public class PaintPicture extends JPanel {
         openPicture(path);
     }
 
-    private void setOnPanel(ChangeFocusListener changeFocusListener) {
-        percentLabel = new PercentLabel();
-        On = new JPanel();
-        clockwise = new JButton();
-        //在容器On中添加还原图片按钮
-        Reset = new JButton();
-        //顺时针
-        counterclockwise = new JButton();
-        //全屏
-        FullScreen = new JButton();
-        //将图片逆时针按钮添加到组件中
-        On.add(counterclockwise);
-        //将重置按钮添加到组件中
-        On.add(Reset);
-        //将全屏按钮添加到组件中
-        On.add(FullScreen);
-        //将图片顺时针按钮添加到组件中
-        On.add(clockwise);
-        //将比例显示添加到组件中
-        On.add(percentLabel);
+    //构造方法（无参函数）（用于初始化）
+    public PaintPicture() {
+        paintPicture = this;
+        $$$setupUI$$$();
+        try (ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream("data/PictureCacheManagement.obj"))) {
+            pictureInformationStorageManagement = (PictureInformationStorageManagement) objectInputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            logger.error(Main.getExceptionMessage(e));
+        }
+        pictureInformationStorageManagement = new PictureInformationStorageManagement();
+        init = new Thread(() -> {
+            Main.setUncaughtExceptionHandler(logger);
+            setLayout(new BorderLayout());
+            fullScreenWindow = new FullScreenWindow();
+            //创建画布
+            imageCanvas = new ImageCanvas();
+            sizeOperate = new SizeOperate(imageCanvas, null);
+        });
+        init.setPriority(Thread.MAX_PRIORITY);
+        init.start();
+        new Thread(() -> {
+            try {
+                init.join();
+            } catch (InterruptedException ignored) {
+
+            }
+
+            PercentSlider.setMaximum(sizeOperate.MaxPercent);
+            PercentSlider.setMinimum(sizeOperate.MinPercent);
+
+            //设置文本中显示的图片缩放比例
+            PercentLabel percentLabel = (PercentLabel) this.percentLabel;
+            percentLabel.set((int) sizeOperate.getPercent());
+            //设置图片缩放滑动条
+            PercentSlider.setValue((int) sizeOperate.getPercent());
+            init_Listener();
+        }).start();
     }
 
-    private void setUnderPanel() {
-        Under = new JPanel();
-        //初始化面板
-        UnderLeft = new JPanel();
-        UnderRight = new JPanel();
-
-        UnderLeft.setLayout(new FlowLayout(FlowLayout.LEADING));
-        UnderRight.setLayout(new FlowLayout(FlowLayout.RIGHT));
-        Under.setLayout(new GridLayout(1, 2));
-
-        PictureResolution = new JLabel();
-        PictureSize = new JLabel();
-
-        smallest = new JButton();
-        biggest = new JButton();
-        PercentSlider = new JSlider(sizeOperate.MinPercent, sizeOperate.MaxPercent);
-
-        //添加左组件
-        UnderLeft.add(PictureResolution);
-        UnderLeft.add(PictureSize);
-
-        //添加右组件
-        UnderRight.add(smallest);
-        UnderRight.add(PercentSlider);
-        UnderRight.add(biggest);
-
-        //加入下方总组件
-        Under.add(UnderLeft);
-        Under.add(UnderRight);
+    public void fitComponent() {
+        sizeOperate.incomeWindowDimension(imageCanvas.getSize());
+        sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
+        sizeOperate.update(false);
     }
 
-    private void init_Listener(ChangeFocusListener changeFocusListener) {
-        PercentSlider.addMouseListener(changeFocusListener);
-        Last.addMouseListener(changeFocusListener);
-        Next.addMouseListener(changeFocusListener);
-        Last.addActionListener(e -> {
-            new Thread(() -> {
-                imageCanvas.openLONPicture(LastSign);
-                if (lastMouseEvent != null) {
-                    mouseAdapter.mouseMoved(lastMouseEvent);
-                }
-            }).start();
-        });
-        Next.addActionListener(e -> {
-            new Thread(() -> {
-                imageCanvas.openLONPicture(NextSign);
-                if (lastMouseEvent != null) {
-                    mouseAdapter.mouseMoved(lastMouseEvent);
-                }
-            }).start();
-        });
-        FullScreen.addMouseListener(changeFocusListener);
+    private void loadPictureInTheParent(String picturePath) {
+        File pictureParent = new File(picturePath).getParentFile();
+        if (!pictureParent.equals(lastPicturePathParent)) {
+            //获取当前图片路径下所有图片
+            CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(picturePath);
+            lastPicturePathParent = pictureParent;
+            Main.main.reviewPictureList(CurrentPathOfPicture);
+        }
+    }
+
+    public void openPicture(String path) {
+        changePicturePath(path);
+    }
+
+    private void init_Listener() {
         FullScreen.addActionListener(e -> {
             Main.main.paintPicture.imageCanvas.setFullScreen(true);
         });
-        Reset.addMouseListener(changeFocusListener);
         //点击时间
         AtomicLong ClickedTime = new AtomicLong();
         //规定时间内点击次数
@@ -289,13 +213,11 @@ public class PaintPicture extends JPanel {
         clockwise.addActionListener(e -> {
             imageCanvas.turnLeft();
         });
-        clockwise.addMouseListener(changeFocusListener);
         //创建图片顺时针按钮监听器
         counterclockwise.addActionListener(e -> {
             imageCanvas.turnRight();
         });
-        counterclockwise.addMouseListener(changeFocusListener);
-        smallest.addMouseListener(new MouseAdapter() {
+        reduceButton.addMouseListener(new MouseAdapter() {
             //判断是否鼠标释放
             boolean isReleased = false;
 
@@ -308,7 +230,7 @@ public class PaintPicture extends JPanel {
                 new Thread(() -> {
                     //循环
                     do {
-                        if (!smallest.isEnabled()) return;
+                        if (!reduceButton.isEnabled()) return;
                         if (sizeOperate.adjustPercent(SizeOperate.Reduce)) {
                             sizeOperate.update(false);
                         }
@@ -356,12 +278,13 @@ public class PaintPicture extends JPanel {
 
         PercentSlider.addChangeListener(e -> {
             if (isMousePressed) {
+                PercentLabel percentLabel = (PercentLabel) this.percentLabel;
                 percentLabel.set(PercentSlider.getValue());
                 sizeOperate.setPercent(PercentSlider.getValue());
                 sizeOperate.update(false);
             }
         });
-        biggest.addMouseListener(new MouseAdapter() {
+        enlargeButton.addMouseListener(new MouseAdapter() {
             boolean isDown = false;
 
             @Override
@@ -369,7 +292,7 @@ public class PaintPicture extends JPanel {
                 isDown = false;
                 new Thread(() -> {
                     do {
-                        if (!biggest.isEnabled()) return;
+                        if (!enlargeButton.isEnabled()) return;
                         if (sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
                             sizeOperate.update(false);
                         }
@@ -390,53 +313,9 @@ public class PaintPicture extends JPanel {
         });
     }
 
-    public void fitComponent() {
-        sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-        sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
-        sizeOperate.update(false);
-    }
-
-    private void loadPictureInTheParent(String picturePath) {
-        File pictureParent = new File(picturePath).getParentFile();
-        if (!pictureParent.equals(lastPicturePathParent)) {
-            //获取当前图片路径下所有图片
-            CurrentPathOfPicture = GetImageInformation.getCurrentPathOfPicture(picturePath);
-            lastPicturePathParent = pictureParent;
-            Main.main.reviewPictureList(CurrentPathOfPicture);
-        }
-    }
-
-    public void openPicture(String path) {
-        changePicturePath(path);
-    }
-
-    //改变图片路径
-    public void changePicturePath(String path) {
-        logger.info("Opened:\"{}\"", path);
-        if (isOnlyInit) {
-            BufferedImage image = null;
-            image = PictureInformationStorageManagement.getImage(pictureInformationStorageManagement.getCachedPicturePath(path));
-            try {
-                init.join();
-            } catch (InterruptedException ignored) {
-
-            }
-            //添加画布至组件中
-            add(imageCanvas, BorderLayout.CENTER);
-            //设置菜单为面板下方并添加至组件中
-            add(Under, BorderLayout.SOUTH);
-            //设置为面板上方并添加至组件中
-            add(On, BorderLayout.NORTH);
-            BufferedImage finalImage = image;
-            new Thread(() -> {
-                validate();
-                sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-                imageCanvas.changePicturePath(finalImage, path);
-            }).start();
-        } else {
-            imageCanvas.changePicturePath(path);
-        }
-        isOnlyInit = false;
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
+        percentLabel = new PercentLabel();
     }
 
     //显示图片大小、分辨率等信息
@@ -452,6 +331,177 @@ public class PaintPicture extends JPanel {
         PictureSize.setText(AdvancedDownloadSpeed.formatBytes(PictureFile.length()));
         if (dimension != null)
             PictureResolution.setText((int) dimension.getWidth() + "x" + (int) dimension.getHeight());
+    }
+
+    //改变图片路径
+    public void changePicturePath(String path) {
+        logger.info("Opened:\"{}\"", path);
+        if (isOnlyInit) {
+            BufferedImage image = null;
+            image = PictureInformationStorageManagement.getImage(pictureInformationStorageManagement.getCachedPicturePath(path));
+            try {
+                init.join();
+            } catch (InterruptedException ignored) {
+
+            }
+            //添加画布至组件中
+            MainPanel.add(imageCanvas, BorderLayout.CENTER);
+            add(MainPanel, BorderLayout.CENTER);
+            BufferedImage finalImage = image;
+            new Thread(() -> {
+                validate();
+                sizeOperate.incomeWindowDimension(imageCanvas.getSize());
+                imageCanvas.changePicturePath(finalImage, path);
+            }).start();
+        } else {
+            imageCanvas.changePicturePath(path);
+        }
+        isOnlyInit = false;
+    }
+
+    /**
+     * Method generated by IntelliJ IDEA GUI Designer
+     * >>> IMPORTANT!! <<<
+     * DO NOT edit this method OR call it in your code!
+     *
+     * @noinspection ALL
+     */
+    private void $$$setupUI$$$() {
+        createUIComponents();
+        MainPanel = new JPanel();
+        MainPanel.setLayout(new BorderLayout(0, 0));
+        MainPanel.setRequestFocusEnabled(false);
+        AboveMainPanel = new JPanel();
+        AboveMainPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        AboveMainPanel.setRequestFocusEnabled(false);
+        MainPanel.add(AboveMainPanel, BorderLayout.NORTH);
+        counterclockwise = new JButton();
+        counterclockwise.setRequestFocusEnabled(false);
+        this.$$$loadButtonText$$$(counterclockwise, this.$$$getMessageFromBundle$$$("messages", "Display_RotateCounterclockwise"));
+        AboveMainPanel.add(counterclockwise);
+        Reset = new JButton();
+        Reset.setRequestFocusEnabled(false);
+        this.$$$loadButtonText$$$(Reset, this.$$$getMessageFromBundle$$$("messages", "Display_reset"));
+        AboveMainPanel.add(Reset);
+        FullScreen = new JButton();
+        FullScreen.setRequestFocusEnabled(false);
+        this.$$$loadButtonText$$$(FullScreen, this.$$$getMessageFromBundle$$$("messages", "Display_FullScreenButton"));
+        AboveMainPanel.add(FullScreen);
+        clockwise = new JButton();
+        clockwise.setRequestFocusEnabled(false);
+        this.$$$loadButtonText$$$(clockwise, this.$$$getMessageFromBundle$$$("messages", "Display_RotateClockwiseButton"));
+        AboveMainPanel.add(clockwise);
+        percentLabel.setRequestFocusEnabled(false);
+        percentLabel.setText("");
+        AboveMainPanel.add(percentLabel);
+        BelowMainPanel = new JPanel();
+        BelowMainPanel.setLayout(new BorderLayout(1, 2));
+        BelowMainPanel.setRequestFocusEnabled(false);
+        MainPanel.add(BelowMainPanel, BorderLayout.SOUTH);
+        SouthLeftPanel = new JPanel();
+        SouthLeftPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 5, 5));
+        SouthLeftPanel.setRequestFocusEnabled(false);
+        BelowMainPanel.add(SouthLeftPanel, BorderLayout.WEST);
+        PictureResolution = new JLabel();
+        Font PictureResolutionFont = this.$$$getFont$$$(null, -1, 15, PictureResolution.getFont());
+        if (PictureResolutionFont != null) PictureResolution.setFont(PictureResolutionFont);
+        PictureResolution.setRequestFocusEnabled(false);
+        PictureResolution.setText("");
+        SouthLeftPanel.add(PictureResolution);
+        PictureSize = new JLabel();
+        Font PictureSizeFont = this.$$$getFont$$$(null, -1, 15, PictureSize.getFont());
+        if (PictureSizeFont != null) PictureSize.setFont(PictureSizeFont);
+        PictureSize.setRequestFocusEnabled(false);
+        PictureSize.setText("");
+        SouthLeftPanel.add(PictureSize);
+        SouthRightPanel = new JPanel();
+        SouthRightPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        SouthRightPanel.setRequestFocusEnabled(false);
+        BelowMainPanel.add(SouthRightPanel, BorderLayout.EAST);
+        reduceButton = new JButton();
+        reduceButton.setRequestFocusEnabled(false);
+        this.$$$loadButtonText$$$(reduceButton, this.$$$getMessageFromBundle$$$("messages", "Display_reduce"));
+        SouthRightPanel.add(reduceButton);
+        PercentSlider = new JSlider();
+        PercentSlider.setRequestFocusEnabled(false);
+        SouthRightPanel.add(PercentSlider);
+        enlargeButton = new JButton();
+        enlargeButton.setRequestFocusEnabled(false);
+        this.$$$loadButtonText$$$(enlargeButton, this.$$$getMessageFromBundle$$$("messages", "Display_enlarge"));
+        SouthRightPanel.add(enlargeButton);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
+        if (currentFont == null) return null;
+        String resultName;
+        if (fontName == null) {
+            resultName = currentFont.getName();
+        } else {
+            Font testFont = new Font(fontName, Font.PLAIN, 10);
+            if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
+                resultName = fontName;
+            } else {
+                resultName = currentFont.getName();
+            }
+        }
+        Font font = new Font(resultName, style >= 0 ? style : currentFont.getStyle(), size >= 0 ? size : currentFont.getSize());
+        boolean isMac = System.getProperty("os.name", "").toLowerCase(Locale.ENGLISH).startsWith("mac");
+        Font fontWithFallback = isMac ? new Font(font.getFamily(), font.getStyle(), font.getSize()) : new StyleContext().getFont(font.getFamily(), font.getStyle(), font.getSize());
+        return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
+    }
+
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private String $$$getMessageFromBundle$$$(String path, String key) {
+        ResourceBundle bundle;
+        try {
+            Class<?> thisClass = this.getClass();
+            if ($$$cachedGetBundleMethod$$$ == null) {
+                Class<?> dynamicBundleClass = thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+                $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+            }
+            bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+        } catch (Exception e) {
+            bundle = ResourceBundle.getBundle(path);
+        }
+        return bundle.getString(key);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    private void $$$loadButtonText$$$(AbstractButton component, String text) {
+        StringBuffer result = new StringBuffer();
+        boolean haveMnemonic = false;
+        char mnemonic = '\0';
+        int mnemonicIndex = -1;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '&') {
+                i++;
+                if (i == text.length()) break;
+                if (!haveMnemonic && text.charAt(i) != '&') {
+                    haveMnemonic = true;
+                    mnemonic = text.charAt(i);
+                    mnemonicIndex = result.length();
+                }
+            }
+            result.append(text.charAt(i));
+        }
+        component.setText(result.toString());
+        if (haveMnemonic) {
+            component.setMnemonic(mnemonic);
+            component.setDisplayedMnemonicIndex(mnemonicIndex);
+        }
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    public JComponent $$$getRootComponent$$$() {
+        return MainPanel;
     }
 
     public class ImageCanvas extends JComponent {
@@ -899,16 +949,17 @@ public class PaintPicture extends JPanel {
             //显示图像
             graphics2D.drawImage(image, (int) FinalX, (int) FinalY, (int) width, (int) height, null);
             //检查比例是否为最大值，如果为最大就把放大按钮禁用
-            if (paintPicture.biggest != null) {
-                paintPicture.biggest.setEnabled(!paintPicture.sizeOperate.isTheBiggestRatio());
-                if (!paintPicture.biggest.isEnabled()) imageCanvas.requestFocus();
+            if (paintPicture.enlargeButton != null) {
+                paintPicture.enlargeButton.setEnabled(!paintPicture.sizeOperate.isTheBiggestRatio());
+                if (!paintPicture.enlargeButton.isEnabled()) imageCanvas.requestFocus();
             }
             //检查比例是否为最小值，如果为最小就把放大按钮禁用
-            if (paintPicture.smallest != null) {
-                paintPicture.smallest.setEnabled(!paintPicture.sizeOperate.isTheSmallestRatio());
-                if (!paintPicture.smallest.isEnabled()) imageCanvas.requestFocus();
+            if (paintPicture.reduceButton != null) {
+                paintPicture.reduceButton.setEnabled(!paintPicture.sizeOperate.isTheSmallestRatio());
+                if (!paintPicture.reduceButton.isEnabled()) imageCanvas.requestFocus();
             }
 
+            PercentLabel percentLabel = (PercentLabel) PaintPicture.paintPicture.percentLabel;
             //设置文本中显示的图片缩放比例
             percentLabel.set((int) sizeOperate.getPercent());
             //设置图片缩放滑动条
@@ -1053,34 +1104,6 @@ public class PaintPicture extends JPanel {
                     sizeOperate.update(true);
                     op = new OperatingCoordinate(x, y);
                 }
-
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    if (sizeOperate == null || !Centre.getBoolean("EnableTurnAboveOrBelow", Main.main.centre.CurrentData))
-                        return;
-                    int x = e.getX();
-                    int width = paintPicture.getWidth();
-                    if (x <= EDGE_THRESHOLD || x >= width - EDGE_THRESHOLD) {
-                        if ((!ComponentInJPanel.isComponentInJPanel(paintPicture, Last)) && hasNext(LastSign)) {
-                            Last.setPreferredSize(new Dimension(width / 35, 0));
-                            paintPicture.add(Last, BorderLayout.WEST);
-                            paintPicture.lastMouseEvent = e;
-                            if (!hasNext(NextSign)) paintPicture.remove(Next);
-                            paintPicture.revalidate();
-                        }
-                        if ((!ComponentInJPanel.isComponentInJPanel(paintPicture, Next)) && hasNext(NextSign)) {
-                            Next.setPreferredSize(new Dimension(width / 35, 0));
-                            paintPicture.add(Next, BorderLayout.EAST);
-                            paintPicture.lastMouseEvent = e;
-                            if (!hasNext(LastSign)) paintPicture.remove(Last);
-                            paintPicture.revalidate();
-                        }
-                        return;
-                    }
-                    paintPicture.remove(Last);
-                    paintPicture.remove(Next);
-                    paintPicture.revalidate();
-                }
             };
 
             addMouseMotionListener(paintPicture.mouseAdapter);
@@ -1135,7 +1158,7 @@ public class PaintPicture extends JPanel {
                 fullScreenWindow.setImageCanvas(imageCanvas);
                 Main.main.getGraphics().dispose();
             } else {
-                PaintPicture.paintPicture.add(imageCanvas, BorderLayout.CENTER);
+                PaintPicture.paintPicture.MainPanel.add(imageCanvas, BorderLayout.CENTER);
             }
             Main.main.setVisible(!fullScreen);
             fullScreenWindow.setVisible(fullScreen);

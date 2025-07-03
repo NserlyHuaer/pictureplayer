@@ -1,6 +1,5 @@
 package NComponent;
 
-import Runner.Main;
 import Size.SizeOperate;
 
 import javax.swing.*;

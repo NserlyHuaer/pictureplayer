@@ -2,8 +2,7 @@ package Tools.ImageManager;
 
 import NComponent.PaintPicture;
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -22,8 +21,8 @@ import java.util.concurrent.TimeUnit;
  * 1.若传入BufferedImage则默认一直使用这个类除非改变（一直占用内存除非更改图片）
  * 2.若传入图片路径则读取完图片并处理之后自动释放此文件（减少内存占用）
  */
+@Slf4j
 public class MultiThreadBlur {
-    private static final Logger log = LoggerFactory.getLogger(MultiThreadBlur.class);
     private static int[] RED_TABLE;
     private static int[] GREEN_TABLE;
     private static int[] BLUE_TABLE;

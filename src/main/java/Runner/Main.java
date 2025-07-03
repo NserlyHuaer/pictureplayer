@@ -84,7 +84,6 @@ public class Main extends JFrame {
     private JLabel CPUName;
     private JLabel JavaPath;
     private JCheckBox EnableHardwareAccelerationCheckBox;
-    private JCheckBox EnableTurnAboveOrBelowCheckBox;
     private JPanel A;
     private JPanel B;
     private JLabel Display_1st;
@@ -189,6 +188,7 @@ public class Main extends JFrame {
             setUncaughtExceptionHandler(logger);
             setDefaultLookAndFeelDecorated(false);
             setContentPane(this.panel1);
+            logger.info("Start GUI");
             setVisible(true);
             Dimension dimension = SizeOperate.FreeOfScreenSize;
             setSize((int) (dimension.getWidth() * 0.5), (int) (dimension.getHeight() * 0.6));
@@ -421,10 +421,6 @@ public class Main extends JFrame {
     //设置界面
     private void Settings() {
         reFresh();
-        EnableTurnAboveOrBelowCheckBox.addActionListener(e -> {
-            centre.CurrentData.replace("EnableTurnAboveOrBelow", String.valueOf(EnableTurnAboveOrBelowCheckBox.isSelected()));
-            SettingRevised(true);
-        });
         EnableConfirmExitCheckBox.addActionListener(e -> {
             centre.CurrentData.replace("EnableConfirmExit", String.valueOf(EnableConfirmExitCheckBox.isSelected()));
             SettingRevised(true);
@@ -474,7 +470,6 @@ public class Main extends JFrame {
     }
 
     private void reFresh() {
-        EnableTurnAboveOrBelowCheckBox.setSelected(Centre.getBoolean("EnableTurnAboveOrBelow", centre.CurrentData));
         EnableHardwareAccelerationCheckBox.setSelected(Centre.getBoolean("EnableHardwareAcceleration", centre.CurrentData));
         EnableConfirmExitCheckBox.setSelected(Centre.getBoolean("EnableConfirmExit", centre.CurrentData));
         EnableHistoryLoaderCheckBox.setSelected(Centre.getBoolean("EnableHistoryLoader", centre.CurrentData));
@@ -684,7 +679,7 @@ public class Main extends JFrame {
         final JScrollPane scrollPane2 = new JScrollPane();
         B.add(scrollPane2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(502, 372), null, 0, false));
         final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(11, 2, new Insets(0, 0, 0, 0), -1, -1, false, true));
+        panel2.setLayout(new GridLayoutManager(10, 2, new Insets(0, 0, 0, 0), -1, -1));
         scrollPane2.setViewportView(panel2);
         EnableConfirmExitCheckBox = new JCheckBox();
         EnableConfirmExitCheckBox.setRequestFocusEnabled(false);
@@ -698,43 +693,39 @@ public class Main extends JFrame {
         EnableHardwareAccelerationCheckBox.setRequestFocusEnabled(false);
         this.$$$loadButtonText$$$(EnableHardwareAccelerationCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableHardwareAcceleration"));
         panel2.add(EnableHardwareAccelerationCheckBox, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
-        EnableTurnAboveOrBelowCheckBox = new JCheckBox();
-        EnableTurnAboveOrBelowCheckBox.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(EnableTurnAboveOrBelowCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableTurnAboveOrBelow"));
-        panel2.add(EnableTurnAboveOrBelowCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         EnableCursorDisplayCheckBox = new JCheckBox();
         EnableCursorDisplayCheckBox.setRequestFocusEnabled(false);
         this.$$$loadButtonText$$$(EnableCursorDisplayCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableCursorDisplayCheckBox"));
-        panel2.add(EnableCursorDisplayCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+        panel2.add(EnableCursorDisplayCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         MouseMoveOffsetsLabel = new JLabel();
         MouseMoveOffsetsLabel.setRequestFocusEnabled(false);
         this.$$$loadLabelText$$$(MouseMoveOffsetsLabel, this.$$$getMessageFromBundle$$$("messages", "MouseMoveOffsetsLabel"));
-        panel2.add(MouseMoveOffsetsLabel, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
+        panel2.add(MouseMoveOffsetsLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
         MouseMoveOffsetsSlider = new JSlider();
         MouseMoveOffsetsSlider.setMaximum(150);
         MouseMoveOffsetsSlider.setMinimum(-65);
         MouseMoveOffsetsSlider.setRequestFocusEnabled(false);
-        panel2.add(MouseMoveOffsetsSlider, new GridConstraints(6, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(MouseMoveOffsetsSlider, new GridConstraints(5, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         EnableProxyServerCheckBox = new JCheckBox();
         EnableProxyServerCheckBox.setRequestFocusEnabled(false);
         this.$$$loadButtonText$$$(EnableProxyServerCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableProxyServerCheckBox"));
-        panel2.add(EnableProxyServerCheckBox, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+        panel2.add(EnableProxyServerCheckBox, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         ProxyServerLabel = new JLabel();
         ProxyServerLabel.setRequestFocusEnabled(false);
         this.$$$loadLabelText$$$(ProxyServerLabel, this.$$$getMessageFromBundle$$$("messages", "ProxyServerLabel"));
-        panel2.add(ProxyServerLabel, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
+        panel2.add(ProxyServerLabel, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
         EnableSecureConnectionCheckBox = new JCheckBox();
         EnableSecureConnectionCheckBox.setRequestFocusEnabled(false);
         this.$$$loadButtonText$$$(EnableSecureConnectionCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableSecureConnectionCheckBox"));
-        panel2.add(EnableSecureConnectionCheckBox, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+        panel2.add(EnableSecureConnectionCheckBox, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         AutoCheckUpdateCheckBox = new JCheckBox();
         AutoCheckUpdateCheckBox.setRequestFocusEnabled(false);
         this.$$$loadButtonText$$$(AutoCheckUpdateCheckBox, this.$$$getMessageFromBundle$$$("messages", "AutoCheckUpdateCheckBox"));
-        panel2.add(AutoCheckUpdateCheckBox, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+        panel2.add(AutoCheckUpdateCheckBox, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
         ProxyServerButton = new JButton();
         ProxyServerButton.setRequestFocusEnabled(false);
         this.$$$loadButtonText$$$(ProxyServerButton, this.$$$getMessageFromBundle$$$("messages", "ProxyServerButton"));
-        panel2.add(ProxyServerButton, new GridConstraints(8, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel2.add(ProxyServerButton, new GridConstraints(7, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JScrollPane scrollPane3 = new JScrollPane();
         tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "FourthPanel"), scrollPane3);
         FourthPanel = new JPanel();
