@@ -1,4 +1,4 @@
-#include <windows.h>
+﻿#include <windows.h>
 #include <iostream>
 #include <tchar.h>
 #include <vector>
@@ -63,7 +63,7 @@ int main() {
 
     // 构建基础Java命令
     std::wstring baseCommand = L"java -cp \"" + exeDir + L"\\PicturePlayer.jar;" +
-        exeDir + L"\\lib\\*\" Runner.Main -XX:+UseG1GC";
+        exeDir + L"\\lib\\*\" top.nserly.GUIStarter -XX:+UseG1GC";
 
     // 添加额外参数（跳过第一个参数即程序自身路径）
     for (size_t i = 1; i < arguments.size(); ++i) {
@@ -120,6 +120,8 @@ int main() {
     GetExitCodeProcess(pi.hProcess, &exitCode);
     std::cout << "Java程序已退出，代码: " << exitCode << std::endl;
 
+    
+
     // 清理资源
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
@@ -128,7 +130,7 @@ int main() {
     if (!AttachConsole(ATTACH_PARENT_PROCESS)) {
         FreeConsole();
     }
-
+    std::cin;
     return exitCode;
 }
 

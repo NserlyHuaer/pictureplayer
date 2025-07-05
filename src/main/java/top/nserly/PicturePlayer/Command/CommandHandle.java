@@ -111,7 +111,7 @@ public class CommandHandle {
                         + "del \".\\" + CURRENT_JAR_NAME + "\"\n"
                         + "ren \"" + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + MainFileSuffix + "\" \"" + CURRENT_JAR_NAME + "\"\n" +
                         "cls\n"
-                        + "\"" + System.getProperty("sun.boot.library.path") + "\\java.exe\" -cp \"" + CURRENT_JAR_NAME + ";lib\\*\" Runner.Main -Dsun.java2d.opengl=true ";
+                        + "\"" + System.getProperty("sun.boot.library.path") + "\\java.exe\" -cp \"" + CURRENT_JAR_NAME + ";lib\\*\" top.nserly.GUIStarter -Dsun.java2d.opengl=true ";
         if (OpenedPicturePath != null && !OpenedPicturePath.isBlank()) {
             batchContent = batchContent + "\"" + OpenedPicturePath + "\"";
         }
@@ -141,7 +141,7 @@ public class CommandHandle {
                 "sleep 1\n"
                         + "rm " + CURRENT_JAR_NAME + "\n"
                         + "mv " + DownloadFilePath.substring(DownloadFilePath.lastIndexOf("/") + 1) + MainFileSuffix + " " + CURRENT_JAR_NAME + "\n"
-                        + "java -jar " + CURRENT_JAR_NAME + " ";
+                        + "\"" + System.getProperty("sun.boot.library.path") + "\\java.exe\" -cp \"" + CURRENT_JAR_NAME + ";lib\\*\" top.nserly.GUIStarter -Dsun.java2d.opengl=true ";
         if (OpenedPicturePath != null && !OpenedPicturePath.isBlank()) {
             shellContent = shellContent + OpenedPicturePath;
         }

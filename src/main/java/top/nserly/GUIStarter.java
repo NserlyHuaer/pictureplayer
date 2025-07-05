@@ -61,6 +61,7 @@ public class GUIStarter extends JFrame {
         log.info("The software starts running...");
         System.setProperty("sun.java2d.opengl", "true");
     }
+
     private JPanel panel1;
     private JTabbedPane tabbedPane1;
     private JCheckBox EnableConfirmExitCheckBox;
@@ -129,7 +130,8 @@ public class GUIStarter extends JFrame {
             }
         }
     };
-    public PaintPicturePanel paintPicture;        private final Thread init_PaintPicture = new Thread(() -> {
+    public PaintPicturePanel paintPicture;
+    private final Thread init_PaintPicture = new Thread(() -> {
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         } catch (ClassNotFoundException | IllegalAccessException | UnsupportedLookAndFeelException |
@@ -137,7 +139,8 @@ public class GUIStarter extends JFrame {
             log.error(ExceptionHandler.getExceptionMessage(e));
         }
         paintPicture = new PaintPicturePanel();
-    });private final DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
+    });
+    private final DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
         public void drop(DropTargetDropEvent dtde) {
             try {
                 dtde.acceptDrop(DnDConstants.ACTION_COPY);
@@ -154,6 +157,7 @@ public class GUIStarter extends JFrame {
             }
         }
     };
+
     public GUIStarter(String title) {
         super(title);
         $$$setupUI$$$();
@@ -1112,8 +1116,6 @@ public class GUIStarter extends JFrame {
     private File checkFileOpen(List<File> files, boolean isMakeSure) {
         return checkFileOpen(new CheckFileIsRightPictureType(files), isMakeSure);
     }
-
-
 
 
 }
