@@ -23,7 +23,7 @@ public class AdvancedDownloadSpeed {
     private final JProgressBar totalProgress;
     private final JProgressBar currentFileProgress;
     private final JLabel speedLabel;
-    private final JLabel DownloadCountings;
+    private final JLabel DownloadCounting;
     private final StringFormation TotalFormation1 = new StringFormation("{Speed} - {FinishedSize}/{TotalSize},{NeedTime}");
     private final StringFormation TotalFormation2 = new StringFormation("{Speed} - {FinishedSize}/0B");
     private final StringFormation totalFormation;
@@ -31,17 +31,17 @@ public class AdvancedDownloadSpeed {
     private StringFormation currentFormation;
     private static final Logger logger = LoggerFactory.getLogger(AdvancedDownloadSpeed.class);
 
-    public AdvancedDownloadSpeed(CheckAndDownloadUpdate downloadUpdate, JProgressBar totalProgress, JProgressBar currentFileProgress, JLabel speedLabel, JLabel DownloadCountings) {
+    public AdvancedDownloadSpeed(CheckAndDownloadUpdate downloadUpdate, JProgressBar totalProgress, JProgressBar currentFileProgress, JLabel speedLabel, JLabel DownloadCounting) {
         this.totalProgress = totalProgress;
         this.currentFileProgress = currentFileProgress;
         this.speedLabel = speedLabel;
-        this.DownloadCountings = DownloadCountings;
+        this.DownloadCounting = DownloadCounting;
         this.downloadUpdate = downloadUpdate;
         // 初始进度条
         totalProgress.setMaximum(downloadUpdate.getUpdateWebSide().size());
         totalProgress.setValue(0);
         totalProgress.setStringPainted(true);
-        StringFormation formation = new StringFormation(DownloadCountings.getText());
+        StringFormation formation = new StringFormation(DownloadCounting.getText());
         formation.add("total", String.valueOf(downloadUpdate.getUpdateWebSide().size()));
         totalFormation = new StringFormation(formation.getProcessingString());
 
@@ -106,14 +106,14 @@ public class AdvancedDownloadSpeed {
                         currentFormation = TotalFormation2;
                     }
                     currentFormation.add("current", String.valueOf(totalFile));
-                    DownloadCountings.setText(currentFormation.getProcessingString());
+                    DownloadCounting.setText(currentFormation.getProcessingString());
                     totalProgress.setValue(totalProgress.getMaximum());
                     ((Timer) actionEvent.getSource()).stop(); // 停止计时器
                 } else {
                     // 更新总进度
                     totalProgress.setValue((100 * currentProgressFile + (int) downloadUpdate.CurrentFileDownloader.getProgress()));
                     totalFormation.add("current", String.valueOf(currentProgressFile + 1));
-                    DownloadCountings.setText(totalFormation.getProcessingString());
+                    DownloadCounting.setText(totalFormation.getProcessingString());
                 }
             }
         });

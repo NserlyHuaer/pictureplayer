@@ -287,7 +287,7 @@ public class ProxyServerChooser extends JDialog {
 
     public void setVisible(boolean visible) {
         if (visible) setProxyServerSelected();
-        setLocation(WindowLocation.ComponentCenter(GUIStarter.main, getWidth(), getHeight()));
+        setLocation(WindowLocation.componentCenter(GUIStarter.main, getWidth(), getHeight()));
         super.setVisible(visible);
     }
 
@@ -433,4 +433,5 @@ public class ProxyServerChooser extends JDialog {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

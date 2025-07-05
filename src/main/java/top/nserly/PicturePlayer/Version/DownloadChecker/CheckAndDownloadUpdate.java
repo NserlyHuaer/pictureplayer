@@ -180,81 +180,7 @@ public class CheckAndDownloadUpdate {
         return finalA;
     }
 
-    //返回值：0.下载完成 1.跳过当前文件 2.取消下载
-    private int download(String down, Map<String, ArrayList> finalA, boolean isTry) {
-        try {
-            if (StopToUpdate) {
-                throw new UpdateException("Update ended,cause of User terminated software update");
-            }
-            if (!isTry) CurrentFileDownloader = new FileDownloader(down, f.getPath());
-            CurrentFileDownloader.setDownloadErrorHandler((e, fileDownloader) -> {
-                if (ExceptionHandling(e) == 0) {
-                    download(down, finalA, true);
-                } else {
-                    CurrentFileDownloader.stopDownload();
-                    DownloadUpdateFrame.downloadUpdateFrame.dispose();
-                    GUIStarter.main.setVisible(true);
-                    stopToUpdate();
-                }
-            });
-            logger.info("Downloading " + down);
-            if (!EnableSecureConnection) logger.warn("The connection is not secure from {}!", down);
-            CurrentFileDownloader.startDownload();
-            ArrayList list = new ArrayList();
-            String cache = CurrentFileDownloader.getFinalPath();
-            if (StopToUpdate) {
-                throw new UpdateException("Update ended,cause of User terminated software update");
-            }
-            if (cache != null) {
-                list.add(cache);
-                list.add(CurrentFileDownloader);
-                finalA.put(down, list);
-            }
-        } catch (UpdateException e) {
-            logger.error(e.getMessage());
-            return 2;
-        }
-        if (CurrentFileDownloader.isCompleted())
-            return 0;
-        else
-            return 1;
-
-    }
-
-    private int ExceptionHandling(IOException e) {
-        logger.error(e.getMessage());
-        int choice = JOptionPane.showOptionDialog(null, Bundle.getMessage("DownloadUpdateError_Content") + "\n" + e, Bundle.getMessage("DownloadUpdateError_Title"), JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options);
-        return choice;
-    }
-
-    //一键下载所有文件(Map(Key:下载网站,Value:List[0]:文件存放路径;[1]下载类))[调用此方法时，推进使用新线程，否则窗体可能会无相应]
-    public Map<String, ArrayList> download() {
-        StopToUpdate = false;
-        return download(getUpdateWebSide());
-    }
-
-    //下载描述文件List[0]:文件存放路径;[1]下载类[调用此方法时，推进使用新线程，否则窗体可能会无相应]
-    public List downloadDescribe() {
-        logger.info("Start downloading describe version file...");
-        StopToUpdate = false;
-        String DescribeFileWebSide = VersionID.getString(versionID.getNormalVersionDescribe(), versionID.getSpecialFields());
-        if (!(DescribeFileWebSide == null) && !DescribeFileWebSide.isEmpty()) {
-            return download(Collections.singletonList(DescribeFileWebSide)).get(DescribeFileWebSide);
-        }
-        return null;
-    }
-
-    //终止更新
-    public void stopToUpdate() {
-        StopToUpdate = true;
-        CurrentFileDownloader.stopDownload();
-    }
-
-    public static boolean isEnableSecureConnection() {
-        return EnableSecureConnection;
-    }
-
-    public static void SecureConnection(boolean Enable) {
+    public static void secureConnection(boolean Enable) {
         if (EnableSecureConnection == Enable) {
             if (!Enable) {
                 //创建一个自定义的TrustManager，它接受所有证书
@@ -300,5 +226,75 @@ public class CheckAndDownloadUpdate {
             }
         }
         EnableSecureConnection = Enable;
+    }
+
+    //返回值：0.下载完成 1.跳过当前文件 2.取消下载
+    private int download(String down, Map<String, ArrayList> finalA, boolean isTry) {
+        try {
+            if (StopToUpdate) {
+                throw new UpdateException("Update ended,cause of User terminated software update");
+            }
+            if (!isTry) CurrentFileDownloader = new FileDownloader(down, f.getPath());
+            CurrentFileDownloader.setDownloadErrorHandler((e, fileDownloader) -> {
+                if (exceptionHandling(e) == 0) {
+                    download(down, finalA, true);
+                } else {
+                    CurrentFileDownloader.stopDownload();
+                    DownloadUpdateFrame.downloadUpdateFrame.dispose();
+                    GUIStarter.main.setVisible(true);
+                    stopToUpdate();
+                }
+            });
+            logger.info("Downloading " + down);
+            if (!EnableSecureConnection) logger.warn("The connection is not secure from {}!", down);
+            CurrentFileDownloader.startDownload();
+            ArrayList list = new ArrayList();
+            String cache = CurrentFileDownloader.getFinalPath();
+            if (StopToUpdate) {
+                throw new UpdateException("Update ended,cause of User terminated software update");
+            }
+            if (cache != null) {
+                list.add(cache);
+                list.add(CurrentFileDownloader);
+                finalA.put(down, list);
+            }
+        } catch (UpdateException e) {
+            logger.error(e.getMessage());
+            return 2;
+        }
+        if (CurrentFileDownloader.isCompleted())
+            return 0;
+        else
+            return 1;
+
+    }
+
+    //一键下载所有文件(Map(Key:下载网站,Value:List[0]:文件存放路径;[1]下载类))[调用此方法时，推进使用新线程，否则窗体可能会无相应]
+    public Map<String, ArrayList> download() {
+        StopToUpdate = false;
+        return download(getUpdateWebSide());
+    }
+
+    //下载描述文件List[0]:文件存放路径;[1]下载类[调用此方法时，推进使用新线程，否则窗体可能会无相应]
+    public List downloadDescribe() {
+        logger.info("Start downloading describe version file...");
+        StopToUpdate = false;
+        String DescribeFileWebSide = VersionID.getString(versionID.getNormalVersionDescribe(), versionID.getSpecialFields());
+        if (!(DescribeFileWebSide == null) && !DescribeFileWebSide.isEmpty()) {
+            return download(Collections.singletonList(DescribeFileWebSide)).get(DescribeFileWebSide);
+        }
+        return null;
+    }
+
+    //终止更新
+    public void stopToUpdate() {
+        StopToUpdate = true;
+        CurrentFileDownloader.stopDownload();
+    }
+
+    private int exceptionHandling(IOException e) {
+        logger.error(e.getMessage());
+        int choice = JOptionPane.showOptionDialog(null, Bundle.getMessage("DownloadUpdateError_Content") + "\n" + e, Bundle.getMessage("DownloadUpdateError_Title"), JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options);
+        return choice;
     }
 }

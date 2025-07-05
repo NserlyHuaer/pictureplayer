@@ -84,7 +84,6 @@ public class StringFormation {
      *
      * @param revalued 改变其中文本（非{sth}格式）
      * @param value    改变它的值
-     * @return
      */
     public void add(String revalued, String value) {//revalued文本,value改变值
         information.remove(revalued);
@@ -95,21 +94,20 @@ public class StringFormation {
      * 改变字符串
      *
      * @param hashMap 添加整个到information
-     * @return
      */
     public void add(HashMap<String, String> hashMap) {//revalued文本,value改变值
         information.putAll(hashMap);
     }
 
     /**
-     * 改变字符串
-     *
-     * @param hashMap 删除information并且添加整个hashMap到information
-     * @return
+     * @param c        修改某类的Class对象
+     * @param variable 被改变类的变量名（区分大小写）
+     * @param value    改变后的值
      */
-    public void RemoveAndAdd(HashMap<String, String> hashMap) {//revalued文本,value改变值
-        if (hashMap != null)
-            information = (HashMap<String, String>) hashMap.clone();
+    public static void revise(Class c, String variable, Object value) throws NoSuchFieldException, IllegalAccessException {//c为类，variable为被修改变量，value为修改的变量
+        var f = c.getDeclaredField(variable);//获取属性列表
+        f.setAccessible(true);//设置为可修改
+        f.set(variable, value);//将变量对应名称里面的值设置为指定值
     }
 
     public List<String> getArray() {
@@ -117,16 +115,13 @@ public class StringFormation {
     }
 
     /**
-     * @param c        修改某类的Class对象
-     * @param variable 被改变类的变量名（区分大小写）
-     * @param value    改变后的值
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
+     * 改变字符串
+     *
+     * @param hashMap 删除information并且添加整个hashMap到information
      */
-    public static void Revise(Class c, String variable, Object value) throws NoSuchFieldException, IllegalAccessException {//c为类，variable为被修改变量，value为修改的变量
-        var f = c.getDeclaredField(variable);//获取属性列表
-        f.setAccessible(true);//设置为可修改
-        f.set(variable, value);//将变量对应名称里面的值设置为指定值
+    public void removeAndAdd(HashMap<String, String> hashMap) {//revalued文本,value改变值
+        if (hashMap != null)
+            information = (HashMap<String, String>) hashMap.clone();
     }
 
 }

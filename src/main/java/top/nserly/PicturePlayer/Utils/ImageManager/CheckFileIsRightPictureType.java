@@ -67,8 +67,8 @@ public class CheckFileIsRightPictureType {
         return UnfinishedList.isEmpty();
     }
 
-    public String FilePathToString(String separator, File... files) {
-        StringBuffer sb = new StringBuffer();
+    public String filePathToString(String separator, File... files) {
+        StringBuilder sb = new StringBuilder();
         boolean isFist = true;
         for (File file : files) {
             if (!isFist) {
@@ -80,8 +80,8 @@ public class CheckFileIsRightPictureType {
         return sb.toString();
     }
 
-    public String FilePathToString(String separator, ArrayList<File> files) {
-        StringBuffer sb = new StringBuffer();
+    public String filePathToString(String separator, ArrayList<File> files) {
+        StringBuilder sb = new StringBuilder();
         boolean isFist = true;
         for (File file : files) {
             if (!isFist) {

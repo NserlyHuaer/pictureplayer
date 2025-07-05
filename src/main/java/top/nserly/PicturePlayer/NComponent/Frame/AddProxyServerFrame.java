@@ -91,7 +91,7 @@ public class AddProxyServerFrame extends JDialog {
 
     public void loadInformationAndVisible(int index) {
         this.index = index;
-        setLocation(WindowLocation.ComponentCenter(proxyServerChooser, getWidth(), getHeight()));
+        setLocation(WindowLocation.componentCenter(proxyServerChooser, getWidth(), getHeight()));
         setVisible(true);
     }
 
@@ -248,4 +248,5 @@ public class AddProxyServerFrame extends JDialog {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

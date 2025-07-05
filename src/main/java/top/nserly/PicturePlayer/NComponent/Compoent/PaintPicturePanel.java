@@ -13,7 +13,6 @@ import top.nserly.PicturePlayer.Utils.ImageManager.Info.GetImageInformation;
 import top.nserly.PicturePlayer.Utils.ImageManager.PictureInformationStorageManagement;
 import top.nserly.PicturePlayer.Version.DownloadChecker.AdvancedDownloadSpeed;
 import top.nserly.SoftwareCollections_API.Handler.Exception.ExceptionHandler;
-import top.nserly.SoftwareCollections_API.Math.EqualsProportion;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -27,6 +26,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -94,8 +96,6 @@ public class PaintPicturePanel extends JPanel {
     private File lastPicturePathParent;
     private static boolean isMousePressed; // 标记鼠标是否按下
 
-    public boolean isOnlyInit = true;
-
     public PictureInformationStorageManagement pictureInformationStorageManagement;
     //图片全屏窗体
     FullScreenFrame fullScreenWindow;
@@ -115,8 +115,8 @@ public class PaintPicturePanel extends JPanel {
             pictureInformationStorageManagement = (PictureInformationStorageManagement) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e) {
             log.error(ExceptionHandler.getExceptionMessage(e));
+            pictureInformationStorageManagement = new PictureInformationStorageManagement();
         }
-        pictureInformationStorageManagement = new PictureInformationStorageManagement();
         init = new Thread(() -> {
             ExceptionHandler.setUncaughtExceptionHandler(log);
             setLayout(new BorderLayout());
@@ -124,6 +124,9 @@ public class PaintPicturePanel extends JPanel {
             //创建画布
             imageCanvas = new ImageCanvas();
             sizeOperate = new SizeOperate(imageCanvas, null);
+            //添加画布至组件中
+            MainPanel.add(imageCanvas, BorderLayout.CENTER);
+            add(MainPanel, BorderLayout.CENTER);
         });
         init.setPriority(Thread.MAX_PRIORITY);
         init.start();
@@ -218,48 +221,11 @@ public class PaintPicturePanel extends JPanel {
         counterclockwise.addActionListener(e -> {
             imageCanvas.turnRight();
         });
-        reduceButton.addMouseListener(new MouseAdapter() {
-            //判断是否鼠标释放
-            boolean isReleased = false;
-
-            //点击、长按触发
-            @Override
-            public void mousePressed(MouseEvent e) {
-                //设置鼠标没有释放
-                isReleased = false;
-                //创建线程
-                new Thread(() -> {
-                    //循环
-                    do {
-                        if (!reduceButton.isEnabled()) return;
-                        if (sizeOperate.adjustPercent(SizeOperate.Reduce)) {
-                            sizeOperate.update(false);
-                        }
-
-                        //抛出异常
-                        try {
-                            //线程休眠
-                            Thread.sleep(16);
-                        } catch (InterruptedException ex) {
-                            break;
-                        }
-                    } while (!isReleased);
-                    imageCanvas.requestFocus();
-                }).start();
-
-            }
-
-            //鼠标放出触发
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                isReleased = true;
-            }
-        });
         //添加面板大小改变监听器
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                if (fullScreenWindow.isShowing() || isOnlyInit) return;
+                if (fullScreenWindow.isShowing() || imageCanvas.getPath() == null) return;
                 sizeOperate.incomeWindowDimension(imageCanvas.getSize());
                 sizeOperate.update(false);
             }
@@ -285,31 +251,81 @@ public class PaintPicturePanel extends JPanel {
                 sizeOperate.update(false);
             }
         });
-        enlargeButton.addMouseListener(new MouseAdapter() {
-            boolean isDown = false;
+        reduceButton.addMouseListener(new MouseAdapter() {
+            // 创建一个 ScheduledExecutorService 来执行定时任务
+            private ScheduledExecutorService executor = null;
 
+            // 点击、长按触发
             @Override
-            public void mousePressed(MouseEvent e) {//点击、长按触发
-                isDown = false;
-                new Thread(() -> {
-                    do {
-                        if (!enlargeButton.isEnabled()) return;
-                        if (sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
-                            sizeOperate.update(false);
-                        }
-                        try {
-                            Thread.sleep(16);
-                        } catch (InterruptedException ex) {
-                            break;
-                        }
-                    } while (!isDown);
-                    imageCanvas.requestFocus();
-                }).start();
+            public void mousePressed(MouseEvent e) {
+                if (executor != null && !executor.isShutdown()) {
+                    // 如果 executor 已经存在且未关闭，则先关闭它
+                    executor.shutdownNow();
+                    executor.close();
+                }
+
+                // 创建一个新的 ScheduledExecutorService
+                executor = Executors.newSingleThreadScheduledExecutor();
+                Runnable task = () -> {
+                    if (!reduceButton.isEnabled()) {
+                        return;
+                    }
+                    if (sizeOperate.adjustPercent(SizeOperate.Reduce)) {
+                        sizeOperate.update(false);
+                    }
+                };
+
+                // 每 16 毫秒执行一次任务
+                executor.scheduleAtFixedRate(task, 0, 16, TimeUnit.MILLISECONDS);
             }
 
+            // 鼠标释放触发
             @Override
-            public void mouseReleased(MouseEvent e) {//鼠标放出触发
-                isDown = true;
+            public void mouseReleased(MouseEvent e) {
+                if (executor != null && !executor.isShutdown()) {
+                    // 关闭 ScheduledExecutorService
+                    executor.shutdownNow();
+                    executor.close();
+                }
+            }
+        });
+
+        enlargeButton.addMouseListener(new MouseAdapter() {
+            // 创建一个 ScheduledExecutorService 来执行定时任务
+            private ScheduledExecutorService executor = null;
+
+            // 点击、长按触发
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (executor != null && !executor.isShutdown()) {
+                    // 如果 executor 已经存在且未关闭，则先关闭它
+                    executor.shutdownNow();
+                    executor.close();
+                }
+
+                // 创建一个新的 ScheduledExecutorService
+                executor = Executors.newSingleThreadScheduledExecutor();
+                Runnable task = () -> {
+                    if (!enlargeButton.isEnabled()) {
+                        return;
+                    }
+                    if (sizeOperate.adjustPercent(SizeOperate.Enlarge)) {
+                        sizeOperate.update(false);
+                    }
+                };
+
+                // 每 16 毫秒执行一次任务
+                executor.scheduleAtFixedRate(task, 0, 16, TimeUnit.MILLISECONDS);
+            }
+
+            // 鼠标释放触发
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (executor != null && !executor.isShutdown()) {
+                    // 关闭 ScheduledExecutorService
+                    executor.shutdownNow();
+                    executor.close();
+                }
             }
         });
     }
@@ -337,27 +353,14 @@ public class PaintPicturePanel extends JPanel {
     //改变图片路径
     public void changePicturePath(String path) {
         log.info("Opened:\"{}\"", path);
-        if (isOnlyInit) {
-            BufferedImage image = null;
-            image = PictureInformationStorageManagement.getImage(pictureInformationStorageManagement.getCachedPicturePath(path));
-            try {
-                init.join();
-            } catch (InterruptedException ignored) {
+        try {
+            init.join();
+        } catch (InterruptedException ignored) {
 
-            }
-            //添加画布至组件中
-            MainPanel.add(imageCanvas, BorderLayout.CENTER);
-            add(MainPanel, BorderLayout.CENTER);
-            BufferedImage finalImage = image;
-            new Thread(() -> {
-                validate();
-                sizeOperate.incomeWindowDimension(imageCanvas.getSize());
-                imageCanvas.changePicturePath(finalImage, path);
-            }).start();
-        } else {
-            imageCanvas.changePicturePath(path);
         }
-        isOnlyInit = false;
+        validate();
+        sizeOperate.incomeWindowDimension(imageCanvas.getSize());
+        imageCanvas.changePicturePath(path);
     }
 
     /**
@@ -563,7 +566,6 @@ public class PaintPicturePanel extends JPanel {
             new Thread(this::init_listener).start();
             new Thread(() -> {
                 isEnableHardware = isEnableHardwareAcceleration;
-                AtomicReference<String> LastPicture_hashcode = new AtomicReference<>("");
                 timer = new Timer(400, e -> {
                     if (!isEnableHardware) return;
                     ((Timer) e.getSource()).stop(); // 停止计时器
@@ -576,7 +578,6 @@ public class PaintPicturePanel extends JPanel {
                                 BlurBufferedImage = multiThreadBlur.applyOptimizedBlur(KernelSize);
                             }
                             isNeedBlurToView = true;
-                            LastPicture_hashcode.set(picture_hashcode);
                             repaint();
                         }
                     }).start();
@@ -651,6 +652,7 @@ public class PaintPicturePanel extends JPanel {
                 path = path.substring(1, path.length() - 1);
             }
 
+            timer.stop();
             RotationDegrees = lastRotationDegrees = 0;
             this.path = path;
             this.picture_hashcode = picture_hashcode;
@@ -666,16 +668,16 @@ public class PaintPicturePanel extends JPanel {
                 //若这两个文件父目录不相同
                 loadPictureInTheParent(finalPath);
             }).start();
+            if (sizeOperate != null) sizeOperate.changeCanvas(this);
             if (isEnableHardware) {
                 new Thread(() -> {
-                    BlurBufferedImage = GetImageInformation.CastToTYPE_INT_RGB(image);
+                    BlurBufferedImage = GetImageInformation.castToTYPEINTRGB(image);
                     synchronized (multiThreadBlur) {
                         multiThreadBlur.changeImage(BlurBufferedImage);
                     }
                     sizeOperate.update(false);
                 }).start();
             }
-            if (sizeOperate != null) sizeOperate.changeCanvas(this);
         }
 
         public void changePicturePath(final BufferedImage image, String path) {
@@ -691,6 +693,7 @@ public class PaintPicturePanel extends JPanel {
             } catch (IOException e) {
                 log.error(ExceptionHandler.getExceptionMessage(e));
             }
+            timer.stop();
             image = BlurBufferedImage = null;
             path = lastPath = picture_hashcode = null;
             LastPercent = lastWidth = lastHeight = X = Y = mouseX = mouseY = lastRotationDegrees = RotationDegrees = 0;
@@ -859,7 +862,7 @@ public class PaintPicturePanel extends JPanel {
             //判断图片缩放比例是否与上次相同
             if (RotationDegrees != lastRotationDegrees) {
                 sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
-                Point point = ImageRotationHelper.getRotatedCoord((int) FinalX, (int) FinalY, 360 - 90 * RotationDegrees, (int) lastWidth, (int) lastHeight);
+                Point point = ImageRotationHelper.getRotatedCord((int) FinalX, (int) FinalY, 360 - 90 * RotationDegrees, (int) lastWidth, (int) lastHeight);
                 FinalX = point.getX();
                 FinalY = point.getY();
             }
@@ -893,7 +896,7 @@ public class PaintPicturePanel extends JPanel {
                 return;
             }
             width = (getImageWidth() * sizeOperate.getPercent() / 100 * (1 / PictureChangeRatio));
-            double height = EqualsProportion.Start(0, width, getImageHeight(), getImageWidth());
+            double height = width * getImageHeight() / getImageWidth();
             sizeOperate.setPercent(width * 100.0 / getImageWidth());
 
             if (RotationDegrees % 2 == 0 && NewWindow != null && NewWindow.equals(LastWindow) && lastWidth != 0 && lastHeight != 0) {

@@ -1,5 +1,6 @@
 package top.nserly.PicturePlayer.NComponent.Compoent;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import top.nserly.GUIStarter;
@@ -12,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 @Slf4j
+@Getter
 public class ThumbnailPreviewOfImage extends JComponent {
     private final BufferedImage Image;
     private final String filePath;

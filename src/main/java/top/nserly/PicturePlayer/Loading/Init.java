@@ -66,11 +66,11 @@ public class Init<KEY, VALUE> {
         }
     }
 
-    public void Run() {
+    public void run() {
         if (!isInit.get()) init();
         try {
             if (!f.exists()) {
-                Writer(setDefault());
+                writer(setDefault());
             }
             properties.clear();
             properties.load(new BufferedReader(new FileReader(f)));
@@ -83,7 +83,7 @@ public class Init<KEY, VALUE> {
         return properties.containsKey(key);
     }
 
-    public void Loading() {
+    public void loading() {
         if (!isInit.get()) init();
         try {
             properties.load(new BufferedReader(new FileReader(f)));
@@ -92,7 +92,7 @@ public class Init<KEY, VALUE> {
         }
     }
 
-    public void SetUpdate(boolean EnableAutoUpdate) {
+    public void setUpdate(boolean EnableAutoUpdate) {
         this.EnableAutoUpdate = EnableAutoUpdate;
     }
 
@@ -100,52 +100,52 @@ public class Init<KEY, VALUE> {
         return (Properties) properties.clone();
     }
 
-    public void ChangeValue(KEY key, VALUE value) {
+    public void changeValue(KEY key, VALUE value) {
         properties.remove(key, value);
         properties.put(key, value);
-        if (EnableAutoUpdate) Store();
+        if (EnableAutoUpdate) store();
     }
 
-    public void Remove(KEY key, VALUE value) {
+    public void remove(KEY key, VALUE value) {
         properties.remove(key, value);
-        if (EnableAutoUpdate) Store();
+        if (EnableAutoUpdate) store();
     }
 
-    public void Update() {
-        Store();
+    public void update() {
+        store();
     }
 
     @SafeVarargs
-    public final void Remove(KEY... key) {
+    public final void remove(KEY... key) {
         for (KEY i : key) {
             properties.remove(key);
         }
-        if (EnableAutoUpdate) Store();
+        if (EnableAutoUpdate) store();
     }
 
-    public void Writer(Map<KEY, VALUE> map) {
+    public void writer(Map<KEY, VALUE> map) {
         if (!isInit.get()) init();
         properties.putAll(map);
-        Store();
+        store();
     }
 
-    public void Writer(KEY key, VALUE value) {
+    public void writer(KEY key, VALUE value) {
         if (!isInit.get()) init();
         properties.put(key, value);
-        Store();
+        store();
     }
 
     @DefaultArgs
-    public Map setDefault() {
-        HashMap<String, String> hashMap = new HashMap<>();
+    public Map<KEY,VALUE> setDefault() {
+        HashMap<KEY, VALUE> hashMap = new HashMap<>();
         var method = DefaultArgs.class.getDeclaredMethods();
         for (Method i : method) {
-            hashMap.put(i.getName(), String.valueOf(i.getDefaultValue()));
+            hashMap.put((KEY) i.getName(), (VALUE) i.getDefaultValue());
         }
         return hashMap;
     }
 
-    private void Store() {
+    private void store() {
         if (!isInit.get()) init();
         try {
             properties.store(new BufferedWriter(new FileWriter(f)), "");

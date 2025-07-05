@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import top.nserly.GUIStarter;
 import top.nserly.PicturePlayer.Loading.DefaultArgs;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +20,6 @@ public class SettingsInfoHandle {
     static {
         try {
             Class<?> clazz = DefaultArgs.class;
-            // 获取注解
-            AnnotatedElement element = clazz;
             // 获取注解中所有成员的方法
             Method[] methods = clazz.getDeclaredMethods();
 
@@ -51,7 +48,7 @@ public class SettingsInfoHandle {
     public void reFresh() {
         setDefault();
         try {
-            GUIStarter.init.Run();
+            GUIStarter.init.run();
             Properties properties = GUIStarter.init.getProperties();
             for (Object obj : properties.keySet()) {
                 if (DefaultData.containsKey((String) obj)) {
@@ -103,7 +100,7 @@ public class SettingsInfoHandle {
 
     //保存设置
     public void save() {
-        GUIStarter.init.Writer(CurrentData);
+        GUIStarter.init.writer(CurrentData);
     }
 
 }

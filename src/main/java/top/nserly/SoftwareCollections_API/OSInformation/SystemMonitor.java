@@ -63,27 +63,49 @@ public class SystemMonitor {
     }
 
 
-    public static void GetInformation() {
-        SystemInfo systemInfo = new SystemInfo();
-        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+    public static void getInformation() {
+        // 获取操作系统和内存信息
+        OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
+
+        // 设置 JVM 内存信息
         JVM_Initialize_Memory = memoryUsage.getInit();
         JVM_Maximum_Free_Memory = memoryUsage.getMax();
         JVM_Used_Memory = memoryUsage.getUsed();
-        Physical_Memory = osmxb.getTotalMemorySize();
-        Physical_Free_Memory = osmxb.getFreeMemorySize();
-        Physical_Used_Memory = osmxb.getTotalMemorySize() - osmxb.getFreeMemorySize();
+
+        // 设置物理内存信息
+        Physical_Memory = osBean.getTotalMemorySize();
+        Physical_Free_Memory = osBean.getFreeMemorySize();
+        Physical_Used_Memory = Physical_Memory - Physical_Free_Memory;
+
         // 获得线程总数
-        ThreadGroup parentThread;
-        for (parentThread = Thread.currentThread().getThreadGroup(); parentThread
-                .getParent() != null; parentThread = parentThread.getParent()) {
-        }
-        Program_Thread_Count = parentThread.activeCount();
+        ThreadGroup rootThreadGroup = getRootThreadGroup(Thread.currentThread().getThreadGroup());
+        Program_Thread_Count = rootThreadGroup.activeCount();
+
+        // 计算内存使用百分比
         DecimalFormat df = new DecimalFormat("#.##");
-        JVM_Memory_Usage = Double.parseDouble(df.format(100.0 * JVM_Used_Memory / JVM_Maximum_Free_Memory));
-        Physical_Memory_Usage = Double.parseDouble(df.format(100.0 * Physical_Free_Memory / Physical_Used_Memory));
+        if (JVM_Maximum_Free_Memory > 0) {
+            JVM_Memory_Usage = Double.parseDouble(df.format(100.0 * JVM_Used_Memory / JVM_Maximum_Free_Memory));
+        } else {
+            JVM_Memory_Usage = 0.0;
+        }
+
+        if (Physical_Used_Memory > 0) {
+            Physical_Memory_Usage = Double.parseDouble(df.format(100.0 * Physical_Free_Memory / Physical_Used_Memory));
+        } else {
+            Physical_Memory_Usage = 0.0;
+        }
     }
+
+    // 递归方法来获取根 ThreadGroup
+    private static ThreadGroup getRootThreadGroup(ThreadGroup group) {
+        if (group.getParent() != null) {
+            return getRootThreadGroup(group.getParent());
+        }
+        return group;
+    }
+
     public static String convertSize(long sizeInBytes) {
         double size = sizeInBytes;
         String[] units = {"B", "KB", "MB", "GB", "TB"};

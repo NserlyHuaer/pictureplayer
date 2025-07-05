@@ -25,6 +25,7 @@ public class CommandHandle {
     static {
         ClassLoader classLoader = CommandHandle.class.getClassLoader();
         URL url = classLoader.getResource(CommandHandle.class.getName().replace('.', '/') + ".class");
+        if(url == null)throw new RuntimeException("Can't find the current JAR file");
         CURRENT_JAR_PATH = url.getPath().substring(5, url.getPath().lastIndexOf("!"));
         CURRENT_JAR_NAME = CURRENT_JAR_PATH.substring(CURRENT_JAR_PATH.lastIndexOf("/") + 1);
         MainFileSuffix = RandomString.getRandomString(5);
@@ -117,7 +118,7 @@ public class CommandHandle {
         }
 
         Path batchPath = Path.of("./replace.bat");
-        Files.write(batchPath, batchContent.getBytes(StandardCharsets.US_ASCII));
+        Files.writeString(batchPath, batchContent, StandardCharsets.US_ASCII);
 
         batchContent = "start replace.bat";
         batchPath = Path.of("./runnable.bat");

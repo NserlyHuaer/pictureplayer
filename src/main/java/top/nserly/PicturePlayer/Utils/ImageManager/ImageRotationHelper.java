@@ -4,7 +4,7 @@ import java.awt.*;
 
 public class ImageRotationHelper {
     //获取未旋转状态下的坐标
-    public static Point getOriginalCoord(int rotatedX, int rotatedY, int angle, int width, int height) {
+    public static Point getOriginalCord(int rotatedX, int rotatedY, int angle, int width, int height) {
         int originalX = rotatedX;
         int originalY = rotatedY;
         switch (angle / 90 % 4) {
@@ -25,7 +25,7 @@ public class ImageRotationHelper {
     }
 
     //获取旋转状态下的坐标
-    public static Point getRotatedCoord(int originalX, int originalY, int angle, int width, int height) {
+    public static Point getRotatedCord(int originalX, int originalY, int angle, int width, int height) {
         int newX = originalX;
         int newY = originalY;
         switch (angle / 90 % 4) {

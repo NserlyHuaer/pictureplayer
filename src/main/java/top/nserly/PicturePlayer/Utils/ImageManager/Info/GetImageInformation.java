@@ -14,7 +14,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
@@ -55,33 +60,6 @@ public class GetImageInformation {
             if (fileName.endsWith(type)) return true;
         }
         return false;
-
-//        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-//            byte[] buffer = new byte[8];
-//            fileInputStream.read(buffer);
-//            String hexString = bytesToHex(buffer);
-//            // 常见图片格式的文件头十六进制标识
-//            if (hexString.startsWith("FFD8FF")) {
-//                // JPEG格式
-//                return true;
-//            } else if (hexString.startsWith("89504E47")) {
-//                // PNG格式
-//                return true;
-//            } else if (hexString.startsWith("47494638")) {
-//                // GIF格式
-//                return true;
-//            } else if (hexString.startsWith("49492A00")) {
-//                // TIFF格式
-//                return true;
-//            } else if (hexString.startsWith("424D")) {
-//                // BMP格式
-//                return true;
-//            }
-//            return false;
-//        } catch (IOException e) {
-//            logger.error(e.getMessage());
-//            return false;
-//        }
     }
 
     private static String bytesToHex(byte[] bytes) {
@@ -93,7 +71,7 @@ public class GetImageInformation {
     }
 
     //算法实现：将普通的BufferedImage转化为TYPE_INT_RGB BufferedImage
-    public static BufferedImage CastToTYPE_INT_RGB(BufferedImage src) {
+    public static BufferedImage castToTYPEINTRGB(BufferedImage src) {
         // 新增：统一图像格式
         BufferedImage convertedImage = new BufferedImage(
                 src.getWidth(),
@@ -142,33 +120,67 @@ public class GetImageInformation {
 
     //算法实现：获取图片hashcode值（CRC32）
     public static String getHashcode(File file) {
+        Checksum crc = new CRC32();
+        byte[] buffer = new byte[81920];
         try (FileInputStream fis = new FileInputStream(file)) {
-            Checksum crc = new CRC32();
-            byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = fis.read(buffer)) != -1) {
                 crc.update(buffer, 0, bytesRead);
             }
-            // 补零填充至 8 位，保证格式统一
-            return String.format("%08x", crc.getValue());
         } catch (IOException e) {
             logger.error(e.getMessage());
             return null;
         }
+        // 补零填充至 8 位，保证格式统一
+        return String.format("%08x", crc.getValue());
     }
 
-    //算法实现：获取图片格式
+    // 算法实现：多线程获取多个文件的hashcode值（key:文件 ; value:该文件hashcode值）（ThreadCount不建议设置过多）
+    public static HashMap<String, String> getHashcode(String[] files,int ThreadCount) {
+        ExecutorService executor = Executors.newFixedThreadPool(ThreadCount);
+        Map<String, Future<String>> futures = new HashMap<>();
+
+        for (String filePath : files) {
+            File file = new File(filePath);
+            if (file.exists() && !file.isDirectory()) {
+                Future<String> future = executor.submit(() -> getHashcode(file));
+                futures.put(filePath, future);
+            } else {
+                logger.warn("File does not exist or is a directory: " + filePath);
+            }
+        }
+
+        HashMap<String, String> results = new HashMap<>();
+        for (Map.Entry<String, Future<String>> entry : futures.entrySet()) {
+            try {
+                String hashcode = entry.getValue().get();
+                if (hashcode != null) {
+                    results.put(entry.getKey(), hashcode);
+                }
+            } catch (Exception e) {
+                logger.error("Failed to compute hashcode for file: " + entry.getKey(), e);
+            }
+        }
+
+        executor.shutdown();
+        return results;
+    }
+
+
     public static String getPictureType(File file) throws IOException {
-        try {
-            ImageInputStream iis = ImageIO.createImageInputStream(file);
+        try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
             if (readers.hasNext()) {
                 ImageReader reader = readers.next();
-                reader.setInput(iis);
-                return reader.getFormatName();
+                try {
+                    reader.setInput(iis);
+                    return reader.getFormatName();
+                } finally {
+                    reader.dispose();
+                }
             }
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Failed to get picture type for file: " + file.getAbsolutePath(), e);
         }
         return null;
     }
@@ -189,7 +201,7 @@ public class GetImageInformation {
     //算法实现：获取最佳大小、坐标
     public static Rectangle getBestSize(String path) {
         //如果字符串前缀与后缀包含"，则去除其中的"
-        if (path.startsWith("\"") && path.startsWith("\"")) {
+        if (path.startsWith("\"") && path.endsWith("\"")) {
             path = path.substring(1, path.length() - 1);
         }
         //初始化宽度、高度

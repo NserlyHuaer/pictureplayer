@@ -129,14 +129,93 @@ public class GUIStarter extends JFrame {
         }
         paintPicture = new PaintPicturePanel();
     });
-    private final DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        main = new GUIStarter("Picture Player(Version:" + PicturePlayerVersion.getVersion() + ")");
+        new Thread(() -> {
+            for (String arg : args) {
+                if (GetImageInformation.isImageFile(new File(arg))) {
+                    main.openPicture(arg);
+                    return;
+                }
+            }
+        }).start();
+        extractedSystemInfoToLog();
+    }
+
+    //打开图片
+    public void openPicture(String path) {
+        textField1.setText(path);
+        new Thread(() -> {
+            if (path == null || path.endsWith("???")) return;
+            try {
+                init_PaintPicture.join();
+            } catch (InterruptedException ignored) {
+
+            }
+            if (paintPicture.imageCanvas == null || paintPicture.imageCanvas.getPath() == null) {
+                tabbedPane1.setComponentAt(1, paintPicture);
+                new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
+            }
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    paintPicture.setSize(tabbedPane1.getSize());
+                    paintPicture.changePicturePath(path);
+                    tabbedPane1.setSelectedIndex(1);
+                });
+            } catch (InterruptedException | InvocationTargetException e) {
+                log.error(ExceptionHandler.getExceptionMessage(e));
+            }
+        }).start();
+    }        //静态代码块
+
+    static {
+        //初始化Init
+        init = new Init<>();
+        init.setUpdate(true);
+        ExceptionHandler.setUncaughtExceptionHandler(log);
+        log.info("The software starts running...");
+        System.setProperty("sun.java2d.opengl", "true");
+    }
+
+    private static Method $$$cachedGetBundleMethod$$$ = null;
+
+    private File checkFileOpen(CheckFileIsRightPictureType checkFileIsRightPictureType, boolean isMakeSure) {
+        checkFileIsRightPictureType.statistics();
+        if (checkFileIsRightPictureType.getNotImageCount() != 0) {
+            JOptionPane.showMessageDialog(GUIStarter.main, Bundle.getMessage("OpenPictureError_Content") + "\n\"" + checkFileIsRightPictureType.filePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", Bundle.getMessage("OpenPictureError_Title"), JOptionPane.ERROR_MESSAGE);
+        }
+        if (checkFileIsRightPictureType.getImageCount() == 0) return null;
+        File choose;
+        if (checkFileIsRightPictureType.getImageCount() == 1) {
+            choose = checkFileIsRightPictureType.getImageList().getFirst();
+            String choose_hashcode = GetImageInformation.getHashcode(choose);
+            if (GUIStarter.main.paintPicture != null && GUIStarter.main.paintPicture.imageCanvas.getPath() != null) {
+                if (choose_hashcode == null && paintPicture.imageCanvas.getPicture_hashcode() == null) {
+                    log.warn("Couldn't get current or opening picture hashcode,this will fake the judgment file path");
+                    if (!new File(GUIStarter.main.paintPicture.imageCanvas.getPath()).equals(choose)) return null;
+                } else if (Objects.equals(choose_hashcode, paintPicture.imageCanvas.getPicture_hashcode()))
+                    return REPEAT_PICTURE_PATH_LOGOTYPE;
+                if (isMakeSure && JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("OpenPictureExactly_Content") + "\n\"" + choose.getPath() + "\"", Bundle.getMessage("OpenPictureExactly_Title"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+                    return REPEAT_PICTURE_PATH_LOGOTYPE;
+            }
+        } else {
+            choose = OpenImageChooser.openImageWithChoice(GUIStarter.main, checkFileIsRightPictureType.getImageList());
+        }
+        return choose;
+    }    private final DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
         public void drop(DropTargetDropEvent dtde) {
             try {
                 dtde.acceptDrop(DnDConstants.ACTION_COPY);
                 Transferable transferable = dtde.getTransferable();
                 if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                    List<File> files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                    File file = checkFileOpen(files, true);
+                    Object obj = transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                    List<File> files = null;
+                    if (!(obj instanceof List<?>)) {
+                        throw new ClassCastException("Can't convert object:" + obj + "to object List<File>");
+                    }
+                    files = (List<File>) obj;
+                    File file = checkFileOpen(files);
                     if (file != null) {
                         openPicture(file.getPath());
                     }
@@ -146,16 +225,6 @@ public class GUIStarter extends JFrame {
             }
         }
     };
-
-    //静态代码块
-    static {
-        //初始化Init
-        init = new Init<String, String>();
-        init.SetUpdate(true);
-        ExceptionHandler.setUncaughtExceptionHandler(log);
-        log.info("The software starts running...");
-        System.setProperty("sun.java2d.opengl", "true");
-    }
 
     public GUIStarter(String title) {
         super(title);
@@ -170,7 +239,7 @@ public class GUIStarter extends JFrame {
             setVisible(true);
             Dimension dimension = SizeOperate.FreeOfScreenSize;
             setSize((int) (dimension.getWidth() * 0.5), (int) (dimension.getHeight() * 0.6));
-            setLocation(WindowLocation.ComponentCenter(null, getWidth(), getHeight()));
+            setLocation(WindowLocation.componentCenter(null, getWidth(), getHeight()));
             setMinimumSize(new Dimension(680, 335));
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
@@ -182,20 +251,20 @@ public class GUIStarter extends JFrame {
             paintPicture.pictureInformationStorageManagement.optimize();
         }).start();
         changeFocusListener = new ChangeFocusListener(this);
-        init.Run();
+        init.run();
         new Thread(() -> {
             ExceptionHandler.setUncaughtExceptionHandler(log);
             ProxyServerPrefix = ProxyServerLabel.getText();
             MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
             centre = new SettingsInfoHandle();
-            Init();
+            init();
             if (!GetImageInformation.isHardwareAccelerated) {
                 centre.CurrentData.replace("EnableHardwareAcceleration", "false");
                 EnableHardwareAccelerationCheckBox.setSelected(false);
                 EnableHardwareAccelerationCheckBox.setEnabled(false);
                 centre.save();
             }
-            About();
+            about();
             if (SettingsInfoHandle.getBoolean("EnableProxyServer", main.centre.CurrentData)) {
                 setProxyServerOfInit();
                 log.info("Proxy Server is turned on, and all networking activities of the Program will be handled by the proxy server");
@@ -218,16 +287,13 @@ public class GUIStarter extends JFrame {
         PaintPicturePanel.isEnableHardwareAcceleration = Boolean.parseBoolean(init.getProperties().getProperty("EnableHardwareAcceleration")) && GetImageInformation.isHardwareAccelerated;
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        main = new GUIStarter("Picture Player(Version:" + PicturePlayerVersion.getVersion() + ")");
-        new Thread(() -> {
-            for (String arg : args) {
-                if (GetImageInformation.isImageFile(new File(arg))) {
-                    main.openPicture(arg);
-                    return;
-                }
-            }
-        }).start();
+    private static void closeInformation() {
+        if (PaintPicturePanel.paintPicture != null && PaintPicturePanel.paintPicture.sizeOperate != null)
+            PaintPicturePanel.paintPicture.sizeOperate.close();
+        if (main != null) main.dispose();
+    }
+
+    private static void extractedSystemInfoToLog() {
         //获取操作系统版本
         log.info("OS:{}", SystemMonitor.OS_NAME);
         //获取系统语言
@@ -243,12 +309,6 @@ public class GUIStarter extends JFrame {
         }
     }
 
-    private static void CloseInformation() {
-        if (PaintPicturePanel.paintPicture != null && PaintPicturePanel.paintPicture.sizeOperate != null)
-            PaintPicturePanel.paintPicture.sizeOperate.close();
-        if (main != null) main.dispose();
-    }
-
     //关闭
     public static void close() {
         if (GUIStarter.main.getTitle().contains("*")) {
@@ -256,11 +316,11 @@ public class GUIStarter extends JFrame {
             if (choose == JOptionPane.YES_OPTION) {
                 log.info("Saving Settings...");
                 GUIStarter.main.centre.save();
-                CloseInformation();
+                closeInformation();
                 log.info("Program Termination!");
                 System.exit(0);
             } else if (choose == JOptionPane.NO_OPTION) {
-                CloseInformation();
+                closeInformation();
                 log.info("Program Termination!");
                 System.exit(0);
             } else {
@@ -269,9 +329,9 @@ public class GUIStarter extends JFrame {
         }
 
         //加载配置文件
-        init.Loading();
+        init.loading();
         if (init.getProperties().get("EnableConfirmExit") != null && init.getProperties().get("EnableConfirmExit").toString().equalsIgnoreCase("false")) {
-            CloseInformation();
+            closeInformation();
             log.info("Program Termination!");
             System.exit(0);
         }
@@ -281,7 +341,7 @@ public class GUIStarter extends JFrame {
         jDialog.setTitle(Bundle.getMessage("DefaultWindowClose_Title"));
         //设置面板大小（获取父面板坐标）
         jDialog.setSize(260, 170);
-        jDialog.setLocation(WindowLocation.ComponentCenter(main, jDialog.getWidth(), jDialog.getHeight()));
+        jDialog.setLocation(WindowLocation.componentCenter(main, jDialog.getWidth(), jDialog.getHeight()));
         //创建文字
         var jLabel1 = new JLabel(Bundle.getMessage("DefaultWindowClose_Content"));
         //设置文字字体、格式
@@ -310,10 +370,10 @@ public class GUIStarter extends JFrame {
         yes.addActionListener(e1 -> {
             //关闭面板
             main.dispose();
-            CloseInformation();
+            closeInformation();
             if (jCheckBox.isSelected()) {
-                init.ChangeValue("EnableConfirmExit", "false");
-                init.Update();
+                init.changeValue("EnableConfirmExit", "false");
+                init.update();
             }
             log.info("Program Termination!");
             System.exit(0);
@@ -338,8 +398,8 @@ public class GUIStarter extends JFrame {
                         PaintPicturePanel.paintPicture.sizeOperate.close();
                     if (main != null) main.dispose();
                     if (jCheckBox.isSelected()) {
-                        init.ChangeValue("EnableConfirmExit", "false");
-                        init.Update();
+                        init.changeValue("EnableConfirmExit", "false");
+                        init.update();
                     }
                     log.info("Program Termination!");
                     System.exit(0);
@@ -356,6 +416,116 @@ public class GUIStarter extends JFrame {
         });
         //显示面板
         jDialog.setVisible(true);
+    }
+
+    //初始化所有组件设置
+    private void init() {
+        VersionView.setText(VersionView.getText() + PicturePlayerVersion.getShorterVersion());
+        TurnButton.addMouseListener(changeFocusListener);
+        TurnButton.addActionListener(e -> {
+            String path = textField1.getText().trim();
+            //如果字符串前缀与后缀包含"，则去除其中的"
+            if (path.startsWith("\"") && path.endsWith("\"")) {
+                path = path.substring(1, path.length() - 1);
+            }
+            File file = new File(path);
+            if (GetImageInformation.isImageFile(file)) {
+                openPicture(path);
+                return;
+            }
+
+            JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+            fileChooser.setCurrentDirectory(file);
+            String picturePath;
+            while (true) {
+                int returnValue = fileChooser.showOpenDialog(GUIStarter.main);
+                File chooseFile = fileChooser.getSelectedFile();
+                if (chooseFile == null) return;
+                picturePath = chooseFile.getPath();
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    file = checkFileOpen(new File(picturePath));
+                    if (file == null) continue;
+                    String filePath = file.getAbsolutePath();
+                    if (filePath.endsWith("???")) {
+                        tabbedPane1.setSelectedIndex(1);
+                        break;
+                    }
+                    openPicture(filePath);
+                    paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
+                }
+                return;
+            }
+        });
+        SecondPanel.addMouseListener(mouseAdapter);
+        // 设置SecondPanel为可接受拖放
+        new DropTarget(SecondPanel, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
+        settings();
+        SaveButton.addActionListener(e -> {
+            log.info("Saving Settings...");
+            centre.save();
+            settingRevised(false);
+        });
+        ResetButton.addActionListener(e -> {
+            centre.setDefault();
+            reFresh();
+            settingRevised(true);
+        });
+        RefreshButton.addActionListener(e -> {
+            centre.reFresh();
+            reFresh();
+            settingRevised(false);
+        });
+        ProxyServerButton.addActionListener(e -> {
+            proxyServerChooser.setVisible(true);
+        });
+        new Thread(() -> {
+            ExceptionHandler.setUncaughtExceptionHandler(log);
+            JavaPath.setText(JavaPath.getText() + System.getProperty("sun.boot.library.path"));
+            DefaultJVMMem.setText(DefaultJVMMem.getText() + SystemMonitor.convertSize(SystemMonitor.JVM_Initialize_Memory));
+            JVMVersionLabel.setText(JVMVersionLabel.getText() + System.getProperty("java.runtime.version"));
+            ProgramStartTime.setText(ProgramStartTime.getText() + SystemMonitor.PROGRAM_START_TIME);
+            CurrentSoftwareVersionLabel.setText(CurrentSoftwareVersionLabel.getText() + PicturePlayerVersion.getVersion());
+            CurrentSoftwareInteriorLabel.setText(CurrentSoftwareInteriorLabel.getText() + PicturePlayerVersion.getVersionID());
+            OSLabel.setText(OSLabel.getText() + SystemMonitor.OS_NAME);
+            CPUName.setText(CPUName.getText() + SystemMonitor.CPU_NAME);
+            CurrentSoftwareLanguage.setText(CurrentSoftwareLanguage.getText() + System.getProperty("user.language"));
+            if (EnableProxyServer)
+                CheckVersionButton.setText(CheckVersionButton.getText() + Bundle.getMessage("IsEnableProxyServer"));
+            final String JmemI = MemUsed.getText();
+            final String TTI = TotalThread.getText();
+            tabbedPane1.addChangeListener(e -> {
+                request();
+                if (tabbedPane1.getSelectedIndex() == 3) {
+                    future = executor.scheduleAtFixedRate(new Runnable() {
+                        @Override
+                        public void run() {
+                            SystemMonitor.getInformation();
+                            MemUsed.setText(JmemI + SystemMonitor.convertSize(SystemMonitor.JVM_Used_Memory) + "/" + SystemMonitor.convertSize(SystemMonitor.JVM_Maximum_Free_Memory) + "(" + SystemMonitor.JVM_Memory_Usage + "%" + ")");
+                            TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
+                        }
+                    }, 0, 2, TimeUnit.SECONDS);
+                } else {
+                    if (future != null) future.cancel(false);
+                }
+                if (tabbedPane1.getSelectedIndex() == 2 && !IsFreshen) {
+                    IsFreshen = true;
+                    reFresh();
+                }
+            });
+        }).start();
+        //设置窗体在显示时自动获取焦点
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowActivated(WindowEvent e) {
+                request();
+
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                close();
+            }
+        });
     }
 
     //代理服务器设置
@@ -400,346 +570,6 @@ public class GUIStarter extends JFrame {
             //让窗体获取焦点
             requestFocusInWindow();
         }
-    }
-
-    //初始化所有组件设置
-    private void Init() {
-        VersionView.setText(VersionView.getText() + PicturePlayerVersion.getVersion());
-        TurnButton.addMouseListener(changeFocusListener);
-        TurnButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String path = textField1.getText().trim();
-                //如果字符串前缀与后缀包含"，则去除其中的"
-                if (path.startsWith("\"") && path.endsWith("\"")) {
-                    path = path.substring(1, path.length() - 1);
-                }
-                File file = new File(path);
-                if (GetImageInformation.isImageFile(file)) {
-                    openPicture(path);
-                    return;
-                }
-
-                JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-                fileChooser.setCurrentDirectory(file);
-                String picturePath;
-                while (true) {
-                    int returnValue = fileChooser.showOpenDialog(GUIStarter.main);
-                    File chooseFile = fileChooser.getSelectedFile();
-                    if (chooseFile == null) return;
-                    picturePath = chooseFile.getPath();
-                    if (returnValue == JFileChooser.APPROVE_OPTION) {
-                        file = checkFileOpen(false, new File(picturePath));
-                        if (file == null) continue;
-                        String filePath = file.getAbsolutePath();
-                        if (filePath.endsWith("???")) {
-                            tabbedPane1.setSelectedIndex(1);
-                            break;
-                        }
-                        openPicture(filePath);
-                        paintPicture.sizeOperate.setPercent(paintPicture.sizeOperate.getPictureOptimalSize());
-                    }
-                    return;
-                }
-            }
-        });
-        SecondPanel.addMouseListener(mouseAdapter);
-        // 设置SecondPanel为可接受拖放
-        new DropTarget(SecondPanel, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
-        Settings();
-        SaveButton.addActionListener(e -> {
-            log.info("Saving Settings...");
-            centre.save();
-            SettingRevised(false);
-        });
-        ResetButton.addActionListener(e -> {
-            centre.setDefault();
-            reFresh();
-            SettingRevised(true);
-        });
-        RefreshButton.addActionListener(e -> {
-            centre.reFresh();
-            reFresh();
-            SettingRevised(false);
-        });
-        ProxyServerButton.addActionListener(e -> {
-            proxyServerChooser.setVisible(true);
-        });
-        new Thread(() -> {
-            ExceptionHandler.setUncaughtExceptionHandler(log);
-            JavaPath.setText(JavaPath.getText() + System.getProperty("sun.boot.library.path"));
-            DefaultJVMMem.setText(DefaultJVMMem.getText() + SystemMonitor.convertSize(SystemMonitor.JVM_Initialize_Memory));
-            JVMVersionLabel.setText(JVMVersionLabel.getText() + System.getProperty("java.runtime.version"));
-            ProgramStartTime.setText(ProgramStartTime.getText() + SystemMonitor.PROGRAM_START_TIME);
-            CurrentSoftwareVersionLabel.setText(CurrentSoftwareVersionLabel.getText() + PicturePlayerVersion.getVersion());
-            CurrentSoftwareInteriorLabel.setText(CurrentSoftwareInteriorLabel.getText() + PicturePlayerVersion.getVersionID());
-            OSLabel.setText(OSLabel.getText() + SystemMonitor.OS_NAME);
-            CPUName.setText(CPUName.getText() + SystemMonitor.CPU_NAME);
-            CurrentSoftwareLanguage.setText(CurrentSoftwareLanguage.getText() + System.getProperty("user.language"));
-            if (EnableProxyServer)
-                CheckVersionButton.setText(CheckVersionButton.getText() + Bundle.getMessage("IsEnableProxyServer"));
-            final String JmemI = MemUsed.getText();
-            final String TTI = TotalThread.getText();
-            tabbedPane1.addChangeListener(e -> {
-                request();
-                if (tabbedPane1.getSelectedIndex() == 3) {
-                    future = executor.scheduleAtFixedRate(new Runnable() {
-                        @Override
-                        public void run() {
-                            SystemMonitor.GetInformation();
-                            MemUsed.setText(JmemI + SystemMonitor.convertSize(SystemMonitor.JVM_Used_Memory) + "/" + SystemMonitor.convertSize(SystemMonitor.JVM_Maximum_Free_Memory) + "(" + SystemMonitor.JVM_Memory_Usage + "%" + ")");
-                            TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
-                        }
-                    }, 0, 2, TimeUnit.SECONDS);
-                } else {
-                    if (future != null) future.cancel(false);
-                }
-                if (tabbedPane1.getSelectedIndex() == 2 && !IsFreshen) {
-                    IsFreshen = true;
-                    reFresh();
-                }
-            });
-        }).start();
-        //设置窗体在显示时自动获取焦点
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowActivated(WindowEvent e) {
-                request();
-
-            }
-
-            @Override
-            public void windowClosing(WindowEvent e) {
-                close();
-            }
-        });
-    }
-
-    //打开图片
-    public void openPicture(String path) {
-        textField1.setText(path);
-        new Thread(() -> {
-            if (path == null || path.endsWith("???")) return;
-            try {
-                init_PaintPicture.join();
-            } catch (InterruptedException ignored) {
-
-            }
-            if (paintPicture.isOnlyInit) {
-                tabbedPane1.setComponentAt(1, paintPicture);
-                new DropTarget(paintPicture, DnDConstants.ACTION_COPY_OR_MOVE, dropTargetAdapter, true);
-            }
-            try {
-                SwingUtilities.invokeAndWait(() -> {
-                    paintPicture.setSize(tabbedPane1.getSize());
-                    paintPicture.changePicturePath(path);
-                    tabbedPane1.setSelectedIndex(1);
-                });
-            } catch (InterruptedException | InvocationTargetException e) {
-                log.error(ExceptionHandler.getExceptionMessage(e));
-            }
-        }).start();
-    }
-
-    //设置界面
-    private void Settings() {
-        reFresh();
-        EnableConfirmExitCheckBox.addActionListener(e -> {
-            centre.CurrentData.replace("EnableConfirmExit", String.valueOf(EnableConfirmExitCheckBox.isSelected()));
-            SettingRevised(true);
-        });
-        EnableHistoryLoaderCheckBox.addActionListener(e -> {
-            centre.CurrentData.replace("EnableHistoryLoader", String.valueOf(EnableHistoryLoaderCheckBox.isSelected()));
-            SettingRevised(true);
-        });
-        EnableCursorDisplayCheckBox.addActionListener(e -> {
-            centre.CurrentData.replace("EnableCursorDisplay", String.valueOf(EnableCursorDisplayCheckBox.isSelected()));
-            SettingRevised(true);
-        });
-        MouseMoveOffsetsSlider.addChangeListener(e -> {
-            centre.CurrentData.replace("MouseMoveOffsets", String.valueOf(MouseMoveOffsetsSlider.getValue()));
-            StringBuilder stringBuffer1 = new StringBuilder(MouseMoveLabelPrefix);
-            stringBuffer1.insert(MouseMoveLabelPrefix.indexOf(":") + 1, MouseMoveOffsetsSlider.getValue() + "% ");
-            MouseMoveOffsetsLabel.setText(stringBuffer1.toString());
-            SettingRevised(true);
-        });
-        EnableProxyServerCheckBox.addActionListener(e -> {
-            centre.CurrentData.replace("EnableProxyServer", String.valueOf(EnableProxyServerCheckBox.isSelected()));
-            ProxyServerButton.setVisible(EnableProxyServerCheckBox.isSelected());
-            ProxyServerLabel.setVisible(EnableProxyServerCheckBox.isSelected());
-            SettingRevised(true);
-        });
-        EnableHardwareAccelerationCheckBox.addActionListener(e -> {
-            centre.CurrentData.replace("EnableHardwareAcceleration", String.valueOf(EnableHardwareAccelerationCheckBox.isSelected()));
-            ProxyServerButton.setEnabled(EnableHardwareAccelerationCheckBox.isSelected());
-            SettingRevised(true);
-        });
-        EnableSecureConnectionCheckBox.addActionListener(e -> {
-            if (!EnableSecureConnectionCheckBox.isSelected()) {
-                EnableSecureConnectionCheckBox.setSelected(true);
-                int choose = JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("ConfirmCloseSecureConnection_Content_1Line") + "\n" + Bundle.getMessage("ConfirmCloseSecureConnection_Content_2Line"), Bundle.getMessage("ConfirmCloseSecureConnection_Title"), JOptionPane.YES_NO_OPTION);
-                if (choose != 0) {
-                    return;
-                }
-                EnableSecureConnectionCheckBox.setSelected(false);
-            }
-            centre.CurrentData.replace("EnableSecureConnection", String.valueOf(EnableSecureConnectionCheckBox.isSelected()));
-            SettingRevised(true);
-        });
-        AutoCheckUpdateCheckBox.addActionListener(e -> {
-            centre.CurrentData.replace("AutoCheckUpdate", String.valueOf(AutoCheckUpdateCheckBox.isSelected()));
-            SettingRevised(true);
-        });
-    }
-
-    private void reFresh() {
-        EnableHardwareAccelerationCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableHardwareAcceleration", centre.CurrentData));
-        EnableConfirmExitCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableConfirmExit", centre.CurrentData));
-        EnableHistoryLoaderCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableHistoryLoader", centre.CurrentData));
-        EnableCursorDisplayCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableCursorDisplay", centre.CurrentData));
-        MouseMoveOffsetsSlider.setValue((int) SettingsInfoHandle.getDouble("MouseMoveOffsets", centre.CurrentData));
-        StringBuilder stringBuffer = new StringBuilder(MouseMoveLabelPrefix);
-        stringBuffer.insert(MouseMoveLabelPrefix.indexOf(":") + 1, MouseMoveOffsetsSlider.getValue() + "% ");
-        MouseMoveOffsetsLabel.setText(stringBuffer.toString());
-        EnableProxyServerCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableProxyServer", centre.CurrentData));
-        ProxyServerLabel.setText(ProxyServerPrefix + centre.CurrentData.get("ProxyServer"));
-        EnableSecureConnectionCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableSecureConnection", centre.CurrentData));
-        AutoCheckUpdateCheckBox.setSelected(SettingsInfoHandle.getBoolean("AutoCheckUpdate", centre.CurrentData));
-        ProxyServerButton.setVisible(EnableProxyServerCheckBox.isSelected());
-        ProxyServerLabel.setVisible(EnableProxyServerCheckBox.isSelected());
-    }
-
-    //关于界面设置
-    private void About() {
-        CheckAndDownloadUpdate downloadUpdate = new CheckAndDownloadUpdate(UPDATE_WEBSITE);
-        CheckVersionButton.addActionListener(e -> {
-            downloadUpdate.setWebSide(UPDATE_WEBSITE);
-            try {
-                if (!downloadUpdate.checkIfTheLatestVersion()) {
-                    int choice = JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("NoAnyUpdate_Content_First") + "\n" + Bundle.getMessage("NoAnyUpdate_Content_Second"), Bundle.getMessage("NoAnyUpdate_Title"), JOptionPane.YES_NO_OPTION);
-                    if (choice != JOptionPane.YES_OPTION) {
-                        return;
-                    }
-                    downloadUpdate.ForceToGetUpdates();
-                }
-            } catch (IOException e1) {
-                log.error(ExceptionHandler.getExceptionMessage(e1));
-                JOptionPane.showMessageDialog(GUIStarter.main, "Error: " + e1 + "\n" + Bundle.getMessage("CantGetUpdate_Content"), Bundle.getMessage("CantGetUpdate_Title"), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            new Thread(() -> {
-                ExceptionHandler.setUncaughtExceptionHandler(log);
-                ConfirmUpdateDialog confirmUpdateDialog = new ConfirmUpdateDialog(downloadUpdate);
-                confirmUpdateDialog.pack();
-                confirmUpdateDialog.setVisible(true);
-            }).start();
-        });
-
-        FreeUpMemory.addActionListener(e -> {
-            System.gc();
-            JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("FreeUpMemory_Content"), Bundle.getMessage("FreeUpMemory_Title"), JOptionPane.DEFAULT_OPTION);
-        });
-
-    }
-
-    //设置修改
-    private void SettingRevised(boolean a) {
-        if (a && !getTitle().contains("*")) {
-            setTitle(getTitle() + "*");
-        } else if ((!a) && getTitle().contains("*")) {
-            setTitle(getTitle().substring(0, getTitle().lastIndexOf("*")));
-        }
-    }
-
-
-    //代理服务器更改
-    public void setProxyServerOfInit(String ProxyServerAddress) {
-        if (ProxyServerAddress == null || ProxyServerAddress.trim().isEmpty()) return;
-        ProxyServerAddress = ProxyServerAddress.trim();
-        if (ProxyServerAddress.equals(centre.CurrentData.get("ProxyServer"))) return;
-        if (!ProxyServerAddress.equals("proxy server address") && !ProxyServerAddress.isEmpty()) {
-            init.ChangeValue("ProxyServer", ProxyServerAddress);
-            setProxyServerOfInit();
-            log.info("To enable a new proxy server:{}", ProxyServerAddress);
-            EnableProxyServerCheckBox.setSelected(true);
-            ProxyServerButton.setVisible(true);
-            ProxyServerLabel.setVisible(true);
-            centre.CurrentData.replace("ProxyServer", ProxyServerAddress);
-            ProxyServerLabel.setText(Bundle.getMessage("ProxyServerLabel") + centre.CurrentData.get("ProxyServer"));
-            JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("ProxyServerWasModified_Content"), Bundle.getMessage("ProxyServerWasModified_Title"), JOptionPane.YES_NO_OPTION);
-            SettingRevised(true);
-        }
-    }
-
-    public void reviewPictureList(ArrayList<String> picturePath) {
-        ArrayList<String> cached = (ArrayList<String>) picturePath.clone();
-        //移走所有已在列表中的图片路径
-        cached.removeAll(thumbnailPreviewOfImages.keySet());
-
-        ArrayList<String> removed = new ArrayList<>();
-
-        //移走所有当前列表中的图片路径不在当前显示列表
-        for (String currentBufferedPicturePath : thumbnailPreviewOfImages.keySet()) {
-            if (!picturePath.contains(currentBufferedPicturePath)) {
-                FileChoosePane.remove(thumbnailPreviewOfImages.get(currentBufferedPicturePath));
-                removed.add(currentBufferedPicturePath);
-            }
-        }
-        removed.forEach(thumbnailPreviewOfImages::remove);
-
-        //创建当前显示列表没有的图片
-        for (String path : cached) {
-            ThumbnailPreviewOfImage thumbnailPreviewOfImage = null;
-            try {
-                thumbnailPreviewOfImage = new ThumbnailPreviewOfImage(path);
-            } catch (IOException e) {
-                log.error(ExceptionHandler.getExceptionMessage(e));
-                picturePath.remove(path);
-                continue;
-            }
-            FileChoosePane.add(thumbnailPreviewOfImage);
-            thumbnailPreviewOfImages.put(path, thumbnailPreviewOfImage);
-        }
-        FileChoosePane.revalidate();
-        FileChoosePane.repaint();
-    }
-
-    private File checkFileOpen(CheckFileIsRightPictureType checkFileIsRightPictureType, boolean isMakeSure) {
-        checkFileIsRightPictureType.statistics();
-        if (checkFileIsRightPictureType.getNotImageCount() != 0) {
-            JOptionPane.showMessageDialog(GUIStarter.main, Bundle.getMessage("OpenPictureError_Content") + "\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", Bundle.getMessage("OpenPictureError_Title"), JOptionPane.ERROR_MESSAGE);
-        }
-        if (checkFileIsRightPictureType.getImageCount() == 0) return null;
-        File choose;
-        if (checkFileIsRightPictureType.getImageCount() == 1) {
-            choose = checkFileIsRightPictureType.getImageList().getFirst();
-            String choose_hashcode = GetImageInformation.getHashcode(choose);
-            if (GUIStarter.main.paintPicture != null && !GUIStarter.main.paintPicture.isOnlyInit) {
-                if (choose_hashcode == null && paintPicture.imageCanvas.getPicture_hashcode() == null) {
-                    log.warn("Couldn't get current or opening picture hashcode,this will fake the judgment file path");
-                    if (!new File(GUIStarter.main.paintPicture.imageCanvas.getPath()).equals(choose)) return null;
-                } else if (Objects.equals(choose_hashcode, paintPicture.imageCanvas.getPicture_hashcode()))
-                    return REPEAT_PICTURE_PATH_LOGOTYPE;
-                if (isMakeSure && JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("OpenPictureExactly_Content") + "\n\"" + choose.getPath() + "\"", Bundle.getMessage("OpenPictureExactly_Title"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
-                    return REPEAT_PICTURE_PATH_LOGOTYPE;
-            }
-        } else {
-            choose = OpenImageChooser.openImageWithChoice(GUIStarter.main, checkFileIsRightPictureType.getImageList());
-        }
-        return choose;
-    }
-
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
-    }
-
-    //检查文件打开
-    private File checkFileOpen(boolean isMakeSure, File... files) {
-        return checkFileOpen(new CheckFileIsRightPictureType(files), isMakeSure);
-    }
-
-    private File checkFileOpen(List<File> files, boolean isMakeSure) {
-        return checkFileOpen(new CheckFileIsRightPictureType(files), isMakeSure);
     }
 
     /**
@@ -1038,7 +868,7 @@ public class GUIStarter extends JFrame {
         return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
-    private static Method $$$cachedGetBundleMethod$$$ = null;
+
 
     private String $$$getMessageFromBundle$$$(String path, String key) {
         ResourceBundle bundle;
@@ -1115,5 +945,183 @@ public class GUIStarter extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
+
+
+    //设置界面
+    private void settings() {
+        reFresh();
+        EnableConfirmExitCheckBox.addActionListener(e -> {
+            centre.CurrentData.replace("EnableConfirmExit", String.valueOf(EnableConfirmExitCheckBox.isSelected()));
+            settingRevised(true);
+        });
+        EnableHistoryLoaderCheckBox.addActionListener(e -> {
+            centre.CurrentData.replace("EnableHistoryLoader", String.valueOf(EnableHistoryLoaderCheckBox.isSelected()));
+            settingRevised(true);
+        });
+        EnableCursorDisplayCheckBox.addActionListener(e -> {
+            centre.CurrentData.replace("EnableCursorDisplay", String.valueOf(EnableCursorDisplayCheckBox.isSelected()));
+            settingRevised(true);
+        });
+        MouseMoveOffsetsSlider.addChangeListener(e -> {
+            centre.CurrentData.replace("MouseMoveOffsets", String.valueOf(MouseMoveOffsetsSlider.getValue()));
+            StringBuilder stringBuffer1 = new StringBuilder(MouseMoveLabelPrefix);
+            stringBuffer1.insert(MouseMoveLabelPrefix.indexOf(":") + 1, MouseMoveOffsetsSlider.getValue() + "% ");
+            MouseMoveOffsetsLabel.setText(stringBuffer1.toString());
+            settingRevised(true);
+        });
+        EnableProxyServerCheckBox.addActionListener(e -> {
+            centre.CurrentData.replace("EnableProxyServer", String.valueOf(EnableProxyServerCheckBox.isSelected()));
+            ProxyServerButton.setVisible(EnableProxyServerCheckBox.isSelected());
+            ProxyServerLabel.setVisible(EnableProxyServerCheckBox.isSelected());
+            settingRevised(true);
+        });
+        EnableHardwareAccelerationCheckBox.addActionListener(e -> {
+            centre.CurrentData.replace("EnableHardwareAcceleration", String.valueOf(EnableHardwareAccelerationCheckBox.isSelected()));
+            ProxyServerButton.setEnabled(EnableHardwareAccelerationCheckBox.isSelected());
+            settingRevised(true);
+        });
+        EnableSecureConnectionCheckBox.addActionListener(e -> {
+            if (!EnableSecureConnectionCheckBox.isSelected()) {
+                EnableSecureConnectionCheckBox.setSelected(true);
+                int choose = JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("ConfirmCloseSecureConnection_Content_1Line") + "\n" + Bundle.getMessage("ConfirmCloseSecureConnection_Content_2Line"), Bundle.getMessage("ConfirmCloseSecureConnection_Title"), JOptionPane.YES_NO_OPTION);
+                if (choose != 0) {
+                    return;
+                }
+                EnableSecureConnectionCheckBox.setSelected(false);
+            }
+            centre.CurrentData.replace("EnableSecureConnection", String.valueOf(EnableSecureConnectionCheckBox.isSelected()));
+            settingRevised(true);
+        });
+        AutoCheckUpdateCheckBox.addActionListener(e -> {
+            centre.CurrentData.replace("AutoCheckUpdate", String.valueOf(AutoCheckUpdateCheckBox.isSelected()));
+            settingRevised(true);
+        });
+    }
+
+    //关于界面设置
+    private void about() {
+        CheckAndDownloadUpdate downloadUpdate = new CheckAndDownloadUpdate(UPDATE_WEBSITE);
+        CheckVersionButton.addActionListener(e -> {
+            downloadUpdate.setWebSide(UPDATE_WEBSITE);
+            try {
+                if (!downloadUpdate.checkIfTheLatestVersion()) {
+                    int choice = JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("NoAnyUpdate_Content_First") + "\n" + Bundle.getMessage("NoAnyUpdate_Content_Second"), Bundle.getMessage("NoAnyUpdate_Title"), JOptionPane.YES_NO_OPTION);
+                    if (choice != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                    downloadUpdate.ForceToGetUpdates();
+                }
+            } catch (IOException e1) {
+                log.error(ExceptionHandler.getExceptionMessage(e1));
+                JOptionPane.showMessageDialog(GUIStarter.main, "Error: " + e1 + "\n" + Bundle.getMessage("CantGetUpdate_Content"), Bundle.getMessage("CantGetUpdate_Title"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            new Thread(() -> {
+                ExceptionHandler.setUncaughtExceptionHandler(log);
+                ConfirmUpdateDialog confirmUpdateDialog = new ConfirmUpdateDialog(downloadUpdate);
+                confirmUpdateDialog.pack();
+                confirmUpdateDialog.setVisible(true);
+            }).start();
+        });
+
+        FreeUpMemory.addActionListener(e -> {
+            System.gc();
+            JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("FreeUpMemory_Content"), Bundle.getMessage("FreeUpMemory_Title"), JOptionPane.DEFAULT_OPTION);
+        });
+
+    }
+
+    private void reFresh() {
+        EnableHardwareAccelerationCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableHardwareAcceleration", centre.CurrentData));
+        EnableConfirmExitCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableConfirmExit", centre.CurrentData));
+        EnableHistoryLoaderCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableHistoryLoader", centre.CurrentData));
+        EnableCursorDisplayCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableCursorDisplay", centre.CurrentData));
+        MouseMoveOffsetsSlider.setValue((int) SettingsInfoHandle.getDouble("MouseMoveOffsets", centre.CurrentData));
+        StringBuilder stringBuffer = new StringBuilder(MouseMoveLabelPrefix);
+        stringBuffer.insert(MouseMoveLabelPrefix.indexOf(":") + 1, MouseMoveOffsetsSlider.getValue() + "% ");
+        MouseMoveOffsetsLabel.setText(stringBuffer.toString());
+        EnableProxyServerCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableProxyServer", centre.CurrentData));
+        ProxyServerLabel.setText(ProxyServerPrefix + centre.CurrentData.get("ProxyServer"));
+        EnableSecureConnectionCheckBox.setSelected(SettingsInfoHandle.getBoolean("EnableSecureConnection", centre.CurrentData));
+        AutoCheckUpdateCheckBox.setSelected(SettingsInfoHandle.getBoolean("AutoCheckUpdate", centre.CurrentData));
+        ProxyServerButton.setVisible(EnableProxyServerCheckBox.isSelected());
+        ProxyServerLabel.setVisible(EnableProxyServerCheckBox.isSelected());
+    }
+
+    //设置修改
+    private void settingRevised(boolean a) {
+        if (a && !getTitle().contains("*")) {
+            setTitle(getTitle() + "*");
+        } else if ((!a) && getTitle().contains("*")) {
+            setTitle(getTitle().substring(0, getTitle().lastIndexOf("*")));
+        }
+    }
+
+    //代理服务器更改
+    public void setProxyServerOfInit(String ProxyServerAddress) {
+        if (ProxyServerAddress == null || ProxyServerAddress.trim().isEmpty()) return;
+        ProxyServerAddress = ProxyServerAddress.trim();
+        if (ProxyServerAddress.equals(centre.CurrentData.get("ProxyServer"))) return;
+        if (!ProxyServerAddress.equals("proxy server address") && !ProxyServerAddress.isEmpty()) {
+            init.changeValue("ProxyServer", ProxyServerAddress);
+            setProxyServerOfInit();
+            log.info("To enable a new proxy server:{}", ProxyServerAddress);
+            EnableProxyServerCheckBox.setSelected(true);
+            ProxyServerButton.setVisible(true);
+            ProxyServerLabel.setVisible(true);
+            centre.CurrentData.replace("ProxyServer", ProxyServerAddress);
+            ProxyServerLabel.setText(Bundle.getMessage("ProxyServerLabel") + centre.CurrentData.get("ProxyServer"));
+            JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("ProxyServerWasModified_Content"), Bundle.getMessage("ProxyServerWasModified_Title"), JOptionPane.YES_NO_OPTION);
+            settingRevised(true);
+        }
+    }
+
+    //检查文件打开
+    private File checkFileOpen(File... files) {
+        return checkFileOpen(new CheckFileIsRightPictureType(files), false);
+    }
+
+    public void reviewPictureList(ArrayList<String> picturePath) {
+        ArrayList<String> cached = (ArrayList<String>) picturePath.clone();
+        //移走所有已在列表中的图片路径
+        cached.removeAll(thumbnailPreviewOfImages.keySet());
+
+        ArrayList<String> removed = new ArrayList<>();
+
+        //移走所有当前列表中的图片路径不在当前显示列表
+        for (String currentBufferedPicturePath : thumbnailPreviewOfImages.keySet()) {
+            if (!picturePath.contains(currentBufferedPicturePath)) {
+                FileChoosePane.remove(thumbnailPreviewOfImages.get(currentBufferedPicturePath));
+                removed.add(currentBufferedPicturePath);
+            }
+        }
+        removed.forEach(thumbnailPreviewOfImages::remove);
+
+        //创建当前显示列表没有的图片
+        for (String path : cached) {
+            ThumbnailPreviewOfImage thumbnailPreviewOfImage = null;
+            try {
+                thumbnailPreviewOfImage = new ThumbnailPreviewOfImage(path);
+            } catch (IOException e) {
+                log.error(ExceptionHandler.getExceptionMessage(e));
+                picturePath.remove(path);
+                continue;
+            }
+            FileChoosePane.add(thumbnailPreviewOfImage);
+            thumbnailPreviewOfImages.put(path, thumbnailPreviewOfImage);
+        }
+        FileChoosePane.revalidate();
+        FileChoosePane.repaint();
+    }
+
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
+    }
+
+    private File checkFileOpen(List<File> files) {
+        return checkFileOpen(new CheckFileIsRightPictureType(files), true);
+    }
+
 
 }

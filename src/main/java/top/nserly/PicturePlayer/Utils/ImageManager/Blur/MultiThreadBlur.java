@@ -89,7 +89,7 @@ public class MultiThreadBlur {
         // 使用try-with-resources确保流关闭
         try (InputStream is = Files.newInputStream(Paths.get(srcPath))) {
             BufferedImage simpleImage = ImageIO.read(is);
-            return GetImageInformation.CastToTYPE_INT_RGB(simpleImage);
+            return GetImageInformation.castToTYPEINTRGB(simpleImage);
         } catch (IOException e) {
             log.error("Image loading failed", e);
             return null;
@@ -140,8 +140,8 @@ public class MultiThreadBlur {
         if (RED_TABLE == null || GREEN_TABLE == null || BLUE_TABLE == null)
             initTable();
 
-
         src = getImageAndCastToTYPE_INT_RGB(srcPath);
+        if(src == null) throw new NullPointerException("Image is null");
         width = src.getWidth();
         height = src.getHeight();
         srcPixels = ((DataBufferInt) src.getRaster().getDataBuffer()).getData();
@@ -191,7 +191,7 @@ public class MultiThreadBlur {
     }
 
     // 分块处理任务
-    private class BlurTask extends RecursiveAction {
+    private static class BlurTask extends RecursiveAction {
         private static final int THRESHOLD = 128; // 最小处理单位
         private final int[] src, dest;
         private final int width, height, kernelSize, start, end;

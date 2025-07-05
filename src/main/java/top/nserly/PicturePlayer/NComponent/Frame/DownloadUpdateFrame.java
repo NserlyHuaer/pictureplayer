@@ -36,7 +36,7 @@ public class DownloadUpdateFrame extends JFrame {
         downloadUpdateFrame = this;
         setContentPane(Main);
         StringFormation formation = new StringFormation(Title.getText());
-        formation.add("top/nserly/PicturePlayer/Version", update.NewVersionName);
+        formation.add("Version", update.NewVersionName);
         formation.add("VersionID", String.valueOf(update.NewVersionID));
         Title.setText(formation.getProcessingString());
         downloadUpdate = update;
@@ -48,7 +48,7 @@ public class DownloadUpdateFrame extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                int choose = JOptionPane.showConfirmDialog(downloadUpdateFrame, Bundle.getMessage("CancelUpdate_Content"), Bundle.getMessage("CancelUpdate_Title"), JOptionPane.ERROR_MESSAGE);
+                int choose = JOptionPane.showConfirmDialog(downloadUpdateFrame, Bundle.getMessage("CancelUpdate_Content"), Bundle.getMessage("CancelUpdate_Title"), JOptionPane.YES_NO_OPTION);
                 if (choose == JOptionPane.OK_OPTION) {
                     downloadUpdate.stopToUpdate();
                     GUIStarter.main.setVisible(true);
@@ -67,7 +67,7 @@ public class DownloadUpdateFrame extends JFrame {
     public void setVisible(boolean b) {
         if (b && !isVisible()) {
             AdvancedDownloadSpeed advancedDownloadSpeed = new AdvancedDownloadSpeed(downloadUpdate, TotalProgress, CurrentProgress, SpeedLabel, DownloadCounting);
-            Point location = WindowLocation.ComponentCenter(GUIStarter.main, getWidth(), getHeight());
+            Point location = WindowLocation.componentCenter(GUIStarter.main, getWidth(), getHeight());
             setLocation(location);
         }
         GUIStarter.main.setVisible(!b);
@@ -202,4 +202,5 @@ public class DownloadUpdateFrame extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return Main;
     }
+
 }

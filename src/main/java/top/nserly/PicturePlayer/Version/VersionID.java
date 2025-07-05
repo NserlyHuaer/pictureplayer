@@ -58,7 +58,7 @@ public class VersionID {
     //还原含有特殊字段的字符串原本的字符串
     public static String getString(String str, HashMap<String, String> SpecialFields) {
         StringFormation formation = new StringFormation(str);
-        formation.RemoveAndAdd(SpecialFields);
+        formation.removeAndAdd(SpecialFields);
         return formation.getProcessingString();
     }
 }

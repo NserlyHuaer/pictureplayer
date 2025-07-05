@@ -73,7 +73,7 @@ public class ConfirmUpdateDialog extends JDialog {
     public void setVisible(boolean b) {
         if (b) {
             pack();
-            Point location = WindowLocation.ComponentCenter(GUIStarter.main, getWidth(), getHeight());
+            Point location = WindowLocation.componentCenter(GUIStarter.main, getWidth(), getHeight());
             setLocation(location);
         }
         super.setVisible(b);
@@ -239,4 +239,5 @@ public class ConfirmUpdateDialog extends JDialog {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
+
 }

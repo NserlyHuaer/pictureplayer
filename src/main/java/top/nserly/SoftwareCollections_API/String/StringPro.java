@@ -42,7 +42,7 @@ public final class StringPro implements Cloneable {
     }
 
     public void appendLn(Object object) {
-        str.append(object + "\n");
+        str.append(object).append("\n");
     }
 
     public String toString() {
@@ -57,10 +57,15 @@ public final class StringPro implements Cloneable {
         return str.hashCode();
     }
 
+    @Override
     public boolean equals(Object object) {
-        if (object instanceof StringBuffer str) {
-            return str.equals(str);
+        if (this == object) {
+            return true;
         }
-        return false;
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        StringBuffer str = ((StringPro) object).toStringBuffer();
+        return this.toString().contentEquals(str);
     }
 }
