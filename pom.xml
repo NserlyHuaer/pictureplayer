@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.nserly</groupId>
+    <groupId>top.nserly</groupId>
     <artifactId>PicturePlayer</artifactId>
     <version>1.0-SNAPSHOT</version>
 
@@ -13,12 +13,12 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gson.version>2.13.1</gson.version>
-        <log4j.version>2.25.0</log4j.version>
-        <slf4j.version>2.0.17</slf4j.version>
         <oshi.version>6.8.2</oshi.version>
         <imageio.version>3.12.0</imageio.version>
         <thumbnailator.version>0.4.20</thumbnailator.version>
         <forms_rt.version>142.1</forms_rt.version>
+        <log4j.version>2.25.0</log4j.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <lombox.version>1.18.38</lombox.version>
     </properties>
 
