@@ -1,12 +1,13 @@
 package top.nserly.SoftwareCollections_API.DownloadFile;
 
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,8 +16,8 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * 多线程文件下载器，支持断点续传、速度计算和智能重命名
  */
+@Slf4j
 public class FileDownloader implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(FileDownloader.class);
     private int redirectCount = 0;
     private static final int MAX_REDIRECTS = 5;
 
@@ -49,6 +50,7 @@ public class FileDownloader implements Runnable {
     private long lastBytesRecord;
 
     //下载报错控制
+    @Setter
     private DownloadErrorHandler downloadErrorHandler;
 
     public FileDownloader(String sourceUrl, String saveDirectory) {
@@ -59,10 +61,6 @@ public class FileDownloader implements Runnable {
         this.sourceUrl = sourceUrl;
         this.saveDirectory = normalizeDirectoryPath(saveDirectory);
         createSaveDirectory();
-        this.downloadErrorHandler = downloadErrorHandler;
-    }
-
-    public void setDownloadErrorHandler(DownloadErrorHandler downloadErrorHandler) {
         this.downloadErrorHandler = downloadErrorHandler;
     }
 
@@ -131,7 +129,7 @@ public class FileDownloader implements Runnable {
         HttpURLConnection connection = createConnection(true);
         try {
             if (connection.getResponseCode() != HttpURLConnection.HTTP_PARTIAL) {
-                logger.warn("Server doesn't support resume, restarting download");
+                log.warn("Server doesn't support resume, restarting download");
                 resetDownload();
                 startNewDownload();
                 return;
@@ -157,7 +155,7 @@ public class FileDownloader implements Runnable {
 
             while ((readBytes = bis.read(buffer)) != -1) {
                 if (isStopped.get()) {
-                    logger.info("Download stopped by user");
+                    log.info("Download stopped by user");
                     return;
                 }
 
@@ -176,7 +174,7 @@ public class FileDownloader implements Runnable {
         int retry = 0;
         while (retry++ < 3) {
             try {
-                URL url = new URL(sourceUrl);
+                URL url = URL.of(URI.create(sourceUrl), null);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setConnectTimeout(CONNECT_TIMEOUT);
                 connection.setReadTimeout(READ_TIMEOUT);
@@ -188,7 +186,7 @@ public class FileDownloader implements Runnable {
                 return connection;
             } catch (IOException e) {
                 if (retry == 3) throw e;
-                logger.warn("Connection failed, retrying... ({}/3)", retry);
+                log.warn("Connection failed, retrying... ({}/3)", retry);
 
 
             }
@@ -213,7 +211,7 @@ public class FileDownloader implements Runnable {
         // 获取文件大小
         this.fileSize = connection.getContentLengthLong();
         if (fileSize == -1) {
-            logger.warn("File size unknown, progress tracking limited");
+            log.warn("File size unknown, progress tracking limited");
         }
     }
 
@@ -298,7 +296,7 @@ public class FileDownloader implements Runnable {
         }
 
         isCompleted.set(true);
-        logger.info("Download completed: {}", finalFile.getAbsolutePath());
+        log.info("Download completed: {}", finalFile.getAbsolutePath());
 
 
     }
@@ -307,9 +305,9 @@ public class FileDownloader implements Runnable {
      * 处理下载错误
      */
     private void handleDownloadError(IOException e) {
-        logger.error("Download failed: {}", e.getMessage());
+        log.error("Download failed: {}", e.getMessage());
         if (e instanceof FileNotFoundException) {
-            logger.error("File not found on server");
+            log.error("File not found on server");
         }
     }
 
@@ -319,7 +317,7 @@ public class FileDownloader implements Runnable {
     private void cleanResources() {
         if (isStopped.get() && !isCompleted.get()) {
             new File(tempFilePath).delete();
-            logger.info("Cleaned temp file");
+            log.info("Cleaned temp file");
         }
     }
 
@@ -360,7 +358,7 @@ public class FileDownloader implements Runnable {
 
         // 更新下载URL并重新开始
         this.sourceUrl = newUrl;
-        logger.info("检测到重定向到: {}", newUrl);
+        log.info("检测到重定向到: {}", newUrl);
         startNewDownload();
     }
 
@@ -397,12 +395,12 @@ public class FileDownloader implements Runnable {
      */
     private String getFileNameFromUrl() {
         try {
-            URL url = new URL(sourceUrl);
+            URL url = URL.of(URI.create(sourceUrl), null);
             String path = url.getPath();
             int slashIndex = path.lastIndexOf('/');
             return slashIndex == -1 ? path : path.substring(slashIndex + 1);
         } catch (MalformedURLException e) {
-            logger.error("Invalid URL format: {}", sourceUrl, e);
+            log.error("Invalid URL format: {}", sourceUrl, e);
             return "unknown_file";
         }
     }

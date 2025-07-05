@@ -83,5 +83,4 @@ public class FullScreenFrame extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
-
 }

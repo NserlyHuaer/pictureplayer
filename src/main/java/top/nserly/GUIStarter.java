@@ -51,17 +51,6 @@ public class GUIStarter extends JFrame {
     //初始化
     public static final Init<String, String> init;
     public static GUIStarter main;
-
-    //静态代码块
-    static {
-        //初始化Init
-        init = new Init<String, String>();
-        init.SetUpdate(true);
-        ExceptionHandler.setUncaughtExceptionHandler(log);
-        log.info("The software starts running...");
-        System.setProperty("sun.java2d.opengl", "true");
-    }
-
     private JPanel panel1;
     private JTabbedPane tabbedPane1;
     private JCheckBox EnableConfirmExitCheckBox;
@@ -157,6 +146,16 @@ public class GUIStarter extends JFrame {
             }
         }
     };
+
+    //静态代码块
+    static {
+        //初始化Init
+        init = new Init<String, String>();
+        init.SetUpdate(true);
+        ExceptionHandler.setUncaughtExceptionHandler(log);
+        log.info("The software starts running...");
+        System.setProperty("sun.java2d.opengl", "true");
+    }
 
     public GUIStarter(String title) {
         super(title);
@@ -653,6 +652,96 @@ public class GUIStarter extends JFrame {
     }
 
 
+    //代理服务器更改
+    public void setProxyServerOfInit(String ProxyServerAddress) {
+        if (ProxyServerAddress == null || ProxyServerAddress.trim().isEmpty()) return;
+        ProxyServerAddress = ProxyServerAddress.trim();
+        if (ProxyServerAddress.equals(centre.CurrentData.get("ProxyServer"))) return;
+        if (!ProxyServerAddress.equals("proxy server address") && !ProxyServerAddress.isEmpty()) {
+            init.ChangeValue("ProxyServer", ProxyServerAddress);
+            setProxyServerOfInit();
+            log.info("To enable a new proxy server:{}", ProxyServerAddress);
+            EnableProxyServerCheckBox.setSelected(true);
+            ProxyServerButton.setVisible(true);
+            ProxyServerLabel.setVisible(true);
+            centre.CurrentData.replace("ProxyServer", ProxyServerAddress);
+            ProxyServerLabel.setText(Bundle.getMessage("ProxyServerLabel") + centre.CurrentData.get("ProxyServer"));
+            JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("ProxyServerWasModified_Content"), Bundle.getMessage("ProxyServerWasModified_Title"), JOptionPane.YES_NO_OPTION);
+            SettingRevised(true);
+        }
+    }
+
+    public void reviewPictureList(ArrayList<String> picturePath) {
+        ArrayList<String> cached = (ArrayList<String>) picturePath.clone();
+        //移走所有已在列表中的图片路径
+        cached.removeAll(thumbnailPreviewOfImages.keySet());
+
+        ArrayList<String> removed = new ArrayList<>();
+
+        //移走所有当前列表中的图片路径不在当前显示列表
+        for (String currentBufferedPicturePath : thumbnailPreviewOfImages.keySet()) {
+            if (!picturePath.contains(currentBufferedPicturePath)) {
+                FileChoosePane.remove(thumbnailPreviewOfImages.get(currentBufferedPicturePath));
+                removed.add(currentBufferedPicturePath);
+            }
+        }
+        removed.forEach(thumbnailPreviewOfImages::remove);
+
+        //创建当前显示列表没有的图片
+        for (String path : cached) {
+            ThumbnailPreviewOfImage thumbnailPreviewOfImage = null;
+            try {
+                thumbnailPreviewOfImage = new ThumbnailPreviewOfImage(path);
+            } catch (IOException e) {
+                log.error(ExceptionHandler.getExceptionMessage(e));
+                picturePath.remove(path);
+                continue;
+            }
+            FileChoosePane.add(thumbnailPreviewOfImage);
+            thumbnailPreviewOfImages.put(path, thumbnailPreviewOfImage);
+        }
+        FileChoosePane.revalidate();
+        FileChoosePane.repaint();
+    }
+
+    private File checkFileOpen(CheckFileIsRightPictureType checkFileIsRightPictureType, boolean isMakeSure) {
+        checkFileIsRightPictureType.statistics();
+        if (checkFileIsRightPictureType.getNotImageCount() != 0) {
+            JOptionPane.showMessageDialog(GUIStarter.main, Bundle.getMessage("OpenPictureError_Content") + "\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", Bundle.getMessage("OpenPictureError_Title"), JOptionPane.ERROR_MESSAGE);
+        }
+        if (checkFileIsRightPictureType.getImageCount() == 0) return null;
+        File choose;
+        if (checkFileIsRightPictureType.getImageCount() == 1) {
+            choose = checkFileIsRightPictureType.getImageList().getFirst();
+            String choose_hashcode = GetImageInformation.getHashcode(choose);
+            if (GUIStarter.main.paintPicture != null && !GUIStarter.main.paintPicture.isOnlyInit) {
+                if (choose_hashcode == null && paintPicture.imageCanvas.getPicture_hashcode() == null) {
+                    log.warn("Couldn't get current or opening picture hashcode,this will fake the judgment file path");
+                    if (!new File(GUIStarter.main.paintPicture.imageCanvas.getPath()).equals(choose)) return null;
+                } else if (Objects.equals(choose_hashcode, paintPicture.imageCanvas.getPicture_hashcode()))
+                    return REPEAT_PICTURE_PATH_LOGOTYPE;
+                if (isMakeSure && JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("OpenPictureExactly_Content") + "\n\"" + choose.getPath() + "\"", Bundle.getMessage("OpenPictureExactly_Title"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+                    return REPEAT_PICTURE_PATH_LOGOTYPE;
+            }
+        } else {
+            choose = OpenImageChooser.openImageWithChoice(GUIStarter.main, checkFileIsRightPictureType.getImageList());
+        }
+        return choose;
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
+    }
+
+    //检查文件打开
+    private File checkFileOpen(boolean isMakeSure, File... files) {
+        return checkFileOpen(new CheckFileIsRightPictureType(files), isMakeSure);
+    }
+
+    private File checkFileOpen(List<File> files, boolean isMakeSure) {
+        return checkFileOpen(new CheckFileIsRightPictureType(files), isMakeSure);
+    }
+
     /**
      * Method generated by IntelliJ IDEA GUI Designer
      * >>> IMPORTANT!! <<<
@@ -1026,96 +1115,5 @@ public class GUIStarter extends JFrame {
     public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
-
-    //代理服务器更改
-    public void setProxyServerOfInit(String ProxyServerAddress) {
-        if (ProxyServerAddress == null || ProxyServerAddress.trim().isEmpty()) return;
-        ProxyServerAddress = ProxyServerAddress.trim();
-        if (ProxyServerAddress.equals(centre.CurrentData.get("ProxyServer"))) return;
-        if (!ProxyServerAddress.equals("proxy server address") && !ProxyServerAddress.isEmpty()) {
-            init.ChangeValue("ProxyServer", ProxyServerAddress);
-            setProxyServerOfInit();
-            log.info("To enable a new proxy server:{}", ProxyServerAddress);
-            EnableProxyServerCheckBox.setSelected(true);
-            ProxyServerButton.setVisible(true);
-            ProxyServerLabel.setVisible(true);
-            centre.CurrentData.replace("ProxyServer", ProxyServerAddress);
-            ProxyServerLabel.setText(Bundle.getMessage("ProxyServerLabel") + centre.CurrentData.get("ProxyServer"));
-            JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("ProxyServerWasModified_Content"), Bundle.getMessage("ProxyServerWasModified_Title"), JOptionPane.YES_NO_OPTION);
-            SettingRevised(true);
-        }
-    }
-
-    public void reviewPictureList(ArrayList<String> picturePath) {
-        ArrayList<String> cached = (ArrayList<String>) picturePath.clone();
-        //移走所有已在列表中的图片路径
-        cached.removeAll(thumbnailPreviewOfImages.keySet());
-
-        ArrayList<String> removed = new ArrayList<>();
-
-        //移走所有当前列表中的图片路径不在当前显示列表
-        for (String currentBufferedPicturePath : thumbnailPreviewOfImages.keySet()) {
-            if (!picturePath.contains(currentBufferedPicturePath)) {
-                FileChoosePane.remove(thumbnailPreviewOfImages.get(currentBufferedPicturePath));
-                removed.add(currentBufferedPicturePath);
-            }
-        }
-        removed.forEach(thumbnailPreviewOfImages::remove);
-
-        //创建当前显示列表没有的图片
-        for (String path : cached) {
-            ThumbnailPreviewOfImage thumbnailPreviewOfImage = null;
-            try {
-                thumbnailPreviewOfImage = new ThumbnailPreviewOfImage(path);
-            } catch (IOException e) {
-                log.error(ExceptionHandler.getExceptionMessage(e));
-                picturePath.remove(path);
-                continue;
-            }
-            FileChoosePane.add(thumbnailPreviewOfImage);
-            thumbnailPreviewOfImages.put(path, thumbnailPreviewOfImage);
-        }
-        FileChoosePane.revalidate();
-        FileChoosePane.repaint();
-    }
-
-    private File checkFileOpen(CheckFileIsRightPictureType checkFileIsRightPictureType, boolean isMakeSure) {
-        checkFileIsRightPictureType.statistics();
-        if (checkFileIsRightPictureType.getNotImageCount() != 0) {
-            JOptionPane.showMessageDialog(GUIStarter.main, Bundle.getMessage("OpenPictureError_Content") + "\n\"" + checkFileIsRightPictureType.FilePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", Bundle.getMessage("OpenPictureError_Title"), JOptionPane.ERROR_MESSAGE);
-        }
-        if (checkFileIsRightPictureType.getImageCount() == 0) return null;
-        File choose;
-        if (checkFileIsRightPictureType.getImageCount() == 1) {
-            choose = checkFileIsRightPictureType.getImageList().getFirst();
-            String choose_hashcode = GetImageInformation.getHashcode(choose);
-            if (GUIStarter.main.paintPicture != null && !GUIStarter.main.paintPicture.isOnlyInit) {
-                if (choose_hashcode == null && paintPicture.imageCanvas.getPicture_hashcode() == null) {
-                    log.warn("Couldn't get current or opening picture hashcode,this will fake the judgment file path");
-                    if (!new File(GUIStarter.main.paintPicture.imageCanvas.getPath()).equals(choose)) return null;
-                } else if (Objects.equals(choose_hashcode, paintPicture.imageCanvas.getPicture_hashcode()))
-                    return REPEAT_PICTURE_PATH_LOGOTYPE;
-                if (isMakeSure && JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("OpenPictureExactly_Content") + "\n\"" + choose.getPath() + "\"", Bundle.getMessage("OpenPictureExactly_Title"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
-                    return REPEAT_PICTURE_PATH_LOGOTYPE;
-            }
-        } else {
-            choose = OpenImageChooser.openImageWithChoice(GUIStarter.main, checkFileIsRightPictureType.getImageList());
-        }
-        return choose;
-    }
-
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
-    }
-
-    //检查文件打开
-    private File checkFileOpen(boolean isMakeSure, File... files) {
-        return checkFileOpen(new CheckFileIsRightPictureType(files), isMakeSure);
-    }
-
-    private File checkFileOpen(List<File> files, boolean isMakeSure) {
-        return checkFileOpen(new CheckFileIsRightPictureType(files), isMakeSure);
-    }
-
 
 }

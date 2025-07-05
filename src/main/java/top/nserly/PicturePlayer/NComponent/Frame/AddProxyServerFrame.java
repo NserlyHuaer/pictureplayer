@@ -248,5 +248,4 @@ public class AddProxyServerFrame extends JDialog {
     public JComponent $$$getRootComponent$$$() {
         return contentPane;
     }
-
 }
