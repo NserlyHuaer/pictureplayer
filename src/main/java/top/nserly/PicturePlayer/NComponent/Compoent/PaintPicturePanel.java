@@ -642,7 +642,8 @@ public class PaintPicturePanel extends JPanel {
         }
 
         public void changePicturePath(String path, String picture_hashcode) {
-            BufferedImage image = PictureInformationStorageManagement.getImage(pictureInformationStorageManagement.getCachedPicturePath(path, picture_hashcode));
+            BufferedImage image = PictureInformationStorageManagement.getImage(
+                    pictureInformationStorageManagement.getCachedPicturePath(path, picture_hashcode));
             changePicturePath(image, path, picture_hashcode);
         }
 
@@ -687,7 +688,8 @@ public class PaintPicturePanel extends JPanel {
 
         public void close() {
             removeAll();
-            try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream("data/PictureCacheManagement.obj"))) {
+            try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+                    new FileOutputStream("data/PictureCacheManagement.obj"))) {
                 objectOutputStream.writeObject(pictureInformationStorageManagement);
                 objectOutputStream.flush();
             } catch (IOException e) {
@@ -768,7 +770,9 @@ public class PaintPicturePanel extends JPanel {
 
         @Override
         public synchronized void paint(Graphics g) {
-            if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0 || (LastPercent == sizeOperate.getPercent() && RotationDegrees == LastPercent && !isMove && lastPath.equals(path)) || getImageWidth() == 0 || getImageHeight() == 0) {
+            if (NewWindow == null || NewWindow.width == 0 || NewWindow.height == 0
+                    || (LastPercent == sizeOperate.getPercent() && RotationDegrees == LastPercent
+                    && !isMove && lastPath.equals(path)) || getImageWidth() == 0 || getImageHeight() == 0) {
                 g.dispose();
                 g = null;
                 return;
@@ -823,7 +827,8 @@ public class PaintPicturePanel extends JPanel {
             LastWindowWidth = LastWindow.getWidth();
             LastWindowHeight = LastWindow.getHeight();
             //判断是否为移动（若移动，则执行本代码）;窗体、图片缩放比例相比于之前是否存在改变（如果没有，则执行本代码）
-            if (isMove && RotationDegrees == lastRotationDegrees && LastPercent == sizeOperate.getPercent() && LastWindow != null && LastWindow.equals(NewWindow)) {
+            if (isMove && RotationDegrees == lastRotationDegrees && LastPercent == sizeOperate.getPercent()
+                    && LastWindow != null && LastWindow.equals(NewWindow)) {
                 X += mouseX;
                 Y += mouseY;
                 if (RotationDegrees == 0) {
@@ -862,7 +867,8 @@ public class PaintPicturePanel extends JPanel {
             //判断图片缩放比例是否与上次相同
             if (RotationDegrees != lastRotationDegrees) {
                 sizeOperate.setPercent(sizeOperate.getPictureOptimalSize());
-                Point point = ImageRotationHelper.getRotatedCord((int) FinalX, (int) FinalY, 360 - 90 * RotationDegrees, (int) lastWidth, (int) lastHeight);
+                Point point = ImageRotationHelper.getRotatedCord((int) FinalX, (int) FinalY,
+                        360 - 90 * RotationDegrees, (int) lastWidth, (int) lastHeight);
                 FinalX = point.getX();
                 FinalY = point.getY();
             }
@@ -899,10 +905,12 @@ public class PaintPicturePanel extends JPanel {
             double height = width * getImageHeight() / getImageWidth();
             sizeOperate.setPercent(width * 100.0 / getImageWidth());
 
-            if (RotationDegrees % 2 == 0 && NewWindow != null && NewWindow.equals(LastWindow) && lastWidth != 0 && lastHeight != 0) {
+            if (RotationDegrees % 2 == 0 && NewWindow != null && NewWindow.equals(LastWindow)
+                    && lastWidth != 0 && lastHeight != 0) {
                 FinalX = width * (FinalX - mouseX) / lastWidth + mouseX;
                 FinalY = height * (FinalY - mouseY) / lastHeight + mouseY;
-            } else if (RotationDegrees % 2 == 1 && NewWindow != null && NewWindow.equals(LastWindow) && lastWidth != 0 && lastHeight != 0) {
+            } else if (RotationDegrees % 2 == 1 && NewWindow != null && NewWindow.equals(LastWindow)
+                    && lastWidth != 0 && lastHeight != 0) {
                 FinalX = height * (FinalX - mouseX) / lastHeight + mouseX;
                 FinalY = width * (FinalY - mouseY) / lastWidth + mouseY;
             }
@@ -1030,7 +1038,8 @@ public class PaintPicturePanel extends JPanel {
                 log.warn("Couldn't get Mouse Information");
             }
             Robot finalRobot = robot;
-            Image image = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(0, 0, new int[0], 0, 0));
+            Image image = Toolkit.getDefaultToolkit().createImage(
+                    new MemoryImageSource(0, 0, new int[0], 0, 0));
             final boolean[] EnableCursorDisplay = new boolean[1];
             addMouseListener(new MouseAdapter() {
                 //鼠标一按下就触发
@@ -1038,11 +1047,13 @@ public class PaintPicturePanel extends JPanel {
                 public void mousePressed(MouseEvent e) {
                     if (e.getButton() != MouseEvent.BUTTON1) return;
                     op = new OperatingCoordinate(e.getX(), e.getY());
-                    EnableCursorDisplay[0] = SettingsInfoHandle.getBoolean("EnableCursorDisplay", GUIStarter.main.centre.CurrentData);
+                    EnableCursorDisplay[0] = SettingsInfoHandle.getBoolean("EnableCursorDisplay",
+                            GUIStarter.main.centre.CurrentData);
                     if (EnableCursorDisplay[0]) return;
                     setCursor(Toolkit.getDefaultToolkit().createCustomCursor(image, new Point(0, 0), null));
                     mouseLocation = MouseInfo.getPointerInfo().getLocation();
-                    if (ShowingSize != null && LocationOnScreen != null && ShowingSize.equals(sizeOperate.getWindowSize()) && LocationOnScreen.equals(imageCanvas.getLocationOnScreen()))
+                    if (ShowingSize != null && LocationOnScreen != null && ShowingSize.equals(sizeOperate.getWindowSize())
+                            && LocationOnScreen.equals(imageCanvas.getLocationOnScreen()))
                         return;
                     LocationOnScreen = imageCanvas.getLocationOnScreen();
                     ShowingSize = sizeOperate.getWindowSize();
@@ -1104,7 +1115,10 @@ public class PaintPicturePanel extends JPanel {
                         }
                     }
                     //增加坐标值
-                    imageCanvas.setMouseCoordinate((int) ((1 + SettingsInfoHandle.getDouble("MouseMoveOffsets", GUIStarter.main.centre.CurrentData) / 100.0) * (x - op.x())), (int) ((1 + SettingsInfoHandle.getDouble("MouseMoveOffsets", GUIStarter.main.centre.CurrentData) / 100.0) * (y - op.y())));
+                    imageCanvas.setMouseCoordinate((int) ((1 + SettingsInfoHandle.getDouble("MouseMoveOffsets",
+                            GUIStarter.main.centre.CurrentData) / 100.0) * (x - op.x())),
+                            (int) ((1 + SettingsInfoHandle.getDouble("MouseMoveOffsets",
+                                    GUIStarter.main.centre.CurrentData) / 100.0) * (y - op.y())));
                     sizeOperate.update(true);
                     op = new OperatingCoordinate(x, y);
                 }
@@ -1153,7 +1167,8 @@ public class PaintPicturePanel extends JPanel {
         }
 
         public void setFullScreen(boolean fullScreen) {
-            if (imageCanvas == null || fullScreenWindow == null || GUIStarter.main == null || sizeOperate == null || PaintPicturePanel.paintPicture == null)
+            if (imageCanvas == null || fullScreenWindow == null || GUIStarter.main == null || sizeOperate == null
+                    || PaintPicturePanel.paintPicture == null)
                 return;
             if (fullScreen == fullScreenWindow.isShowing() && fullScreen != GUIStarter.main.isShowing()) {
                 return;

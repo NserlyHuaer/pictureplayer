@@ -26,7 +26,7 @@ public class FileDownloader implements Runnable {
     private static final int CONNECT_TIMEOUT = 5_000;
     private static final int READ_TIMEOUT = 5_000;
     private static final String TEMP_SUFFIX = ".download";
-    private static final int PROGRESS_UPDATE_INTERVAL = 300; // 进度更新间隔(ms)
+    private static final int PROGRESS_UPDATE_INTERVAL = 100; // 进度更新间隔(ms)
 
     // 下载状态
     private final AtomicBoolean isStopped = new AtomicBoolean(false);
@@ -338,8 +338,8 @@ public class FileDownloader implements Runnable {
 
         if (responseCode != HttpURLConnection.HTTP_OK
                 && responseCode != HttpURLConnection.HTTP_PARTIAL) {
-            throw new IOException("无效的HTTP响应码: " + responseCode
-                    + " | 消息: " + connection.getResponseMessage());
+            throw new IOException("Invalid HTTP response code: " + responseCode
+                    + " | Messages: " + connection.getResponseMessage());
         }
     }
 
@@ -348,17 +348,17 @@ public class FileDownloader implements Runnable {
      */
     private void handleRedirect(HttpURLConnection connection) throws IOException {
         if (redirectCount++ >= MAX_REDIRECTS) {
-            throw new IOException("超过最大重定向次数 (" + MAX_REDIRECTS + ")");
+            throw new IOException("The maximum number of redirects is exceeded (" + MAX_REDIRECTS + ")");
         }
 
         String newUrl = connection.getHeaderField("Location");
         if (newUrl == null) {
-            throw new IOException("收到重定向响应但没有Location头");
+            throw new IOException("A redirect response is received but there is no Location header");
         }
 
         // 更新下载URL并重新开始
         this.sourceUrl = newUrl;
-        log.info("检测到重定向到: {}", newUrl);
+        log.info("A redirect to was detected: {}", newUrl);
         startNewDownload();
     }
 

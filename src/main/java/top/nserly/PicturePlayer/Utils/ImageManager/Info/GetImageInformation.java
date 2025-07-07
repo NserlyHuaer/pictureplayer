@@ -1,7 +1,6 @@
 package top.nserly.PicturePlayer.Utils.ImageManager.Info;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import top.nserly.PicturePlayer.Size.GetSystemSize;
 
 import javax.imageio.ImageIO;
@@ -23,9 +22,9 @@ import java.util.concurrent.Future;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+@Slf4j
 public class GetImageInformation {
     public static final boolean isHardwareAccelerated;
-    private static final Logger logger = LoggerFactory.getLogger(GetImageInformation.class);
     public static final String[] readFormats = ImageIO.getReaderFormatNames();
 
     private static final String[] SupportPictureExtension = new String[readFormats.length];
@@ -128,16 +127,16 @@ public class GetImageInformation {
                 crc.update(buffer, 0, bytesRead);
             }
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             return null;
         }
         // 补零填充至 8 位，保证格式统一
         return String.format("%08x", crc.getValue());
     }
 
-    // 算法实现：多线程获取多个文件的hashcode值（key:文件 ; value:该文件hashcode值）（ThreadCount不建议设置过多）
-    public static HashMap<String, String> getHashcode(String[] files,int ThreadCount) {
-        ExecutorService executor = Executors.newFixedThreadPool(ThreadCount);
+    // 算法实现：多线程获取多个文件的hashcode值（key:文件 ; value:该文件hashcode值）
+    public static HashMap<String, String> getHashcode(String[] files) {
+        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
         Map<String, Future<String>> futures = new HashMap<>();
 
         for (String filePath : files) {
@@ -146,7 +145,7 @@ public class GetImageInformation {
                 Future<String> future = executor.submit(() -> getHashcode(file));
                 futures.put(filePath, future);
             } else {
-                logger.warn("File does not exist or is a directory: " + filePath);
+                log.warn("File does not exist or is a directory: {}", filePath);
             }
         }
 
@@ -158,7 +157,7 @@ public class GetImageInformation {
                     results.put(entry.getKey(), hashcode);
                 }
             } catch (Exception e) {
-                logger.error("Failed to compute hashcode for file: " + entry.getKey(), e);
+                log.error("Failed to compute hashcode for file: {}", entry.getKey(), e);
             }
         }
 
@@ -180,7 +179,7 @@ public class GetImageInformation {
                 }
             }
         } catch (IOException e) {
-            logger.error("Failed to get picture type for file: " + file.getAbsolutePath(), e);
+            log.error("Failed to get picture type for file: {}", file.getAbsolutePath(), e);
         }
         return null;
     }

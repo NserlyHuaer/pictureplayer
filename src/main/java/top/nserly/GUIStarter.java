@@ -180,52 +180,6 @@ public class GUIStarter extends JFrame {
 
     private static Method $$$cachedGetBundleMethod$$$ = null;
 
-    private File checkFileOpen(CheckFileIsRightPictureType checkFileIsRightPictureType, boolean isMakeSure) {
-        checkFileIsRightPictureType.statistics();
-        if (checkFileIsRightPictureType.getNotImageCount() != 0) {
-            JOptionPane.showMessageDialog(GUIStarter.main, Bundle.getMessage("OpenPictureError_Content") + "\n\"" + checkFileIsRightPictureType.filePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", Bundle.getMessage("OpenPictureError_Title"), JOptionPane.ERROR_MESSAGE);
-        }
-        if (checkFileIsRightPictureType.getImageCount() == 0) return null;
-        File choose;
-        if (checkFileIsRightPictureType.getImageCount() == 1) {
-            choose = checkFileIsRightPictureType.getImageList().getFirst();
-            String choose_hashcode = GetImageInformation.getHashcode(choose);
-            if (GUIStarter.main.paintPicture != null && GUIStarter.main.paintPicture.imageCanvas.getPath() != null) {
-                if (choose_hashcode == null && paintPicture.imageCanvas.getPicture_hashcode() == null) {
-                    log.warn("Couldn't get current or opening picture hashcode,this will fake the judgment file path");
-                    if (!new File(GUIStarter.main.paintPicture.imageCanvas.getPath()).equals(choose)) return null;
-                } else if (Objects.equals(choose_hashcode, paintPicture.imageCanvas.getPicture_hashcode()))
-                    return REPEAT_PICTURE_PATH_LOGOTYPE;
-                if (isMakeSure && JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("OpenPictureExactly_Content") + "\n\"" + choose.getPath() + "\"", Bundle.getMessage("OpenPictureExactly_Title"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
-                    return REPEAT_PICTURE_PATH_LOGOTYPE;
-            }
-        } else {
-            choose = OpenImageChooser.openImageWithChoice(GUIStarter.main, checkFileIsRightPictureType.getImageList());
-        }
-        return choose;
-    }    private final DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
-        public void drop(DropTargetDropEvent dtde) {
-            try {
-                dtde.acceptDrop(DnDConstants.ACTION_COPY);
-                Transferable transferable = dtde.getTransferable();
-                if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                    Object obj = transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                    List<File> files = null;
-                    if (!(obj instanceof List<?>)) {
-                        throw new ClassCastException("Can't convert object:" + obj + "to object List<File>");
-                    }
-                    files = (List<File>) obj;
-                    File file = checkFileOpen(files);
-                    if (file != null) {
-                        openPicture(file.getPath());
-                    }
-                }
-            } catch (IOException | UnsupportedFlavorException e) {
-                log.error(ExceptionHandler.getExceptionMessage(e));
-            }
-        }
-    };
-
     public GUIStarter(String title) {
         super(title);
         $$$setupUI$$$();
@@ -273,6 +227,8 @@ public class GUIStarter extends JFrame {
             proxyServerChooser = new ProxyServerChooser();
             proxyServerChooser.pack();
             proxyServerChooser.setTitle(Bundle.getMessage("InputProxyServer_Title"));
+
+            CheckAndDownloadUpdate.secureConnection(EnableSecureConnectionCheckBox.isSelected());
             if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
                 CheckAndDownloadUpdate downloadUpdate = new CheckAndDownloadUpdate(UPDATE_WEBSITE);
                 new Thread(() -> {
@@ -285,6 +241,52 @@ public class GUIStarter extends JFrame {
             }
         }).start();
         PaintPicturePanel.isEnableHardwareAcceleration = Boolean.parseBoolean(init.getProperties().getProperty("EnableHardwareAcceleration")) && GetImageInformation.isHardwareAccelerated;
+    }    private final DropTargetAdapter dropTargetAdapter = new DropTargetAdapter() {
+        public void drop(DropTargetDropEvent dtde) {
+            try {
+                dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                Transferable transferable = dtde.getTransferable();
+                if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    Object obj = transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                    List<File> files = null;
+                    if (!(obj instanceof List<?>)) {
+                        throw new ClassCastException("Can't convert object:" + obj + "to object List<File>");
+                    }
+                    files = (List<File>) obj;
+                    File file = checkFileOpen(files);
+                    if (file != null) {
+                        openPicture(file.getPath());
+                    }
+                }
+            } catch (IOException | UnsupportedFlavorException e) {
+                log.error(ExceptionHandler.getExceptionMessage(e));
+            }
+        }
+    };
+
+    private File checkFileOpen(CheckFileIsRightPictureType checkFileIsRightPictureType, boolean isMakeSure) {
+        checkFileIsRightPictureType.statistics();
+        if (checkFileIsRightPictureType.getNotImageCount() != 0) {
+            JOptionPane.showMessageDialog(GUIStarter.main, Bundle.getMessage("OpenPictureError_Content") + "\n\"" + checkFileIsRightPictureType.filePathToString("\n", checkFileIsRightPictureType.getNotImageList()) + "\"", Bundle.getMessage("OpenPictureError_Title"), JOptionPane.ERROR_MESSAGE);
+        }
+        if (checkFileIsRightPictureType.getImageCount() == 0) return null;
+        File choose;
+        if (checkFileIsRightPictureType.getImageCount() == 1) {
+            choose = checkFileIsRightPictureType.getImageList().getFirst();
+            String choose_hashcode = GetImageInformation.getHashcode(choose);
+            if (GUIStarter.main.paintPicture != null && GUIStarter.main.paintPicture.imageCanvas.getPath() != null) {
+                if (choose_hashcode == null && paintPicture.imageCanvas.getPicture_hashcode() == null) {
+                    log.warn("Couldn't get current or opening picture hashcode,this will fake the judgment file path");
+                    if (!new File(GUIStarter.main.paintPicture.imageCanvas.getPath()).equals(choose)) return null;
+                } else if (Objects.equals(choose_hashcode, paintPicture.imageCanvas.getPicture_hashcode()))
+                    return REPEAT_PICTURE_PATH_LOGOTYPE;
+                if (isMakeSure && JOptionPane.showConfirmDialog(GUIStarter.main, Bundle.getMessage("OpenPictureExactly_Content") + "\n\"" + choose.getPath() + "\"", Bundle.getMessage("OpenPictureExactly_Title"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+                    return REPEAT_PICTURE_PATH_LOGOTYPE;
+            }
+        } else {
+            choose = OpenImageChooser.openImageWithChoice(GUIStarter.main, checkFileIsRightPictureType.getImageList());
+        }
+        return choose;
     }
 
     private static void closeInformation() {
@@ -496,13 +498,10 @@ public class GUIStarter extends JFrame {
             tabbedPane1.addChangeListener(e -> {
                 request();
                 if (tabbedPane1.getSelectedIndex() == 3) {
-                    future = executor.scheduleAtFixedRate(new Runnable() {
-                        @Override
-                        public void run() {
-                            SystemMonitor.getInformation();
-                            MemUsed.setText(JmemI + SystemMonitor.convertSize(SystemMonitor.JVM_Used_Memory) + "/" + SystemMonitor.convertSize(SystemMonitor.JVM_Maximum_Free_Memory) + "(" + SystemMonitor.JVM_Memory_Usage + "%" + ")");
-                            TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
-                        }
+                    future = executor.scheduleAtFixedRate(() -> {
+                        SystemMonitor.getInformation();
+                        MemUsed.setText(JmemI + SystemMonitor.convertSize(SystemMonitor.JVM_Used_Memory) + "/" + SystemMonitor.convertSize(SystemMonitor.JVM_Maximum_Free_Memory) + "(" + SystemMonitor.JVM_Memory_Usage + "%" + ")");
+                        TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
                     }, 0, 2, TimeUnit.SECONDS);
                 } else {
                     if (future != null) future.cancel(false);

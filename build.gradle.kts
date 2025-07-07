@@ -4,6 +4,7 @@
  * This project uses @Incubating APIs which are subject to change.
  */
 
+apply(from = "$rootDir/versionsPlugin.gradle")
 plugins {
     `java-library`
     `maven-publish`

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -181,34 +180,23 @@ public class CheckAndDownloadUpdate {
     }
 
     public static void secureConnection(boolean Enable) {
-        if (EnableSecureConnection == Enable) {
+        if (EnableSecureConnection != Enable) {
             if (!Enable) {
-                //创建一个自定义的TrustManager，它接受所有证书
-                TrustManager[] trustManagers = new TrustManager[]{new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                    }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                    }
-
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[]{};
-                    }
-                }};
+                TrustManager[] trustAllCerts = new TrustManager[] {
+                        new X509TrustManager() {
+                            public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                            public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                            public X509Certificate[] getAcceptedIssuers() { return null; }
+                        }
+                };
                 try {
-                    //初始化SSLConText
-                    SSLContext sc = SSLContext.getInstance("TLS");
-                    sc.init(null, trustManagers, new SecureRandom());
-                    //获取默认的SSLSocketFactory,并设置为信任所有证书
-                    SSLSocketFactory ssf = sc.getSocketFactory();
-                    HttpsURLConnection.setDefaultSSLSocketFactory(ssf);
-                } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                    logger.error(e.getMessage());
-                    return;
+                    SSLContext sslContext = SSLContext.getInstance("TLS");
+                    sslContext.init(null, trustAllCerts, new SecureRandom());
+                    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+                } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
                 }
+                HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
                 logger.warn("SSL validation is turned off and your computer may be vulnerable!");
             } else {
                 try {
