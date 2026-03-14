@@ -22,6 +22,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import top.nserly.GUIStarter;
 import top.nserly.SoftwareCollections_API.OSInformation.SystemMonitor;
 import top.nserly.SoftwareCollections_API.Queue.ThreadPoolTaskQueue;
+import top.nserly.SoftwareCollections_API.Thread.ThreadControl;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,7 +32,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -42,17 +45,17 @@ public class ThumbnailPreviewOfImage extends JComponent {
     private static final ThreadPoolTaskQueue loadingPictureTaskQueue =
             new ThreadPoolTaskQueue(
                     SystemMonitor.CPU_Physical_Core_Count,
-                    SystemMonitor.CPU_Logical_Thread_Count
+                    SystemMonitor.CPU_Logical_Thread_Count,
+                    true
             );
 
     static {
         // 定期清理失效缓存（避免缓存膨胀）
-        try (ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor()) {
-            scheduler.scheduleAtFixedRate(() -> {
-                THUMBNAIL_CACHE.entrySet().removeIf(entry -> entry.getValue().get() == null);
-                log.debug("Clean up the invalid thumbnail cache, the current cache size: {}", THUMBNAIL_CACHE.size());
-            }, 5, 5, TimeUnit.MINUTES); // 每5分钟清理一次
-        }
+        ThreadControl.virtualThreadsController.executePeriodically("ThumbnailPreviewOfImage_ClenupThumnailCache",
+                () -> {
+                    THUMBNAIL_CACHE.entrySet().removeIf(entry -> entry.getValue().get() == null);
+                    log.debug("Clean up the invalid thumbnail cache, the current cache size: {}", THUMBNAIL_CACHE.size());
+                }, 5, 5, TimeUnit.MINUTES);// 每5分钟清理一次
     }
 
     private final MouseAdapter mouseAdapter;
@@ -133,7 +136,7 @@ public class ThumbnailPreviewOfImage extends JComponent {
     // 判断所有图片是否加载完毕
     public static boolean isCompleteLoading() {
         // 正确逻辑： 无活跃线程 且 无等待任务
-        return  loadingPictureTaskQueue.getActiveThreadCount() == 0
+        return loadingPictureTaskQueue.getActiveThreadCount() == 0
                 && loadingPictureTaskQueue.getPendingTaskCount() == 0;
     }
 
@@ -144,6 +147,7 @@ public class ThumbnailPreviewOfImage extends JComponent {
 
     /**
      * 等待图片加载完毕（带超时机制）
+     *
      * @param timeout 最大等待时间（毫秒），0表示无限等待
      * @return 若加载完成返回true，超时返回false
      * @throws InterruptedException 若线程被中断则抛出

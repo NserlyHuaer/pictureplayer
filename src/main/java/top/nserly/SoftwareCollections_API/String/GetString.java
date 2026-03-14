@@ -19,13 +19,10 @@ package top.nserly.SoftwareCollections_API.String;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 public class GetString {
-    private static final ExecutorService executor = Executors.newCachedThreadPool();
-    private static final byte[] bytes = new byte[102400];
+    private static final byte[] bytes = new byte[10240];
 
     // 保持原始方法不变，以便兼容现有代码
     public static String getString(InputStream inputStream) {

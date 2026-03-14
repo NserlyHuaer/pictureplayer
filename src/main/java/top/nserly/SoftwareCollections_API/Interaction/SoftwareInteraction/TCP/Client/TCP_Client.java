@@ -127,6 +127,10 @@ public class TCP_Client {
         socket.getOutputStream().flush();
     }
 
+    public void sendln(String message) throws IOException {
+        send(message + "\n");
+    }
+
     public void close() throws IOException {
         t.interrupt();
         t = null;
@@ -142,7 +146,7 @@ public class TCP_Client {
         interaction.setReceviceSoftwareNameInformationAction(future::complete);
 
         // 发送请求
-        send("{getSoftwareName}");
+        sendln("{getSoftwareName}");
 
         // 等待 future 完成并获取结果
         return future.get(5, java.util.concurrent.TimeUnit.SECONDS);

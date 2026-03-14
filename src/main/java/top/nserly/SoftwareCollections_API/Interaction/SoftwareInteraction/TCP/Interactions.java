@@ -20,12 +20,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import top.nserly.SoftwareCollections_API.Handler.Exception.ExceptionHandler;
+import top.nserly.SoftwareCollections_API.Interaction.SoftwareInteraction.TCP.Server.TCP_ServerSocket;
 import top.nserly.SoftwareCollections_API.String.GetString;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -40,11 +41,15 @@ public abstract class Interactions implements Callable<Integer> {
     public ReceviceSoftwareNameInformationAction receviceSoftwareNameInformationAction;
     private long ms;
     private int tryCount = 0;
-    public ArrayList<Socket> ClientSockets = null;
+    public List<Socket> ClientSockets = null;
 
-    public Interactions(Socket socket, ArrayList<Socket> ClientSockets) {
+    public Interactions(Socket socket, List<Socket> ClientSockets) {
         this.socket = socket;
         this.ClientSockets = ClientSockets;
+    }
+
+    public Interactions(Socket socket) {
+        this.socket = socket;
     }
 
     /**
@@ -57,10 +62,10 @@ public abstract class Interactions implements Callable<Integer> {
      */
     public static Interactions getInstance(Class<? extends Interactions> interactions,
                                            Socket socket,
-                                           ArrayList<Socket> ClientSockets) {
+                                           List<Socket> ClientSockets) {
         try {
             Constructor<? extends Interactions> constructor =
-                    interactions.getDeclaredConstructor(Socket.class, ArrayList.class);
+                    interactions.getDeclaredConstructor(Socket.class, List.class);
 
             constructor.setAccessible(true);
 
@@ -125,9 +130,12 @@ public abstract class Interactions implements Callable<Integer> {
     }
 
     private int internalInformationProcessing() throws Exception {
+        return internalInformationProcessing(sendMessage);
+    }
+
+    public int internalInformationProcessing(String sendMessage) throws Exception {
         if (sendMessage.equals("{getSoftwareName}")) {
-            socket.getOutputStream().write(("{SoftwareName} " + System.getProperty("SoftwareName")).getBytes());
-            socket.getOutputStream().flush();
+            TCP_ServerSocket.send(socket, "{SoftwareName} " + System.getProperty("SoftwareName") + "\n");
             return 0;
         } else if (sendMessage.startsWith("{SoftwareName} ")) {
             if (receviceSoftwareNameInformationAction != null) {

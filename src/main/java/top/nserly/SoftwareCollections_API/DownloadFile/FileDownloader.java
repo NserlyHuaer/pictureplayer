@@ -19,6 +19,7 @@ package top.nserly.SoftwareCollections_API.DownloadFile;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import top.nserly.SoftwareCollections_API.Thread.ThreadControl;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -94,7 +95,7 @@ public class FileDownloader implements Runnable {
      * 在新线程中启动下载任务
      */
     public void startDownloadInNewThread() {
-        new Thread(this).start();
+        ThreadControl.virtualThreadsController.executeImmediately(this.toString(),this);
     }
 
     /**

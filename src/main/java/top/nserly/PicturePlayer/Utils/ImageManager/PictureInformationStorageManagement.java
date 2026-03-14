@@ -21,17 +21,12 @@ import top.nserly.PicturePlayer.Loading.Init;
 import top.nserly.PicturePlayer.Utils.ImageManager.Info.GetImageInformation;
 import top.nserly.SoftwareCollections_API.Handler.Exception.ExceptionHandler;
 import top.nserly.SoftwareCollections_API.String.RandomString;
+import top.nserly.SoftwareCollections_API.Thread.ThreadControl;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
 
 @Slf4j
 public record PictureInformationStorageManagement(TreeMap<String, ArrayList<String>> treeMap) implements Serializable {
@@ -124,45 +119,43 @@ public record PictureInformationStorageManagement(TreeMap<String, ArrayList<Stri
         Init.clearDirectory(new File(saveDir));
     }
 
-    // 清除原图片不存在的图片缓存（返回清除的缓存图片数量）（建议在新进程中调用）
+    // 清除原图片不存在的图片缓存（返回清除的缓存图片数量）
     public void optimize() {
         if (treeMap == null || treeMap.isEmpty()) {
             clear();
             return;
         }
+        // 创建一个线程池来处理文件删除任务
+        ThreadControl.virtualThreadsController.executeImmediately("PictureInformationStorageManagement_CacheGC", () -> {
+            // 存储需要删除的缓存路径
+            List<String> remove = new LinkedList<>();
+            synchronized (treeMap) {
+                // 遍历缓存树
+                for (Map.Entry<String, ArrayList<String>> entry : treeMap.entrySet()) {
+                    final String originalPicturePath = entry.getKey();
+                    final ArrayList<String> cache = entry.getValue();
+                    final File currentProcessingFile = new File(originalPicturePath);
+                    final File currentProcessingCachedFile = new File(cache.get(1));
 
-        // 使用 ConcurrentHashMap 来存储需要删除的缓存路径
-        ConcurrentHashMap<String, ArrayList<String>> cacheToDelete = new ConcurrentHashMap<>();
-
-        // 创建一个线程池来并行处理文件删除任务
-        try (ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
-            // 遍历缓存树
-            for (Map.Entry<String, ArrayList<String>> entry : treeMap.entrySet()) {
-                final String originalPicturePath = entry.getKey();
-                final ArrayList<String> cache = entry.getValue();
-                final File currentProcessingFile = new File(originalPicturePath);
-                final File currentProcessingCachedFile = new File(cache.get(1));
-
-                // 提交任务到线程池
-                executorService.submit(() -> {
+                    // 提交任务到线程池
                     if (!currentProcessingFile.exists() ||
                             !currentProcessingCachedFile.exists() ||
                             GetImageInformation.isOriginalJavaSupportedPictureType(originalPicturePath) ||
                             !hashcodeEquals(originalPicturePath, cache.get(0)) ||
                             !hashcodeEquals(currentProcessingCachedFile.getPath(), cache.get(2))) {
-
-                        synchronized (cacheToDelete) {
-                            cacheToDelete.put(originalPicturePath, cache);
-                        }
+                        remove.add(originalPicturePath);
                     }
-                });
+                }
+                // 删除需要删除的缓存
+                for (String i : remove) {
+                    try {
+                        removePictureCache(i);
+                    } catch (Exception e) {
+                        log.error(ExceptionHandler.getExceptionMessage(e));
+                    }
+                }
             }
-        }
-
-        // 删除需要删除的缓存
-        for (Map.Entry<String, ArrayList<String>> entry : cacheToDelete.entrySet()) {
-            removePictureCache(entry.getKey());
-        }
+        });
     }
 
 

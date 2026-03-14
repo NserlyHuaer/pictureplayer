@@ -134,16 +134,7 @@ public class SizeOperate {
 
 
     private double decide(double size) {
-        double result;
-        if (size > MaxPercent) {
-            result = MaxPercent;
-        } else {
-            result = size;
-        }
-        if (size < MinPercent) {
-            result = MinPercent;
-        }
-        return result;
+        return Math.max(MinPercent, Math.min(size, MaxPercent));
     }
 
     //获取图片最佳比例
@@ -202,40 +193,15 @@ public class SizeOperate {
         if ((operate == Enlarge && percent == MaxPercent) || (operate == Reduce && percent == MinPercent)) {
             return false;
         }
-        double result = 0;
-        switch (operate) {
-            case Enlarge -> {
-                if (AdjustPercent <= 0) {
-                    if (percent < FittestPercent) result = decide(4 + percent);
-                    else {
-                        result = decide(11 + percent);
-                    }
-                } else if (percent < FittestPercent) {
-                    result = decide(AdjustPercent + percent);
-                } else if (percent > FittestPercent) {
-                    result = decide(2 * AdjustPercent + percent);
-                }
-                percent = result;
-                if (percent > MaxPercent) {
-                    percent = MaxPercent;
-                }
-            }
-            case Reduce -> {
-                if (AdjustPercent <= 0) {
-                    if (percent < FittestPercent) result = decide(-4 + percent);
-                    else {
-                        result = decide(-11 + percent);
-                    }
-                } else if (percent < FittestPercent) result = decide(-AdjustPercent + percent);
-                else if (percent > FittestPercent) {
-                    result = decide(-2 * AdjustPercent + percent);
-                }
-                percent = result;
-                if (percent < MinPercent) {
-                    percent = MaxPercent;
-                }
-            }
-        }
+        // 1. 提取硬编码的魔法数值，提升可维护性
+        int baseAdjust = AdjustPercent <= 0 ? (percent < FittestPercent ? 4 : 11) : AdjustPercent;
+        // 2. 根据Enlarge/Reduce确定符号，减少分支重复
+        int sign = operate == Enlarge ? 1 : -1;
+        // 3. 处理倍数（仅AdjustPercent>0且percent>FittestPercent时翻倍）
+        int adjustValue = baseAdjust * (AdjustPercent > 0 && percent > FittestPercent ? 2 : 1);
+
+        // 4. 计算最终结果，消除重复的decide调用
+        percent = decide(percent + sign * adjustValue);
         return true;
     }
 

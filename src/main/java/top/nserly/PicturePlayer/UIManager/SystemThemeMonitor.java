@@ -21,12 +21,11 @@ import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.WinReg;
 import lombok.extern.slf4j.Slf4j;
 import top.nserly.SoftwareCollections_API.Handler.Exception.ExceptionHandler;
+import top.nserly.SoftwareCollections_API.Thread.ThreadControl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -37,13 +36,11 @@ import java.util.function.Consumer;
 public class SystemThemeMonitor {
     private final Consumer<Boolean> themeChangeCallback;
     private final OSThemeDetector detector;
-    private final ScheduledExecutorService executor;
+    private static final String TaskID_SystemThemeMonitor = "SystemThemeMonitor_ScanSystemTheme";
     private Boolean currentTheme;
 
     public SystemThemeMonitor(Consumer<Boolean> callback) {
         this.themeChangeCallback = callback;
-        this.executor = Executors.newSingleThreadScheduledExecutor();
-
         // 根据操作系统选择对应的检测器
         if (Platform.isWindows()) {
             detector = new WindowsThemeDetector();
@@ -54,16 +51,16 @@ public class SystemThemeMonitor {
         }
 
         // 启动定期检查任务
-        executor.scheduleAtFixedRate(this::checkTheme, 0, 1, TimeUnit.SECONDS);
+        ThreadControl.virtualThreadsController.executePeriodically(TaskID_SystemThemeMonitor,this::checkTheme, 0, 1, TimeUnit.SECONDS);
     }
 
     public void shutdown() {
-        executor.shutdownNow();
+        ThreadControl.virtualThreadsController.terminateTaskImmediately(TaskID_SystemThemeMonitor);
     }
 
     public void startListener() {
-        if (executor.isShutdown()) {
-            executor.scheduleAtFixedRate(this::checkTheme, 0, 1, TimeUnit.SECONDS);
+        if (!ThreadControl.virtualThreadsController.listActiveTasks().contains(TaskID_SystemThemeMonitor)) {
+            ThreadControl.virtualThreadsController.executePeriodically(TaskID_SystemThemeMonitor,this::checkTheme, 0, 1, TimeUnit.SECONDS);
         }
     }
 

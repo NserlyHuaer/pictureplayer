@@ -16,7 +16,6 @@
 
 package top.nserly.SoftwareCollections_API.Interaction.SoftwareInteraction.TCP.Server;
 
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,49 +26,52 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 此类为被实例化的类的线程为依据，进行存储数据
+ * This class stores data based on the thread of the instantiated class
  * <p>
- * 它还可以读取实例化的时候线程的对象
+ * It can also read the thread object when instantiated
  * </p>
  */
 @Slf4j
 public class TCP_ServerSocket {
     @Getter
-    protected Set<String> BlackList;//黑名单列表
+    protected Set<String> blackList;// Blacklist
     @Setter
-    protected CheckClient CheckForClient;//检查客户端是否正确
+    protected CheckClient checkForClient;// Check if the client is valid
     @Getter
     @Setter
-    protected int MaxConnect;//服务器最大连接数
+    protected int maxConnect;// Maximum number of server connections
     @Getter
-    protected ExecutorService ThreadPool;//线程池
+    protected ExecutorService virtualThreadExecutor;// Virtual thread executor
     protected Class<? extends Interactions> interactions;
-    private WaitForConnectClient waitForConnectClient;//用于管理等待程序
+    private WaitForConnectClient waitForConnectClient;// Manage waiting process
     @Getter
-    ArrayList<Socket> ClientSockets;//客户端套接字集合
+    private final List<Socket> clientSockets;// Client socket collection (thread-safe)
     private ServerSocket serverSocket;
     @Getter
-    private String IPv4;//服务器ipv4地址
+    private String ipv4;// Server ipv4 address
     @Getter
-    private String IPv6;//服务器ipv6地址
+    private String ipv6;// Server ipv6 address
     @Getter
-    private int port;//服务器端口
+    private int port;// Server port
+    private final AtomicBoolean isServerRunning = new AtomicBoolean(false);
 
+    // Initialize thread-safe collections
     {
-        BlackList = new HashSet<>();
-        ClientSockets = new ArrayList<>();
+        blackList = Collections.synchronizedSet(new HashSet<>());
+        clientSockets = Collections.synchronizedList(new ArrayList<>());
     }
 
+    // Initialize IP addresses
     {
-        //获取ipv6地址
+        // Get IPv6 address
         Enumeration<NetworkInterface> networkInterfaces;
         try {
             networkInterfaces = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to get network interfaces", e);
         }
         while (networkInterfaces.hasMoreElements()) {
             NetworkInterface networkInterface = networkInterfaces.nextElement();
@@ -77,42 +79,60 @@ public class TCP_ServerSocket {
             while (inetAddresses.hasMoreElements()) {
                 InetAddress inetAddress = inetAddresses.nextElement();
                 if (inetAddress instanceof Inet6Address && !inetAddress.isLinkLocalAddress()) {
-                    IPv6 = inetAddress.getHostAddress();
+                    ipv6 = inetAddress.getHostAddress();
                 }
             }
         }
-        //获取ipv4地址
+
+        // Get IPv4 address
         InetAddress localhost;
         try {
             localhost = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to get localhost address", e);
         }
-        IPv4 = localhost.getHostAddress();
+        ipv4 = localhost.getHostAddress();
     }
 
     /**
-     * @param port         服务器端口
-     * @param MaxConnect   服务器最大连接数
-     * @param interactions 验证成功后和客户端交互
+     * Constructor
+     *
+     * @param port         Server port
+     * @param maxConnect   Maximum number of server connections
+     * @param interactions Interaction logic after successful verification
      */
-    public TCP_ServerSocket(int port, int MaxConnect, Class<? extends Interactions> interactions) {
+    public TCP_ServerSocket(int port, int maxConnect, Class<? extends Interactions> interactions) {
         this.port = port;
-        this.MaxConnect = MaxConnect;
+        this.maxConnect = maxConnect;
         this.interactions = interactions;
+        // Create virtual thread executor (JDK 21+ Virtual Threads)
+        this.virtualThreadExecutor = Executors.newVirtualThreadPerTaskExecutor();
     }
 
+    /**
+     * Check if port is available
+     *
+     * @param port Port number
+     * @return true if port is available
+     */
     public static boolean isPortAvailable(int port) {
         try (java.nio.channels.ServerSocketChannel channel = java.nio.channels.ServerSocketChannel.open()) {
             channel.socket().setReuseAddress(true);
-            channel.socket().bind(new java.net.InetSocketAddress(port));
+            channel.socket().bind(new InetSocketAddress(port));
             return true;
         } catch (IOException e) {
+            log.warn("Port {} is not available", port, e);
             return false;
         }
     }
 
-
+    /**
+     * Send message to client
+     *
+     * @param socket  Client socket
+     * @param message Message to send
+     * @throws IOException If I/O error occurs
+     */
     public static void send(Socket socket, String message) throws IOException {
         if (socket == null || !socket.isConnected()) {
             throw new IllegalArgumentException("Socket is null or not connected");
@@ -124,204 +144,330 @@ public class TCP_ServerSocket {
         socket.getOutputStream().flush();
     }
 
-    public void changeBlackList(Set<String> BlackIP) {
-        BlackList = BlackIP;
+    // ------------------------------ Blacklist Management ------------------------------
+    public void changeBlackList(Set<String> blackIP) {
+        this.blackList = Collections.synchronizedSet(new HashSet<>(blackIP));
     }
 
-    public void changeBlackList(List<String> BlackIP) {
-        BlackList = new HashSet<>();
-        BlackList.addAll(BlackIP);
+    public void changeBlackList(List<String> blackIP) {
+        this.blackList = Collections.synchronizedSet(new HashSet<>(blackIP));
     }
 
-    public void changeBlackList(String... BlackIP) {
-        BlackList = new HashSet<>();
-        BlackList.addAll(Arrays.asList(BlackIP));
-    }
-
-    public ArrayList<Socket> checkAndGetClientSockets() {
-        checkConnectState();
-        return ClientSockets;
-    }
-
-    public Set<String> getClientIP() {
-        if (ClientSockets.isEmpty()) {
-            return null;
-        }
-        Set<String> cache = new HashSet<>();
-        ClientSockets.forEach(e -> cache.add(e.getInetAddress().getHostAddress()));
-
-        return cache;
-    }
-
-    public void disconnect(String IP) {
-        ArrayList<Socket> arrayList = ClientSockets;
-        for (Socket i : arrayList) {
-            if (i.getInetAddress().getHostAddress().equals(IP)) {
-                try {
-                    i.close();
-                    arrayList.remove(i);
-                } catch (IOException ignored) {
-
-                }
-            }
-        }
-    }
-
-    public void addBlackListByCurrentSocket(Socket client) {
-        String IP = client.getInetAddress().getHostAddress();
-        disconnect(IP);
-        addBlackList(IP);
+    public void changeBlackList(String... blackIP) {
+        this.blackList = Collections.synchronizedSet(new HashSet<>(Arrays.asList(blackIP)));
     }
 
     public void cleanBlacklist() {
-        BlackList.clear();
+        blackList.clear();
     }
 
-    public synchronized void checkConnectState() {
-        if (ClientSockets == null) return;
-        Set<Socket> cache = new HashSet<>(ClientSockets);
-        for (Socket i : cache) {
-            if (i.isClosed()) {
+    public void removeBlackIP(String blackIP) {
+        blackList.remove(blackIP);
+    }
+
+    public boolean containsBlack(String blackIP) {
+        return blackList.contains(blackIP);
+    }
+
+    public void addBlackList(String blackIP) {
+        blackList.add(blackIP);
+    }
+
+    public void addBlackList(List<String> blackIP) {
+        blackList.addAll(blackIP);
+    }
+
+    public void addBlackList(String... blackIP) {
+        blackList.addAll(Arrays.asList(blackIP));
+    }
+
+    public void addBlackList(Set<String> blackIP) {
+        blackList.addAll(blackIP);
+    }
+
+    // ------------------------------ Connection Management ------------------------------
+    /**
+     * Add client to blacklist and disconnect
+     *
+     * @param client Client socket
+     */
+    public void addBlackListByCurrentSocket(Socket client) {
+        if (client == null) return;
+        String ip = client.getInetAddress().getHostAddress();
+        disconnect(ip);
+        addBlackList(ip);
+    }
+
+    /**
+     * Disconnect specific client by IP
+     *
+     * @param ip Client IP address
+     */
+    public void disconnect(String ip) {
+        if (ip == null || ip.isEmpty()) return;
+
+        // Use iterator to avoid ConcurrentModificationException
+        Iterator<Socket> iterator = clientSockets.iterator();
+        while (iterator.hasNext()) {
+            Socket socket = iterator.next();
+            if (socket.getInetAddress().getHostAddress().equals(ip)) {
                 try {
-                    i.close();
-                } catch (IOException ignored) {
-                    ClientSockets.remove(i);
+                    socket.close();
+                    iterator.remove(); // Safe removal
+                    log.info("Disconnected client: {}", ip);
+                } catch (IOException e) {
+                    log.warn("Failed to close socket for client: {}", ip, e);
                 }
+                break;
             }
+        }
+    }
+
+    /**
+     * Get all connected client IPs
+     *
+     * @return Set of client IPs
+     */
+    public Set<String> getClientIP() {
+        if (clientSockets.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        Set<String> clientIps = new HashSet<>();
+        for (Socket socket : clientSockets) {
+            clientIps.add(socket.getInetAddress().getHostAddress());
+        }
+        return clientIps;
+    }
+
+    /**
+     * Check and get active client sockets
+     *
+     * @return List of active client sockets
+     */
+    public List<Socket> checkAndGetClientSockets() {
+        checkConnectState();
+        return new ArrayList<>(clientSockets); // Return copy to avoid external modification
+    }
+
+    /**
+     * Check client connection status (thread-safe)
+     */
+    public synchronized void checkConnectState() {
+        if (clientSockets.isEmpty()) return;
+
+        Iterator<Socket> iterator = clientSockets.iterator();
+        while (iterator.hasNext()) {
+            Socket socket = iterator.next();
             try {
-                i.sendUrgentData(1);
+                if (socket.isClosed() || !socket.isConnected()) {
+                    iterator.remove();
+                    log.info("Removed closed socket: {}", socket.getInetAddress().getHostAddress());
+                    continue;
+                }
+                // Check connection liveness
+                socket.sendUrgentData(1);
             } catch (IOException e) {
                 try {
-                    i.close();
+                    socket.close();
                 } catch (IOException ignored) {
-
                 }
-                ClientSockets.remove(i);
+                iterator.remove();
+                log.warn("Removed inactive socket: {}", socket.getInetAddress().getHostAddress(), e);
             }
         }
     }
 
-    public void close() throws IOException {
-        if (serverSocket != null)
-            serverSocket.close();
-        Thread closeConnectClient = null;
-        if (waitForConnectClient != null) {
-            closeConnectClient = new Thread(waitForConnectClient::stop);
-            closeConnectClient.start();
-        }
-        if (ThreadPool != null) {
-            ThreadPool.close();
-        }
-        if (closeConnectClient != null)
-            try {
-                // 让其静默1秒钟 (doge)
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
-
-            }
-
-    }
-
-    public void removeBlackIP(String BlackIP) {
-        BlackList.remove(BlackIP);
-    }
-
-    public boolean containsBlack(String BlackIP) {
-        return BlackList.contains(BlackIP);
-    }
-
-    public void addBlackList(String BlackIP) {
-        BlackList.add(BlackIP);
-    }
-
-    public void addBlackList(List<String> BlackIP) {
-        BlackList.addAll(BlackIP);
-    }
-
-    public void addBlackList(String... BlackIP) {
-        BlackList.addAll(Arrays.asList(BlackIP));
-    }
-
-    public void addBlackList(Set<String> BlackIP) {
-        BlackList.addAll(BlackIP);
-    }
-
+    // ------------------------------ Server Lifecycle ------------------------------
+    /**
+     * Start TCP server
+     *
+     * @throws IOException If I/O error occurs
+     */
     public void start() throws IOException {
-        serverSocket = new ServerSocket(port);
+        if (!isServerRunning.compareAndSet(false, true)) {
+            log.warn("Server is already running on port: {}", port);
+            return;
+        }
+
+        // Check port availability
+        if (!isPortAvailable(port)) {
+            throw new IOException("Port " + port + " is not available");
+        }
+
+        // Create server socket with SO_REUSEADDR
+        serverSocket = new ServerSocket();
+        serverSocket.setReuseAddress(true);
+        serverSocket.bind(new InetSocketAddress(port));
+
+        log.info("TCP server started on port: {} (IPv4: {}, IPv6: {})", port, ipv4, ipv6);
+
+        // Start accept client connections with virtual thread
         waitForConnectClient = new WaitForConnectClient(serverSocket, this);
-        new Thread(waitForConnectClient).start();
+        // Use virtual thread for accepting connections
+        Thread acceptThread = Thread.ofVirtual().name("tcp-server-accept-" + port).start(waitForConnectClient);
+    }
+
+    /**
+     * Close TCP server
+     *
+     * @throws IOException If I/O error occurs
+     */
+    public void close() throws IOException {
+        if (!isServerRunning.compareAndSet(true, false)) {
+            log.warn("Server is already closed");
+            return;
+        }
+
+        log.info("Shutting down TCP server on port: {}", port);
+
+        // Stop accepting new connections
+        if (waitForConnectClient != null) {
+            waitForConnectClient.stop();
+        }
+
+        // Close server socket
+        if (serverSocket != null) {
+            serverSocket.close();
+        }
+
+        // Close all client sockets
+        synchronized (clientSockets) {
+            for (Socket socket : clientSockets) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    log.warn("Failed to close client socket", e);
+                }
+            }
+            clientSockets.clear();
+        }
+
+        // Shutdown virtual thread executor (graceful shutdown)
+        if (virtualThreadExecutor != null) {
+            virtualThreadExecutor.shutdown();
+            try {
+                if (!virtualThreadExecutor.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                    virtualThreadExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                virtualThreadExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        log.info("TCP server closed on port: {}", port);
+    }
+
+    // ------------------------------ Inner Classes ------------------------------
+    /**
+     * Functional interface for client validation
+     */
+    @FunctionalInterface
+    public interface CheckClient {
+        boolean Check(Socket socket);
     }
 }
 
+/**
+ * Client connection acceptor (runs in virtual thread)
+ */
 @Slf4j
 class WaitForConnectClient implements Runnable {
-    private final ServerSocket ServerSocket;
+    private final ServerSocket serverSocket;
     private final TCP_ServerSocket tcpServerSocket;
-    private boolean end;
+    private final AtomicBoolean isStopped = new AtomicBoolean(false);
 
     public WaitForConnectClient(ServerSocket serverSocket, TCP_ServerSocket tcpServerSocket) {
-        this.ServerSocket = serverSocket;
+        this.serverSocket = serverSocket;
         this.tcpServerSocket = tcpServerSocket;
     }
 
     public void stop() {
-        end = true;
+        isStopped.set(true);
+        // Interrupt accept() method
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            log.warn("Failed to close server socket", e);
+        }
     }
 
     @Override
     public void run() {
-        a:
-        while (true) {
-            // 等待客户端连接
-            if (end) break;
+        log.info("Start accepting client connections on port: {}", tcpServerSocket.getPort());
+
+        while (!isStopped.get()) {
             try {
-                Socket socket = ServerSocket.accept();
-                log.info("new connection request from {}", socket.getInetAddress().getHostAddress());
-                //查看当前连接数是否达到极限
-                if (tcpServerSocket.MaxConnect != -1 && tcpServerSocket.ClientSockets.size() > tcpServerSocket.MaxConnect) {
-                    socket.close();
-                    log.info("connection refused ({}),Caused by:Current Connection counts has been over MaxConnect({})", socket.getInetAddress().getHostAddress(), tcpServerSocket.MaxConnect);
+                // Blocking accept (will be unblocked when serverSocket is closed)
+                Socket clientSocket = serverSocket.accept();
+                String clientIp = clientSocket.getInetAddress().getHostAddress();
+                log.info("New connection request from: {}", clientIp);
+
+                // 1. Check maximum connection limit
+                int currentConnections = tcpServerSocket.getClientSockets().size();
+                int maxConnections = tcpServerSocket.getMaxConnect();
+                if (maxConnections != -1 && currentConnections >= maxConnections) {
+                    clientSocket.close();
+                    log.info("Connection refused ({}): Max connections reached (current: {}, max: {})",
+                            clientIp, currentConnections, maxConnections);
                     continue;
                 }
-                //查看是否在黑名单列表中
-                if ((tcpServerSocket.BlackList != null) && (!tcpServerSocket.BlackList.isEmpty())) {
-                    for (String s : tcpServerSocket.BlackList) {
-                        if (s.equals(socket.getInetAddress().getHostAddress())) {
-                            socket.close();
-                            log.info("connection refused ({}),Caused by:Address is in BlackList", socket.getInetAddress().getHostAddress());
-                            continue a;
-                        }
-                    }
-                }
-                //查看是否通过最后检查开发者设置的验证是否通过，如果通过就进行连接
-                if (tcpServerSocket.CheckForClient != null)
-                    if (!tcpServerSocket.CheckForClient.Check(socket)) {
-                        socket.close();
-                        log.info("connection refused ({}),Caused by:Developer's definition", socket.getInetAddress().getHostAddress());
-                        continue;
-                    }
 
-                //将客户端添加到链接列表中
-                ArrayList<Socket> set = tcpServerSocket.ClientSockets;
-                if (set == null) set = new ArrayList<>();
-                set.add(socket);
-                tcpServerSocket.ClientSockets = set;
-
-                if (tcpServerSocket.ThreadPool == null) {
-                    //如果线程池为空，则创建一个新的线程池
-                    tcpServerSocket.ThreadPool = Executors.newFixedThreadPool(tcpServerSocket.MaxConnect == -1 ? 999 : tcpServerSocket.MaxConnect);
+                // 2. Check blacklist
+                if (tcpServerSocket.containsBlack(clientIp)) {
+                    clientSocket.close();
+                    log.info("Connection refused ({}): IP is in blacklist", clientIp);
+                    continue;
                 }
-                //创建多线程，用来与用户交互
-                tcpServerSocket.ThreadPool.execute(new FutureTask<>(Objects.requireNonNull(Interactions.getInstance(tcpServerSocket.interactions, socket, tcpServerSocket.ClientSockets))));
+
+                // 3. Check client validation (developer-defined)
+                if (tcpServerSocket.checkForClient != null && !tcpServerSocket.checkForClient.Check(clientSocket)) {
+                    clientSocket.close();
+                    log.info("Connection refused ({}): Failed developer's validation", clientIp);
+                    continue;
+                }
+
+                // 4. Add client to connection list
+                tcpServerSocket.getClientSockets().add(clientSocket);
+                log.info("Client connected: {} (total connections: {})", clientIp, tcpServerSocket.getClientSockets().size());
+
+                // 5. Handle client interaction with virtual thread
+                try {
+                    Interactions interactionInstance = Interactions.getInstance(
+                            tcpServerSocket.interactions, clientSocket, tcpServerSocket.getClientSockets()
+                    );
+                    if (interactionInstance != null) {
+                        // Submit interaction task to virtual thread executor
+                        tcpServerSocket.getVirtualThreadExecutor().execute(() -> {
+                            try {
+                                interactionInstance.call(); // Assume Interactions implements Runnable
+                            } catch (Exception e) {
+                                log.error("Error handling client interaction: {}", clientIp, e);
+                                // Clean up on error
+                                tcpServerSocket.disconnect(clientIp);
+                            }
+                        });
+                    } else {
+                        log.warn("Failed to create interaction instance for client: {}", clientIp);
+                        clientSocket.close();
+                        tcpServerSocket.getClientSockets().remove(clientSocket);
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to initialize client interaction: {}", clientIp, e);
+                    clientSocket.close();
+                    tcpServerSocket.getClientSockets().remove(clientSocket);
+                }
+
             } catch (IOException e) {
-                if (end) break;
-                for (Socket socket : tcpServerSocket.ClientSockets) {
-                    if (socket.isClosed()) {
-                        tcpServerSocket.ClientSockets.remove(socket);
-                        log.info("Closed socket: {}", socket.getInetAddress().getHostAddress());
-                    }
+                if (isStopped.get()) {
+                    log.info("Stopped accepting client connections");
+                    break;
                 }
+                log.error("Error accepting client connection", e);
             }
         }
+
+        log.info("Connection acceptor thread stopped");
     }
 }

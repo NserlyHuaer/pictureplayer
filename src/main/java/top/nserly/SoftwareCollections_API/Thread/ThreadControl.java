@@ -17,6 +17,8 @@
 package top.nserly.SoftwareCollections_API.Thread;
 
 public class ThreadControl {
+    public static final VirtualThreadsController virtualThreadsController = new VirtualThreadsController();
+
     private ThreadControl() {
 
     }

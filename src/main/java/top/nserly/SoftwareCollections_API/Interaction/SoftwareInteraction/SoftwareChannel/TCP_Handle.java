@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import top.nserly.SoftwareCollections_API.Interaction.SoftwareInteraction.TCP.Interactions;
 
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public final class TCP_Handle extends Interactions {
@@ -30,8 +30,12 @@ public final class TCP_Handle extends Interactions {
     @Getter
     public static WindowsAppMutex windowsAppMutex;
 
-    public TCP_Handle(Socket socket, ArrayList<Socket> ClientSockets) {
+    public TCP_Handle(Socket socket, List<Socket> ClientSockets) {
         super(socket, ClientSockets);
+    }
+
+    public TCP_Handle(Socket socket) {
+        super(socket);
     }
 
 
@@ -44,25 +48,29 @@ public final class TCP_Handle extends Interactions {
     private void handle(String message) throws Exception {
         if (windowsAppMutex == null)
             throw new RuntimeException("WindowsAppMutex is not initialized. Please set it before handling messages.");
-        if (message.startsWith("{newPicturePath} ")) {
-            String filePath = message.trim();
-            filePath = filePath.substring(filePath.indexOf(" "));
-            log.info("Received file path: {}", filePath);
-            if (windowsAppMutex.getHandleSoftwareRequestAction() != null) {
-                windowsAppMutex.getHandleSoftwareRequestAction().receiveFile(filePath.trim());
+        String[] orders = message.split("\n");
+        for (String i : orders) {
+            if (i.startsWith("{newPicturePath} ")) {
+                String filePath = i.trim();
+                filePath = filePath.substring(filePath.indexOf(" "));
+                log.info("Received file path: {}", filePath);
+                if (windowsAppMutex.getHandleSoftwareRequestAction() != null) {
+                    windowsAppMutex.getHandleSoftwareRequestAction().receiveFile(filePath.trim());
+                } else {
+                    log.warn("No action defined to handle received file path.");
+                }
+            } else if (i.startsWith("{getSoftwareVisibleDirective} ")) {
+                String softwareVisibleDirective = i.trim();
+                softwareVisibleDirective = softwareVisibleDirective.substring(softwareVisibleDirective.indexOf(" "));
+                if (windowsAppMutex.getHandleSoftwareRequestAction() != null) {
+                    windowsAppMutex.getHandleSoftwareRequestAction().setVisible(Boolean.parseBoolean(softwareVisibleDirective.trim()));
+                } else {
+                    log.warn("No action defined to handle software visible directive.");
+                }
             } else {
-                log.warn("No action defined to handle received file path.");
+                if (super.internalInformationProcessing(i) != 0)
+                    log.warn("Unknown message received: {}", i);
             }
-        } else if (message.startsWith("{getSoftwareVisibleDirective} ")) {
-            String softwareVisibleDirective = message.trim();
-            softwareVisibleDirective = softwareVisibleDirective.substring(softwareVisibleDirective.indexOf(" "));
-            if (windowsAppMutex.getHandleSoftwareRequestAction() != null) {
-                windowsAppMutex.getHandleSoftwareRequestAction().setVisible(Boolean.parseBoolean(softwareVisibleDirective.trim()));
-            } else {
-                log.warn("No action defined to handle software visible directive.");
-            }
-        } else {
-            log.warn("Unknown message received: {}", message);
         }
     }
 }

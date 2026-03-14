@@ -24,13 +24,10 @@ import top.nserly.SoftwareCollections_API.Interaction.SoftwareInteraction.TCP.Se
 import top.nserly.SoftwareCollections_API.Thread.ThreadControl;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class WindowsAppMutex {
-
     @Getter
     private final int port;
     private final Thread Init_Thread;
@@ -42,7 +39,8 @@ public class WindowsAppMutex {
     private HandleSoftwareRequestAction handleSoftwareRequestAction;
     @Getter
     private boolean isSupportedSoftwareName = true;
-    private ScheduledExecutorService executor;
+    private static final String ConnectGC_TaskID = "WindowsAppMutex_ConnectGC";
+
 
     public WindowsAppMutex(int port) {
         this.port = port;
@@ -70,8 +68,9 @@ public class WindowsAppMutex {
                     return "127.0.0.1".equals(hostAddress) || "::1".equals(hostAddress);
                 });
 
-                executor = Executors.newSingleThreadScheduledExecutor();
-                executor.scheduleAtFixedRate(() -> tcpServerSocket.checkConnectState(), 0, 30, TimeUnit.SECONDS);
+
+                ThreadControl.virtualThreadsController.executePeriodically(ConnectGC_TaskID,
+                        () -> tcpServerSocket.checkConnectState(), 0, 30, TimeUnit.SECONDS);
 
                 try {
                     tcpServerSocket.start();
@@ -93,7 +92,7 @@ public class WindowsAppMutex {
         if (!isSupportedSoftwareName)
             throw new RuntimeException("The server does not support the required software name protocol.");
         try {
-            tcpClient.send("{newPicturePath} " + filePath);
+            tcpClient.sendln("{newPicturePath} " + filePath);
         } catch (IOException e) {
             log.warn("Send file path failed: {}", e.getMessage());
             throw new RuntimeException(e);
@@ -108,7 +107,7 @@ public class WindowsAppMutex {
         if (!isSupportedSoftwareName)
             throw new RuntimeException("The server does not support the required software name protocol.");
         try {
-            tcpClient.send("{getSoftwareVisibleDirective} " + visible);
+            tcpClient.sendln("{getSoftwareVisibleDirective} " + visible);
         } catch (IOException e) {
             log.warn("Send visible directive failed: {}", e.getMessage());
             throw new RuntimeException(e);
@@ -133,8 +132,7 @@ public class WindowsAppMutex {
         } catch (IOException e) {
             log.warn("Error closing TCP server: {}", e.getMessage());
         }
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdownNow();
-        }
+
+        ThreadControl.virtualThreadsController.terminateTaskImmediately(ConnectGC_TaskID);
     }
 }

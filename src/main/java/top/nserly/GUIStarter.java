@@ -73,9 +73,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -129,8 +126,6 @@ public class GUIStarter extends JFrame {
     private JButton FreeUpMemory;
     private static final String[] ThemeComboBoxStringItems = new String[]{"Theme_0", "Theme_1", "Theme_2"};
     private static final String[] CloseMainFrameControlComboBoxStringItems = new String[]{"CloseMainFrameControl_0", "CloseMainFrameControl_1", "CloseMainFrameControl_2"};
-    private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private static ScheduledFuture<?> future;
     private final ChangeFocusListener changeFocusListener;
     //是否启用代理服务器
     private static boolean EnableProxyServer;
@@ -211,8 +206,6 @@ public class GUIStarter extends JFrame {
             CheckAndDownloadUpdate downloadUpdate = new CheckAndDownloadUpdate(UPDATE_WEBSITE);
             new Thread(() -> {
                 ExceptionHandler.setUncaughtExceptionHandler(log);
-
-
                 try {
                     if (SystemNotifications.isSupportedSystemNotifications && !downloadUpdate.checkIfTheLatestVersion()) {
                         SystemNotifications.sendMessage(SystemNotifications.DefaultIcon,
@@ -808,25 +801,21 @@ public class GUIStarter extends JFrame {
             final String TTI = TotalThread.getText();
             final String OpenCLRendererI = OpenCLSelectedDeviceNameLavel.getText();
             OpenCLSelectedDeviceNameLavel.setText(OpenCLRendererI + "<No OpenCL device selected>");
+            ThreadControl.virtualThreadsController.executePeriodically("PC_Scanner", () -> {
+                SystemMonitor.getInformation();
+                MemUsed.setText(JmemI + SystemMonitor.convertSize(
+                        SystemMonitor.JVM_Used_Memory) + "/"
+                        + SystemMonitor.convertSize(SystemMonitor.JVM_Maximum_Free_Memory)
+                        + "(" + SystemMonitor.JVM_Memory_Usage
+                        + "%" + ")");
+                TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
+                if (OpenCLBlurProcessor.getIsSupportedOpenCL() && PaintPicturePanel.isEnableHardwareAcceleration)
+                    OpenCLSelectedDeviceNameLavel.setText(OpenCLRendererI + OpenCLBlurProcessor.getSelectedDevice());
+            }, 0, 2, TimeUnit.SECONDS);
             tabbedPane1.addChangeListener(_ -> {
                 request();
                 int tabIndex = tabbedPane1.getSelectedIndex();
-                if (tabIndex == 3) {
-                    future = executor.scheduleAtFixedRate(() -> {
-                        SystemMonitor.getInformation();
-                        MemUsed.setText(JmemI + SystemMonitor.convertSize(
-                                SystemMonitor.JVM_Used_Memory) + "/"
-                                + SystemMonitor.convertSize(SystemMonitor.JVM_Maximum_Free_Memory)
-                                + "(" + SystemMonitor.JVM_Memory_Usage
-                                + "%" + ")");
-                        TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
-                        if (OpenCLBlurProcessor.getIsSupportedOpenCL() && PaintPicturePanel.isEnableHardwareAcceleration)
-                            OpenCLSelectedDeviceNameLavel.setText(OpenCLRendererI + OpenCLBlurProcessor.getSelectedDevice());
-                    }, 0, 2, TimeUnit.SECONDS);
-                } else {
-                    if (tabIndex == 0 && paintPicture != null) paintPicture.refreshPictureThumbnail();
-                    if (future != null) future.cancel(false);
-                }
+                if (tabIndex == 0 && paintPicture != null) paintPicture.refreshPictureThumbnail();
                 if (tabIndex == 2 && !IsFreshen) {
                     IsFreshen = true;
                     reFresh();
@@ -899,7 +888,7 @@ public class GUIStarter extends JFrame {
                             .append("\nOpened: ")
                             .append(PaintPicturePanel.paintPicture.imageCanvas.getPath());
 
-                if (SystemNotifications.isSupportedSystemNotifications && (lastToolTip == null || !lastToolTip.contentEquals(ToolTipText)))
+                if (lastToolTip == null || !lastToolTip.contentEquals(ToolTipText))
                     SystemNotifications.DefaultIcon.setToolTip(ToolTipText.toString());
 
                 lastToolTip = ToolTipText.toString();
@@ -945,6 +934,13 @@ public class GUIStarter extends JFrame {
             }
         } catch (Exception e) {
             log.warn("Turning off the mutex failed: {}", ExceptionHandler.getExceptionMessage(e));
+        }
+
+        log.info("Closing Virtual Threads...");
+        try {
+            ThreadControl.virtualThreadsController.shutdown(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            log.warn("Interrupted while waiting for Virtual Threads to shut down.\n{}", ExceptionHandler.getExceptionMessage(e));
         }
 
         log.info("Program Termination!");
