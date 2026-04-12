@@ -1,0 +1,84 @@
+﻿  AppUtils.cpp
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\AppUtils.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  ConsoleUtils.cpp
+  FileUtils.cpp
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\FileUtils.cpp(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  JOptionPane.cpp
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\JOptionPane.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“JOptionPane.cpp”)
+  
+  PicturePlayerStarter.cpp
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\JOptionPane.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“PicturePlayerStarter.cpp”)
+  
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\PropertiesReader.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“PicturePlayerStarter.cpp”)
+  
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\TcpClient.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“PicturePlayerStarter.cpp”)
+  
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\TcpClient.h(160,77): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+  (编译源文件“PicturePlayerStarter.cpp”)
+  
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\WindowsAppMutex.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“PicturePlayerStarter.cpp”)
+  
+D:\Visual Studio\IDE\VC\Tools\MSVC\14.50.35717\include\xutility(4924,18): warning C4244: “=”: 从“wchar_t”转换到“char”，可能丢失数据
+  (编译源文件“PicturePlayerStarter.cpp”)
+      D:\Visual Studio\IDE\VC\Tools\MSVC\14.50.35717\include\xutility(4924,18):
+      模板实例化上下文(最早的实例化上下文)为
+          D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\PicturePlayerStarter.cpp(111,52):
+          查看对正在编译的函数 模板 实例化“std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)”的引用
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+              _Alloc=std::allocator<char>
+          ]
+              D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\PicturePlayerStarter.cpp(111,29):
+              请参阅 "WinMain" 中对 "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string" 的第一个引用
+          D:\Visual Studio\IDE\VC\Tools\MSVC\14.50.35717\include\xstring(862,17):
+          查看对正在编译的函数 模板 实例化“void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<wchar_t*,wchar_t*,_Size_type>(_Iter,const _Sent,_Size)”的引用
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=wchar_t *,
+              _Sent=wchar_t *,
+              _Size=unsigned __int64
+          ]
+          D:\Visual Studio\IDE\VC\Tools\MSVC\14.50.35717\include\xstring(1018,18):
+          查看对正在编译的函数 模板 实例化“_OutIt *std::_Copy_n_unchecked4<wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)”的引用
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=wchar_t *,
+              _SizeTy=unsigned __int64
+          ]
+  
+  PropertiesReader.cpp
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\PropertiesReader.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“PropertiesReader.cpp”)
+  
+  TcpClient.cpp
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\TcpClient.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“TcpClient.cpp”)
+  
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\TcpClient.h(160,77): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+  (编译源文件“TcpClient.cpp”)
+  
+  WindowsAppMutex.cpp
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\WindowsAppMutex.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“WindowsAppMutex.cpp”)
+  
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\TcpClient.h(1,1): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  (编译源文件“WindowsAppMutex.cpp”)
+  
+D:\cppProjects\PicturePlayerStarter\PicturePlayerStarter\TcpClient.h(160,77): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+  (编译源文件“WindowsAppMutex.cpp”)
+  
+  正在生成代码
+  Previous IPDB not found, fall back to full compilation.
+  All 2414 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  PicturePlayerStarter.vcxproj -> D:\cppProjects\PicturePlayerStarter\x64\Release\PicturePlayerStarter.exe
