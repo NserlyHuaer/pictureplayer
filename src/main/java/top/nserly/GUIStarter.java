@@ -938,7 +938,7 @@ public class GUIStarter extends JFrame {
 
         log.info("Closing Virtual Threads...");
         try {
-            ThreadControl.virtualThreadsController.shutdown(1, TimeUnit.MINUTES);
+            ThreadControl.virtualThreadsController.shutdown(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             log.warn("Interrupted while waiting for Virtual Threads to shut down.\n{}", ExceptionHandler.getExceptionMessage(e));
         }
@@ -1157,6 +1157,7 @@ public class GUIStarter extends JFrame {
         getImageAndHashCode.start();
 
         init.run();
+
         UIManager.getUIManager().setTheme(SettingsInfoHandle.getInt("ThemeMode", init.getProperties()));
         UIManager.getUIManager().applyThemeOnSetAndRefreshWindows();
 

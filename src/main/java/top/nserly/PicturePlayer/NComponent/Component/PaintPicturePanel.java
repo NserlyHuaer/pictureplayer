@@ -146,6 +146,8 @@ public class PaintPicturePanel extends JPanel {
             //添加画布至组件中
             MainPanel.add(imageCanvas, BorderLayout.CENTER);
             add(MainPanel, BorderLayout.CENTER);
+            MinPoint = new Point();
+            MaxPoint = new Point();
 
             if (isEnableHardwareAcceleration && OpenCLBlurProcessor.getIsSupportedOpenCL()) {
                 OpenCLBlurProcessor.init();

@@ -131,15 +131,31 @@ public class OpenCLBlurProcessor implements AutoCloseable {
 
 
     public static String getSelectedDevice() {
-        staticLock.lock();
-        try {
-            if (!staticInitialized.get()) {
-                initLatch.await();
+        // 快速路径：已初始化，直接返回，不进等待逻辑
+        if (staticInitialized.get()) {
+            staticLock.lock();
+            try {
+                return SelectedDevice;
+            } finally {
+                staticLock.unlock();
             }
-            return SelectedDevice;
+        }
+
+        // 未初始化，在锁外等待，彻底避免死锁
+        try {
+            initLatch.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Interrupted while waiting for OpenCL initialization", e);
+        }
+
+        // 等待完成后，加锁二次检查并返回
+        staticLock.lock();
+        try {
+            if (!staticInitialized.get()) {
+                throw new IllegalStateException("OpenCL initialization failed");
+            }
+            return SelectedDevice;
         } finally {
             staticLock.unlock();
         }
