@@ -60,7 +60,7 @@ public class OpenCLBlurProcessor implements AutoCloseable {
     private final AtomicBoolean instanceClosed = new AtomicBoolean(false);
 
     // 优化后的 OpenCL 内核代码
-    private static final String KERNEL_SOURCE = FileContents.read(OpenCLBlurProcessor.class.getResource("AdvancedImageBlur.c"));
+    private static final String KERNEL_SOURCE = FileContents.read(OpenCLBlurProcessor.class.getResource("AdvancedImageBlur.cl"));
 
     // 静态共享资源
     private static cl_context clContext = null;
@@ -109,7 +109,7 @@ public class OpenCLBlurProcessor implements AutoCloseable {
         DeviceSelectorLock.lock();
         try {
             // 基于所有设备总数进行边界检查
-            index = Math.max(0, Math.min(index, getDeviceCount() - 1));
+            index = Math.clamp(index, 0, getDeviceCount() - 1);
             if (index == SelectDeviceIndex) return true;
             SelectDeviceIndex = index;
             closeBlurProcessor();
@@ -331,7 +331,7 @@ public class OpenCLBlurProcessor implements AutoCloseable {
             DeviceCount = allDevices.size();
 
             // 验证并调整设备索引
-            SelectDeviceIndex = Math.max(0, Math.min(SelectDeviceIndex, allDevices.size() - 1));
+            SelectDeviceIndex = Math.clamp(SelectDeviceIndex, 0, allDevices.size() - 1);
             cl_device_id selectedDevice = allDevices.get(SelectDeviceIndex);
             cl_platform_id selectedPlatform = getPlatformFromDevice(selectedDevice);
 
