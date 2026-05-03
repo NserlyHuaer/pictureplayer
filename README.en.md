@@ -7,7 +7,7 @@ A feature-rich image player application that provides a smooth image browsing ex
 Use the following command to run this jar file (it is known that the program is named PicturePlayer.jar and the dependencies are in the lib folder under this program's directory).
 
 ```bash
-java -cp "PicturePlayer.jar;lib/*" Runner.Main -XX:+UseG1GC
+java -cp "PicturePlayer.jar;lib/*" top.nserly.GUIStarter -XX:+UseG1GC
 ```
 
 ## Key Features
