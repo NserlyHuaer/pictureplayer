@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package top.nserly.SoftwareCollections_API.Interaction.SoftwareInteraction.SoftwareChannel;
+package top.nserly.SoftwareCollections_API.Interaction.SystemInteraction.Notifications;
 
 import java.awt.event.MouseEvent;
 

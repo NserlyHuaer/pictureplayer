@@ -19,7 +19,6 @@ package top.nserly.SoftwareCollections_API.Interaction.SystemInteraction.Notific
 import lombok.extern.slf4j.Slf4j;
 import top.nserly.GUIStarter;
 import top.nserly.SoftwareCollections_API.Handler.Exception.ExceptionHandler;
-import top.nserly.SoftwareCollections_API.Interaction.SoftwareInteraction.SoftwareChannel.SystemTrayEvent;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

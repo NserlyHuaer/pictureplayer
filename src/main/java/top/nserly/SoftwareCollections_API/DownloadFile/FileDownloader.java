@@ -95,7 +95,7 @@ public class FileDownloader implements Runnable {
      * 在新线程中启动下载任务
      */
     public void startDownloadInNewThread() {
-        ThreadControl.virtualThreadsController.executeImmediately(this.toString(),this);
+        ThreadControl.virtualThreadsController.executeImmediately(this.toString(), this);
     }
 
     /**
@@ -463,7 +463,11 @@ public class FileDownloader implements Runnable {
         for (String token : tokens) {
             token = token.trim();
             if (token.startsWith("filename=")) {
-                String encodedName = token.substring(9).trim().replace("\"", "");
+                String encodedName = token
+                        .substring(9)
+                        .trim()
+                        .replace("\"", "")
+                        .replaceAll("^'|'$", "");
                 return new String(encodedName.getBytes(StandardCharsets.ISO_8859_1),
                         StandardCharsets.UTF_8);
             }

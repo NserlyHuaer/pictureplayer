@@ -196,6 +196,7 @@ public class CommandHandle {
                 "sleep 1\n"
                         + "rm " + CURRENT_JAR_NAME + "\n"
                         + "mv " + fileName + MainFileSuffix + " " + CURRENT_JAR_NAME + "\n"
+                        + CommandComplement + "\n"
                         + "java -Dsun.java2d.opengl=true -DNUpdate=true -cp " + CURRENT_JAR_NAME + ":lib/* top.nserly.GUIStarter ";
 
         if (openedPicturePath != null && !openedPicturePath.isBlank()) {
