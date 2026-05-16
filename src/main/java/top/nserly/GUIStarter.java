@@ -132,7 +132,7 @@ public class GUIStarter extends JFrame {
     //最新版本下载地址（如果当前是最新版本，则返回null值）
     private static List<String> NewVersionDownloadingWebSide;
     //更新网站（必须指定VersionID.sum下载地址）
-    public static String UPDATE_WEBSITE = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/VersionID.sum";
+    public static String UPDATE_WEBSITE = "https://PicturePlayer.nserly.top/artifacts/PicturePlayer_jar/VersionID.sum";
     String MouseMoveLabelPrefix;
     String ProxyServerPrefix;
     public SettingsInfoHandle centre;

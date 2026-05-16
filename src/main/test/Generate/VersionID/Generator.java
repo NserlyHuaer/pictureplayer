@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.TreeMap;
 
 public class Generator {
-    public static final String DownloadWebSite = "https://gitee.com/nserly-huaer/ImagePlayer/raw/master/artifacts/PicturePlayer_jar/";
+    public static final String DownloadWebSite = "https://PicturePlayer.nserly.top/artifacts/PicturePlayer_jar/";
     public static final String DownloadLibWebSite = DownloadWebSite + "lib/";
 
     void main() throws IOException {
