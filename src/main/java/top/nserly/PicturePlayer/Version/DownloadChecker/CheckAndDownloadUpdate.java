@@ -45,11 +45,12 @@ public class CheckAndDownloadUpdate {
     File f;
     @Setter
     String webSide;
-    public List<String> downloadFileWebSite;
+    //Key:网站 Value:文件hashcode
+    public HashMap<String, String> downloadFileWebSiteAndHashCode;
 
     public String MainFileWebSite;
 
-    public ArrayList<String> DependenciesWebSite;
+    public HashMap<String, String> DependenciesWebSite;
     public int TotalDownloadingFile;
     public int HaveDownloadedFile;
     public FileDownloader CurrentFileDownloader;
@@ -143,16 +144,16 @@ public class CheckAndDownloadUpdate {
     }
 
     //更新最新版本
-    public List<String> getUpdateWebSide() {
+    public HashMap<String, String> getUpdateWebSide() {
         StopToUpdate = false;
         if (!isChecked) {
             try {
-                return checkIfTheLatestVersion() ? downloadFileWebSite : null;
+                return checkIfTheLatestVersion() ? downloadFileWebSiteAndHashCode : null;
             } catch (IOException e) {
                 log.error(e.getMessage());
             }
         }
-        return downloadFileWebSite;
+        return downloadFileWebSiteAndHashCode;
     }
 
     //检查是否存在最新版本
@@ -163,7 +164,7 @@ public class CheckAndDownloadUpdate {
 
         AtomicReference<IOException> exception = new AtomicReference<>();
         FileDownloader fileDownloader = new FileDownloader(webSide, f.getPath());
-        fileDownloader.setDownloadErrorHandler((e, f) -> exception.set(e));
+        fileDownloader.setDownloadErrorHandler((e, _) -> exception.set(e));
         fileDownloader.startDownload();
         if (exception.get() != null) throw exception.get();
         versionID = VersionID.gson.fromJson(FileContents.read(fileDownloader.getFinalPath()), VersionID.class);
@@ -179,7 +180,7 @@ public class CheckAndDownloadUpdate {
         if (versionID != null) {
             MainFileWebSite = VersionID.getString(versionID.getNormalVersionMainFile(), versionID.getSpecialFields());
         }
-        DependenciesWebSite = new ArrayList<>();
+        DependenciesWebSite = new HashMap<>();
         TreeMap<String, String> cache = null;
         if (versionID != null) {
             cache = versionID.getNormalDependencies();
@@ -189,20 +190,29 @@ public class CheckAndDownloadUpdate {
             for (String value : cache.values()) {
                 String dependenciesWebsite = VersionID.getString(value, versionID.getSpecialFields());
                 String dependenciesName = dependenciesWebsite.replace("\\", "/");
+                String dependenciesFileHashCode = null;
+                if (versionID.getNormalDependencies_SHA_256() != null) {
+                    dependenciesFileHashCode = versionID.getNormalDependencies_SHA_256().get(dependenciesName);
+                }
                 dependenciesName = dependenciesName.substring(dependenciesName.lastIndexOf("/") + 1, dependenciesName.lastIndexOf(".jar"));
                 if (!DependenciesName.contains(dependenciesName))
-                    DependenciesWebSite.add(VersionID.getString(dependenciesWebsite, versionID.getSpecialFields()));
+                    DependenciesWebSite.put(VersionID.getString(dependenciesWebsite, versionID.getSpecialFields()), dependenciesFileHashCode);
             }
-        downloadFileWebSite = new ArrayList<>(DependenciesWebSite);
-        downloadFileWebSite.add(MainFileWebSite);
+
+        downloadFileWebSiteAndHashCode = new HashMap<>(DependenciesWebSite);
+        String MainFileHashCode = null;
+        if (versionID != null) {
+            MainFileHashCode = versionID.getStartMainFile_SHA_256() == null ? "" : versionID.getStartMainFile_SHA_256();
+        }
+        downloadFileWebSiteAndHashCode.put(MainFileWebSite, MainFileHashCode);
 
         if (NewVersionID <= Long.parseLong(PicturePlayerVersion.getVersionID())) {
             log.info("You are using the latest version: {}", PicturePlayerVersion.getVersionID());
             return false;
         }
         log.info("New version found: {} ({})", NewVersionID, NewVersionName);
-        log.info("Download file web site: {}", downloadFileWebSite);
-        if (downloadFileWebSite.isEmpty()) {
+        log.info("Download file web site: {}", downloadFileWebSiteAndHashCode);
+        if (downloadFileWebSiteAndHashCode.isEmpty()) {
             log.warn("No files to download!");
             return false;
         }
@@ -210,17 +220,17 @@ public class CheckAndDownloadUpdate {
     }
 
     //一键下载所有文件(Map(Key:下载网站,Value:List[0]:文件存放路径;[1]下载类))[调用此方法时，推进使用新线程，否则窗体可能会无相应]
-    public Map<String, ArrayList<?>> download(List<String> downloadWebSide) {
+    public Map<String, ArrayList<?>> download(HashMap<String, String> downloadWebSide) {
         StopToUpdate = false;
         Map<String, ArrayList<?>> finalA = new HashMap<>();
         if (downloadWebSide == null) return null;
         int index = 0;
         TotalDownloadingFile = downloadWebSide.size();
 
-        for (String down : downloadWebSide) {
+        for (String down : downloadWebSide.keySet()) {
             FilePath.add(down);
             HaveDownloadedFile = index;
-            switch (download(down, finalA, false)) {
+            switch (download(down, downloadWebSide.get(down), finalA, false)) {
                 case 1 -> {
                     TotalDownloadingFile--;
                     continue;
@@ -237,15 +247,15 @@ public class CheckAndDownloadUpdate {
     }
 
     //返回值：0.下载完成 1.跳过当前文件 2.取消下载
-    private int download(String down, Map<String, ArrayList<?>> finalA, boolean isTry) {
+    private int download(String down, String fileHashCode, Map<String, ArrayList<?>> finalA, boolean isTry) {
         try {
             if (StopToUpdate) {
                 throw new UpdateException("Update ended,cause of User terminated software update");
             }
             if (!isTry) CurrentFileDownloader = new FileDownloader(down, f.getPath());
-            CurrentFileDownloader.setDownloadErrorHandler((e, fileDownloader) -> {
+            CurrentFileDownloader.setDownloadErrorHandler((e, _) -> {
                 if (exceptionHandling(e) == 0) {
-                    download(down, finalA, true);
+                    download(down, fileHashCode, finalA, true);
                 } else {
                     CurrentFileDownloader.stopDownload();
                     DownloadUpdateFrame.downloadUpdateFrame.dispose();
@@ -255,6 +265,7 @@ public class CheckAndDownloadUpdate {
             });
             log.info("Downloading {}", down);
             if (!EnableSecureConnection) log.warn("The connection is not secure from {}!", down);
+            CurrentFileDownloader.setHashCode(versionID.getFileHashCodeType(), fileHashCode);
             CurrentFileDownloader.startDownload();
             ArrayList<Object> list = new ArrayList<>();
             String cache = CurrentFileDownloader.getFinalPath();
@@ -289,7 +300,9 @@ public class CheckAndDownloadUpdate {
         StopToUpdate = false;
         String DescribeFileWebSide = VersionID.getString(versionID.getNormalVersionDescribe(), versionID.getSpecialFields());
         if (!(DescribeFileWebSide == null) && !DescribeFileWebSide.isEmpty()) {
-            return download(Collections.singletonList(DescribeFileWebSide)).get(DescribeFileWebSide);
+            HashMap<String, String> map = new HashMap<>();
+            map.put(DescribeFileWebSide, versionID.getNormalVersionDescribe_SHA_256());
+            return download(map).get(DescribeFileWebSide);
         }
         return null;
     }

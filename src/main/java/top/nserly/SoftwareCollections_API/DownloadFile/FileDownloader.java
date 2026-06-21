@@ -19,6 +19,8 @@ package top.nserly.SoftwareCollections_API.DownloadFile;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import top.nserly.SoftwareCollections_API.Handler.Exception.ExceptionHandler;
+import top.nserly.SoftwareCollections_API.Hashcode.FileHashUtil;
 import top.nserly.SoftwareCollections_API.Thread.ThreadControl;
 
 import java.io.*;
@@ -27,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -67,6 +70,12 @@ public class FileDownloader implements Runnable {
     @Getter
     private String sourceUrl;
     private final String saveDirectory;
+    @Setter
+    @Getter
+    private boolean EnableVerifierFile;
+    private String HashCode;
+    private String HashCodeType;
+
     // 设置最终文件名（用于分片下载）
     @Setter
     private String finalFileName;
@@ -90,6 +99,28 @@ public class FileDownloader implements Runnable {
         createSaveDirectory();
         this.downloadErrorHandler = downloadErrorHandler;
     }
+
+    /**
+     * 设置文件hashcode（将在下载完后验证）
+     */
+    public void setHashCode(String hashCodeType, String hashCode) {
+        this.HashCodeType = hashCodeType;
+        this.HashCode = hashCode;
+        this.EnableVerifierFile = true;
+    }
+
+    /**
+     * 检查HashCode是否正常
+     */
+
+    public boolean getHashCodeIsCorrect() {
+        return EnableVerifierFile
+                && HashCodeType != null
+                && FileHashUtil.SUPPORTED_ALGORITHMS.contains(HashCodeType)
+                && HashCode != null
+                && !HashCode.isEmpty();
+    }
+
 
     /**
      * 在新线程中启动下载任务
@@ -357,6 +388,20 @@ public class FileDownloader implements Runnable {
 
         File tempFile = new File(tempFilePath);
         File finalFile = new File(saveDirectory + finalFileName);
+
+        if (getHashCodeIsCorrect()) {
+            try {
+                if (!FileHashUtil.verifyFileHash(tempFile, this.HashCodeType, this.HashCode)) {
+                    log.warn("File hash verification failed:{}", this.sourceUrl);
+                    tempFile.delete();
+                    bytesRead.set(0);
+                    startDownload();
+                    return;
+                }
+            } catch (NoSuchAlgorithmException e) {
+                log.warn(ExceptionHandler.getExceptionMessage(e));
+            }
+        } else log.warn("Disabled Verifier File：{}", this.sourceUrl);
 
         if (!tempFile.renameTo(finalFile)) {
             // 备选方案：使用文件复制

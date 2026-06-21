@@ -38,8 +38,14 @@ public class VersionID {
             .enableComplexMapKeySerialization()
             .create();
 
+    //文件校验类型
+    private String FileHashCodeType;
+
     //用于启动文件
     private String StartMainFile;
+
+    //启动文件SHA-256
+    private String StartMainFile_SHA_256;
 
     //最新外部版本（稳定）
     private String NormalVersion;
@@ -50,11 +56,20 @@ public class VersionID {
     //最新稳定版本描述文件网址
     private String NormalVersionDescribe;
 
+    //最新稳定版本描述文件网址SHA-256
+    private String NormalVersionDescribe_SHA_256;
+
     //最新稳定版本主文件网址（xxx.jar）
     private String NormalVersionMainFile;
 
+    //最新稳定版本主文件网址（xxx.jar）SHA-256
+    private String NormalVersionMainFile_SHA_256;
+
     //最新稳定版依赖（key:依赖名 ; value:依赖下载地址）
     private TreeMap<String, String> NormalDependencies;
+
+    //最新稳定版依赖（key:依赖名 ; value:SHA-256）
+    private TreeMap<String, String> NormalDependencies_SHA_256;
 
 
     //最新外部版本（测试）
@@ -66,11 +81,20 @@ public class VersionID {
     //最新测试版本描述文件网址
     private String TestVersionDescribe;
 
+    //最新测试版本描述文件网址
+    private String TestVersionDescribe_SHA_256;
+
     //最新稳定版本主文件网址（xxx.jar）
     private String TestVersionMainFile;
 
+    //最新稳定版本主文件网址（xxx.jar）SHA-256
+    private String TestVersionMainFile_SHA_256;
+
     //最新测试版依赖（key:依赖名 ; value:依赖下载地址）
     private TreeMap<String, String> TestDependencies;
+
+    //最新测试版依赖（key:依赖名 ; value:依赖下载地址）SHA-256
+    private TreeMap<String, String> TestDependencies_SHA_256;
 
     //特殊字段（使用{xxx}标注的）（key:特殊字段（不包括"{}"的，如特殊字段{demo}，key一定要时demo ; value:对应值（里面不能含有特殊字段）））
     private HashMap<String, String> SpecialFields;

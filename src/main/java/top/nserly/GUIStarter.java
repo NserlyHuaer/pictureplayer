@@ -130,7 +130,7 @@ public class GUIStarter extends JFrame {
     //是否启用代理服务器
     private static boolean EnableProxyServer;
     //最新版本下载地址（如果当前是最新版本，则返回null值）
-    private static List<String> NewVersionDownloadingWebSide;
+    private static HashMap<String,String> NewVersionDownloadingWebSide;
     //更新网站（必须指定VersionID.sum下载地址）
     public static String UPDATE_WEBSITE = "https://PicturePlayer.nserly.top/artifacts/PicturePlayer_jar/VersionID.sum";
     String MouseMoveLabelPrefix;
