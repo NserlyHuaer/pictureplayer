@@ -407,7 +407,7 @@ public class FileDownloader implements Runnable {
             // 备选方案：使用文件复制
             try (InputStream in = new FileInputStream(tempFile);
                  OutputStream out = new FileOutputStream(finalFile)) {
-                byte[] buf = new byte[1024];
+                byte[] buf = new byte[4096];
                 int len;
                 while ((len = in.read(buf)) > 0) {
                     out.write(buf, 0, len);

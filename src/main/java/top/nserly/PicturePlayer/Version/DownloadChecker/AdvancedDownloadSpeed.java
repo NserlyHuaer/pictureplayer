@@ -92,7 +92,7 @@ public class AdvancedDownloadSpeed {
                     OpenedPicturePath = GUIStarter.paintPicture.imageCanvas.getPath();
                 }
 
-                CommandHandle.executeOSSpecificCommands(osType, (String) map.get(website).getFirst(), OpenedPicturePath);
+                CommandHandle.executeOSSpecificCommands(osType, (String) map.get(downloadUpdate.MainFileWebSite).getFirst(), OpenedPicturePath);
             } catch (IOException | NoClassDefFoundError | ExceptionInInitializerError e) {
                 logger.error(ExceptionHandler.getExceptionMessage(e));
                 JOptionPane.showMessageDialog(DownloadUpdateFrame.downloadUpdateFrame, Bundle.getMessage("UpdateError_Content") + "\nCaused by:" + e, Bundle.getMessage("UpdateError_Title"), JOptionPane.ERROR_MESSAGE);

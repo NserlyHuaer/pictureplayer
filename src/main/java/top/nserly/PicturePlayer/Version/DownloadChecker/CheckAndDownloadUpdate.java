@@ -202,7 +202,7 @@ public class CheckAndDownloadUpdate {
         downloadFileWebSiteAndHashCode = new HashMap<>(DependenciesWebSite);
         String MainFileHashCode = null;
         if (versionID != null) {
-            MainFileHashCode = versionID.getStartMainFile_SHA_256() == null ? "" : versionID.getStartMainFile_SHA_256();
+            MainFileHashCode = versionID.getNormalVersionMainFile_SHA_256() == null ? "" : versionID.getNormalVersionMainFile_SHA_256();
         }
         downloadFileWebSiteAndHashCode.put(MainFileWebSite, MainFileHashCode);
 
