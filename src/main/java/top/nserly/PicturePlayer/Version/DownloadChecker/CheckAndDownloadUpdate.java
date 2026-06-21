@@ -190,11 +190,11 @@ public class CheckAndDownloadUpdate {
             for (String value : cache.values()) {
                 String dependenciesWebsite = VersionID.getString(value, versionID.getSpecialFields());
                 String dependenciesName = dependenciesWebsite.replace("\\", "/");
+                dependenciesName = dependenciesName.substring(dependenciesName.lastIndexOf("/") + 1, dependenciesName.lastIndexOf(".jar"));
                 String dependenciesFileHashCode = null;
                 if (versionID.getNormalDependencies_SHA_256() != null) {
-                    dependenciesFileHashCode = versionID.getNormalDependencies_SHA_256().get(dependenciesName);
+                    dependenciesFileHashCode = versionID.getNormalDependencies_SHA_256().get(dependenciesName.substring(0, dependenciesName.lastIndexOf("-")));
                 }
-                dependenciesName = dependenciesName.substring(dependenciesName.lastIndexOf("/") + 1, dependenciesName.lastIndexOf(".jar"));
                 if (!DependenciesName.contains(dependenciesName))
                     DependenciesWebSite.put(VersionID.getString(dependenciesWebsite, versionID.getSpecialFields()), dependenciesFileHashCode);
             }
