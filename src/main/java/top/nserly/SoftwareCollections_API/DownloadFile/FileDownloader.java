@@ -392,7 +392,7 @@ public class FileDownloader implements Runnable {
         if (getHashCodeIsCorrect()) {
             try {
                 if (!FileHashUtil.verifyFileHash(tempFile, this.HashCodeType, this.HashCode)) {
-                    log.warn("File hash verification failed:{}", this.sourceUrl);
+                    log.warn("File hash verification failed: {}", this.sourceUrl);
                     tempFile.delete();
                     bytesRead.set(0);
                     startDownload();
@@ -401,7 +401,7 @@ public class FileDownloader implements Runnable {
             } catch (NoSuchAlgorithmException e) {
                 log.warn(ExceptionHandler.getExceptionMessage(e));
             }
-        } else log.warn("Disabled Verifier File：{}", this.sourceUrl);
+        } else log.warn("Disabled Verifier File: {}", this.sourceUrl);
 
         if (!tempFile.renameTo(finalFile)) {
             // 备选方案：使用文件复制
