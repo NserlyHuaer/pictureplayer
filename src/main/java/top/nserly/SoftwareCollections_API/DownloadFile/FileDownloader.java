@@ -394,7 +394,7 @@ public class FileDownloader implements Runnable {
                 if (!FileHashUtil.verifyFileHash(tempFile, this.HashCodeType, this.HashCode)) {
                     log.warn("File hash verification failed: {}", this.sourceUrl);
                     tempFile.delete();
-                    bytesRead.set(0);
+                    resetDownload();
                     startDownload();
                     return;
                 }
