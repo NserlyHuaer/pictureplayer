@@ -130,7 +130,7 @@ public class GUIStarter extends JFrame {
     //是否启用代理服务器
     private static boolean EnableProxyServer;
     //最新版本下载地址（如果当前是最新版本，则返回null值）
-    private static HashMap<String,String> NewVersionDownloadingWebSide;
+    private static HashMap<String, String> NewVersionDownloadingWebSide;
     //更新网站（必须指定VersionID.sum下载地址）
     public static String UPDATE_WEBSITE = "https://PicturePlayer.nserly.top/artifacts/PicturePlayer_jar/VersionID.sum";
     String MouseMoveLabelPrefix;
@@ -809,7 +809,7 @@ public class GUIStarter extends JFrame {
                         + "(" + SystemMonitor.JVM_Memory_Usage
                         + "%" + ")");
                 TotalThread.setText(TTI + SystemMonitor.Program_Thread_Count);
-                if (OpenCLBlurProcessor.getIsSupportedOpenCL() && PaintPicturePanel.isEnableHardwareAcceleration)
+                if (OpenCLBlurProcessor.getIsSupportedOpenCL() && PaintPicturePanel.isEnableHardwareAcceleration && OpenCLBlurProcessor.isOpenCLAvailable())
                     OpenCLSelectedDeviceNameLavel.setText(OpenCLRendererI + OpenCLBlurProcessor.getSelectedDevice());
             }, 0, 2, TimeUnit.SECONDS);
             tabbedPane1.addChangeListener(_ -> {
