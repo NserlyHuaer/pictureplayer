@@ -82,48 +82,48 @@ public class GUIStarter extends JFrame {
     //初始化
     public static final Init<String, String> init = new Init<>();
     public static GUIStarter main;
-    private JPanel panel1;
-    private JTabbedPane tabbedPane1;
-    private JCheckBox EnableCursorDisplayCheckBox;
-    private JCheckBox EnableHistoryLoaderCheckBox;
-    private JLabel MouseMoveOffsetsLabel;
-    private JSlider MouseMoveOffsetsSlider;
-    private JCheckBox EnableProxyServerCheckBox;
-    private JLabel ProxyServerLabel;
-    private JButton ProxyServerButton;
-    private JCheckBox EnableSecureConnectionCheckBox;
-    private JCheckBox AutoCheckUpdateCheckBox;
-    private JButton SaveButton;
-    private JButton ResetButton;
-    private JButton RefreshButton;
-    private JLabel JVMVersionLabel;
-    private JLabel CurrentSoftwareVersionLabel;
-    private JButton CheckVersionButton;
-    public JTextField textField1;
-    private JButton TurnButton;
-    private JPanel SecondPanel;
-    private JLabel TopLabel;
-    private JLabel VersionView;
-    private JLabel CurrentSoftwareInteriorLabel;
-    private JLabel OSLabel;
-    private JLabel CurrentSoftwareLanguage;
-    private JLabel MemUsed;
-    private JPanel FileChoosePane;
-    private JPanel FirstPanel;
-    private JPanel ThirdPanel;
-    private JPanel FourthPanel;
-    private JLabel TotalThread;
-    private JLabel DefaultJVMMem;
-    private JLabel ProgramStartTime;
-    private JLabel CPUName;
-    private JLabel JavaPath;
-    private JCheckBox EnableHardwareAccelerationCheckBox;
-    private JPanel A;
-    private JPanel B;
-    private JLabel Display_1st;
-    private JLabel Display_2nd;
-    private JLabel Display_3rd;
-    private JButton FreeUpMemory;
+    private final JPanel panel1;
+    private final JTabbedPane tabbedPane1;
+    private final JCheckBox EnableCursorDisplayCheckBox;
+    private final JCheckBox EnableHistoryLoaderCheckBox;
+    private final JLabel MouseMoveOffsetsLabel;
+    private final JSlider MouseMoveOffsetsSlider;
+    private final JCheckBox EnableProxyServerCheckBox;
+    private final JLabel ProxyServerLabel;
+    private final JButton ProxyServerButton;
+    private final JCheckBox EnableSecureConnectionCheckBox;
+    private final JCheckBox AutoCheckUpdateCheckBox;
+    private final JButton SaveButton;
+    private final JButton ResetButton;
+    private final JButton RefreshButton;
+    private final JLabel JVMVersionLabel;
+    private final JLabel CurrentSoftwareVersionLabel;
+    private final JButton CheckVersionButton;
+    public final JTextField textField1;
+    private final JButton TurnButton;
+    private final JPanel SecondPanel;
+    private final JLabel TopLabel;
+    private final JLabel VersionView;
+    private final JLabel CurrentSoftwareInteriorLabel;
+    private final JLabel OSLabel;
+    private final JLabel CurrentSoftwareLanguage;
+    private final JLabel MemUsed;
+    private final JPanel FileChoosePane;
+    private final JPanel FirstPanel;
+    private final JPanel ThirdPanel;
+    private final JPanel FourthPanel;
+    private final JLabel TotalThread;
+    private final JLabel DefaultJVMMem;
+    private final JLabel ProgramStartTime;
+    private final JLabel CPUName;
+    private final JLabel JavaPath;
+    private final JCheckBox EnableHardwareAccelerationCheckBox;
+    private final JPanel A;
+    private final JPanel B;
+    private final JLabel Display_1st;
+    private final JLabel Display_2nd;
+    private final JLabel Display_3rd;
+    private final JButton FreeUpMemory;
     private static final String[] ThemeComboBoxStringItems = new String[]{"Theme_0", "Theme_1", "Theme_2"};
     private static final String[] CloseMainFrameControlComboBoxStringItems = new String[]{"CloseMainFrameControl_0", "CloseMainFrameControl_1", "CloseMainFrameControl_2"};
     private final ChangeFocusListener changeFocusListener;
@@ -153,10 +153,10 @@ public class GUIStarter extends JFrame {
 
     private static WindowsAppMutex windowsAppMutex;
 
-    private JLabel BuildView;
+    private final JLabel BuildView;
 
-    private JComboBox<String> ThemeModeComboBox;
-    private JLabel ThemeModeLabel;
+    private final JComboBox<String> ThemeModeComboBox;
+    private final JLabel ThemeModeLabel;
     private static final Thread init_PaintPicture = new Thread(() -> {
         try {
             PaintPicturePanel.isEnableHardwareAcceleration =
@@ -257,279 +257,363 @@ public class GUIStarter extends JFrame {
         }
     };
 
-    private JComboBox<String> CloseMainFrameControlComboBox;
-    private JLabel OpenCLSelectedDeviceNameLavel;
-    private JScrollPane FileChoosePaneScrollPane;
-    private JLabel OpenCLDevicesChooserLabel;
-    private NComboBox OpenCLDevicesChooser;
+    private final JComboBox<String> CloseMainFrameControlComboBox;
+    private final JLabel OpenCLSelectedDeviceNameLavel;
+    private final JScrollPane FileChoosePaneScrollPane;
+    private final JLabel OpenCLDevicesChooserLabel;
+    private final NComboBox OpenCLDevicesChooser;
 
-    /**
-     * Method generated by IntelliJ IDEA GUI Designer
-     * >>> IMPORTANT!! <<<
-     * DO NOT edit this method OR call it in your code!
-     *
-     * @noinspection ALL
-     */
-    private void $$$setupUI$$$() {
-        panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
-        panel1.setRequestFocusEnabled(true);
-        tabbedPane1 = new JTabbedPane();
-        tabbedPane1.setRequestFocusEnabled(false);
-        tabbedPane1.setToolTipText("");
-        panel1.add(tabbedPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        FirstPanel = new JPanel();
-        FirstPanel.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
-        FirstPanel.setName("");
-        FirstPanel.setToolTipText("");
-        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "FirstPanel"), FirstPanel);
-        textField1 = new JTextField();
-        FirstPanel.add(textField1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
-        TurnButton = new JButton();
-        TurnButton.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(TurnButton, this.$$$getMessageFromBundle$$$("messages", "TurnButton"));
-        FirstPanel.add(TurnButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JPanel panel2 = new JPanel();
-        panel2.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
-        FirstPanel.add(panel2, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        VersionView = new JLabel();
-        VersionView.setRequestFocusEnabled(false);
-        VersionView.setText("Version:");
-        panel2.add(VersionView, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        BuildView = new JLabel();
-        BuildView.setText("");
-        BuildView.setVerticalAlignment(3);
-        BuildView.setVerticalTextPosition(3);
-        panel2.add(BuildView, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        FileChoosePaneScrollPane = new JScrollPane();
-        FirstPanel.add(FileChoosePaneScrollPane, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        FileChoosePane = new JPanel();
-        FileChoosePane.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        FileChoosePane.setOpaque(true);
-        FileChoosePane.setVerifyInputWhenFocusTarget(true);
-        FileChoosePane.putClientProperty("html.disable", Boolean.FALSE);
-        FileChoosePaneScrollPane.setViewportView(FileChoosePane);
-        SecondPanel = new JPanel();
-        SecondPanel.setLayout(new GridBagLayout());
-        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "SecondPanel"), SecondPanel);
-        Display_1st = new JLabel();
-        Font Display_1stFont = this.$$$getFont$$$(null, -1, 35, Display_1st.getFont());
-        if (Display_1stFont != null) Display_1st.setFont(Display_1stFont);
-        Display_1st.setHorizontalTextPosition(11);
-        this.$$$loadLabelText$$$(Display_1st, this.$$$getMessageFromBundle$$$("messages", "Display_1st"));
-        GridBagConstraints gbc;
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        SecondPanel.add(Display_1st, gbc);
-        Display_2nd = new JLabel();
-        Font Display_2ndFont = this.$$$getFont$$$(null, -1, 20, Display_2nd.getFont());
-        if (Display_2ndFont != null) Display_2nd.setFont(Display_2ndFont);
-        this.$$$loadLabelText$$$(Display_2nd, this.$$$getMessageFromBundle$$$("messages", "Display_2nd"));
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.WEST;
-        SecondPanel.add(Display_2nd, gbc);
-        Display_3rd = new JLabel();
-        Display_3rd.setBackground(new Color(-2104859));
-        Font Display_3rdFont = this.$$$getFont$$$(null, -1, 15, Display_3rd.getFont());
-        if (Display_3rdFont != null) Display_3rd.setFont(Display_3rdFont);
-        Display_3rd.setHorizontalAlignment(0);
-        Display_3rd.setHorizontalTextPosition(0);
-        this.$$$loadLabelText$$$(Display_3rd, this.$$$getMessageFromBundle$$$("messages", "Display_3rd"));
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        SecondPanel.add(Display_3rd, gbc);
-        ThirdPanel = new JPanel();
-        ThirdPanel.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
-        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "ThirdPanel"), ThirdPanel);
-        A = new JPanel();
-        A.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
-        ThirdPanel.add(A, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final Spacer spacer1 = new Spacer();
-        A.add(spacer1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        ResetButton = new JButton();
-        ResetButton.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(ResetButton, this.$$$getMessageFromBundle$$$("messages", "ResetButton"));
-        A.add(ResetButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        RefreshButton = new JButton();
-        RefreshButton.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(RefreshButton, this.$$$getMessageFromBundle$$$("messages", "RefreshButton"));
-        A.add(RefreshButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        SaveButton = new JButton();
-        SaveButton.setHorizontalAlignment(0);
-        SaveButton.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(SaveButton, this.$$$getMessageFromBundle$$$("messages", "SaveButton"));
-        SaveButton.setVerticalTextPosition(0);
-        A.add(SaveButton, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        B = new JPanel();
-        B.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        ThirdPanel.add(B, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, 1, 1, null, null, null, 0, false));
-        final JScrollPane scrollPane1 = new JScrollPane();
-        B.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(502, 372), null, 0, false));
-        final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(12, 2, new Insets(0, 0, 0, 0), -1, -1));
-        scrollPane1.setViewportView(panel3);
-        EnableHistoryLoaderCheckBox = new JCheckBox();
-        EnableHistoryLoaderCheckBox.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(EnableHistoryLoaderCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableHistoryLoader"));
-        panel3.add(EnableHistoryLoaderCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
-        EnableHardwareAccelerationCheckBox = new JCheckBox();
-        EnableHardwareAccelerationCheckBox.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(EnableHardwareAccelerationCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableHardwareAcceleration"));
-        panel3.add(EnableHardwareAccelerationCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
-        EnableCursorDisplayCheckBox = new JCheckBox();
-        EnableCursorDisplayCheckBox.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(EnableCursorDisplayCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableCursorDisplayCheckBox"));
-        panel3.add(EnableCursorDisplayCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
-        MouseMoveOffsetsLabel = new JLabel();
-        MouseMoveOffsetsLabel.setRequestFocusEnabled(false);
-        this.$$$loadLabelText$$$(MouseMoveOffsetsLabel, this.$$$getMessageFromBundle$$$("messages", "MouseMoveOffsetsLabel"));
-        panel3.add(MouseMoveOffsetsLabel, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
-        MouseMoveOffsetsSlider = new JSlider();
-        MouseMoveOffsetsSlider.setMaximum(150);
-        MouseMoveOffsetsSlider.setMinimum(-65);
-        MouseMoveOffsetsSlider.setRequestFocusEnabled(false);
-        panel3.add(MouseMoveOffsetsSlider, new GridConstraints(7, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        EnableProxyServerCheckBox = new JCheckBox();
-        EnableProxyServerCheckBox.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(EnableProxyServerCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableProxyServerCheckBox"));
-        panel3.add(EnableProxyServerCheckBox, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
-        ProxyServerLabel = new JLabel();
-        ProxyServerLabel.setRequestFocusEnabled(false);
-        this.$$$loadLabelText$$$(ProxyServerLabel, this.$$$getMessageFromBundle$$$("messages", "ProxyServerLabel"));
-        panel3.add(ProxyServerLabel, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
-        EnableSecureConnectionCheckBox = new JCheckBox();
-        EnableSecureConnectionCheckBox.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(EnableSecureConnectionCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableSecureConnectionCheckBox"));
-        panel3.add(EnableSecureConnectionCheckBox, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
-        AutoCheckUpdateCheckBox = new JCheckBox();
-        AutoCheckUpdateCheckBox.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(AutoCheckUpdateCheckBox, this.$$$getMessageFromBundle$$$("messages", "AutoCheckUpdateCheckBox"));
-        panel3.add(AutoCheckUpdateCheckBox, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
-        ProxyServerButton = new JButton();
-        ProxyServerButton.setRequestFocusEnabled(false);
-        this.$$$loadButtonText$$$(ProxyServerButton, this.$$$getMessageFromBundle$$$("messages", "ProxyServerButton"));
-        panel3.add(ProxyServerButton, new GridConstraints(9, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        ThemeModeLabel = new JLabel();
-        ThemeModeLabel.setRequestFocusEnabled(false);
-        this.$$$loadLabelText$$$(ThemeModeLabel, this.$$$getMessageFromBundle$$$("messages", "ThemeModeLabel"));
-        panel3.add(ThemeModeLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JLabel label1 = new JLabel();
-        this.$$$loadLabelText$$$(label1, this.$$$getMessageFromBundle$$$("messages", "Settings_ExitControlLabel"));
-        panel3.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        CloseMainFrameControlComboBox = new NComboBox();
-        panel3.add(CloseMainFrameControlComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        ThemeModeComboBox = new NComboBox();
-        panel3.add(ThemeModeComboBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        OpenCLDevicesChooserLabel = new JLabel();
-        this.$$$loadLabelText$$$(OpenCLDevicesChooserLabel, this.$$$getMessageFromBundle$$$("messages", "Settings_OpenCLDevicesChooserLabel"));
-        panel3.add(OpenCLDevicesChooserLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        OpenCLDevicesChooser = new NComboBox();
-        panel3.add(OpenCLDevicesChooser, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JScrollPane scrollPane2 = new JScrollPane();
-        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "FourthPanel"), scrollPane2);
-        FourthPanel = new JPanel();
-        FourthPanel.setLayout(new GridLayoutManager(12, 7, new Insets(0, 0, 0, 0), -1, -1));
-        scrollPane2.setViewportView(FourthPanel);
-        JVMVersionLabel = new JLabel();
-        Font JVMVersionLabelFont = this.$$$getFont$$$(null, -1, 16, JVMVersionLabel.getFont());
-        if (JVMVersionLabelFont != null) JVMVersionLabel.setFont(JVMVersionLabelFont);
-        this.$$$loadLabelText$$$(JVMVersionLabel, this.$$$getMessageFromBundle$$$("messages", "JVMVersionLabel"));
-        FourthPanel.add(JVMVersionLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        FourthPanel.add(spacer2, new GridConstraints(11, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        CurrentSoftwareVersionLabel = new JLabel();
-        Font CurrentSoftwareVersionLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareVersionLabel.getFont());
-        if (CurrentSoftwareVersionLabelFont != null)
-            CurrentSoftwareVersionLabel.setFont(CurrentSoftwareVersionLabelFont);
-        this.$$$loadLabelText$$$(CurrentSoftwareVersionLabel, this.$$$getMessageFromBundle$$$("messages", "CurrentSoftwareVersionLabel"));
-        FourthPanel.add(CurrentSoftwareVersionLabel, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        CurrentSoftwareInteriorLabel = new JLabel();
-        Font CurrentSoftwareInteriorLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareInteriorLabel.getFont());
-        if (CurrentSoftwareInteriorLabelFont != null)
-            CurrentSoftwareInteriorLabel.setFont(CurrentSoftwareInteriorLabelFont);
-        this.$$$loadLabelText$$$(CurrentSoftwareInteriorLabel, this.$$$getMessageFromBundle$$$("messages", "CurrentSoftwareInteriorLabel"));
-        FourthPanel.add(CurrentSoftwareInteriorLabel, new GridConstraints(8, 2, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        CheckVersionButton = new JButton();
-        Font CheckVersionButtonFont = this.$$$getFont$$$(null, -1, 16, CheckVersionButton.getFont());
-        if (CheckVersionButtonFont != null) CheckVersionButton.setFont(CheckVersionButtonFont);
-        CheckVersionButton.setRequestFocusEnabled(false);
-        CheckVersionButton.setRolloverEnabled(false);
-        this.$$$loadButtonText$$$(CheckVersionButton, this.$$$getMessageFromBundle$$$("messages", "CheckVersionButton"));
-        FourthPanel.add(CheckVersionButton, new GridConstraints(9, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        OSLabel = new JLabel();
-        Font OSLabelFont = this.$$$getFont$$$(null, -1, 16, OSLabel.getFont());
-        if (OSLabelFont != null) OSLabel.setFont(OSLabelFont);
-        this.$$$loadLabelText$$$(OSLabel, this.$$$getMessageFromBundle$$$("messages", "OSLabel"));
-        FourthPanel.add(OSLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        ProgramStartTime = new JLabel();
-        Font ProgramStartTimeFont = this.$$$getFont$$$(null, -1, 16, ProgramStartTime.getFont());
-        if (ProgramStartTimeFont != null) ProgramStartTime.setFont(ProgramStartTimeFont);
-        this.$$$loadLabelText$$$(ProgramStartTime, this.$$$getMessageFromBundle$$$("messages", "ProgramStartTime"));
-        FourthPanel.add(ProgramStartTime, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        CurrentSoftwareLanguage = new JLabel();
-        CurrentSoftwareLanguage.setEnabled(true);
-        Font CurrentSoftwareLanguageFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareLanguage.getFont());
-        if (CurrentSoftwareLanguageFont != null) CurrentSoftwareLanguage.setFont(CurrentSoftwareLanguageFont);
-        this.$$$loadLabelText$$$(CurrentSoftwareLanguage, this.$$$getMessageFromBundle$$$("messages", "CurrentSoftwareLanguage"));
-        FourthPanel.add(CurrentSoftwareLanguage, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        CPUName = new JLabel();
-        Font CPUNameFont = this.$$$getFont$$$(null, -1, 16, CPUName.getFont());
-        if (CPUNameFont != null) CPUName.setFont(CPUNameFont);
-        this.$$$loadLabelText$$$(CPUName, this.$$$getMessageFromBundle$$$("messages", "CPULabel"));
-        FourthPanel.add(CPUName, new GridConstraints(1, 0, 1, 7, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        TotalThread = new JLabel();
-        Font TotalThreadFont = this.$$$getFont$$$(null, -1, 16, TotalThread.getFont());
-        if (TotalThreadFont != null) TotalThread.setFont(TotalThreadFont);
-        this.$$$loadLabelText$$$(TotalThread, this.$$$getMessageFromBundle$$$("messages", "TotalThread"));
-        FourthPanel.add(TotalThread, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        MemUsed = new JLabel();
-        Font MemUsedFont = this.$$$getFont$$$(null, -1, 16, MemUsed.getFont());
-        if (MemUsedFont != null) MemUsed.setFont(MemUsedFont);
-        this.$$$loadLabelText$$$(MemUsed, this.$$$getMessageFromBundle$$$("messages", "MemUsed"));
-        FourthPanel.add(MemUsed, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        DefaultJVMMem = new JLabel();
-        Font DefaultJVMMemFont = this.$$$getFont$$$(null, -1, 16, DefaultJVMMem.getFont());
-        if (DefaultJVMMemFont != null) DefaultJVMMem.setFont(DefaultJVMMemFont);
-        this.$$$loadLabelText$$$(DefaultJVMMem, this.$$$getMessageFromBundle$$$("messages", "DefaultJVMMem"));
-        FourthPanel.add(DefaultJVMMem, new GridConstraints(6, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        FourthPanel.add(spacer3, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer4 = new Spacer();
-        FourthPanel.add(spacer4, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer5 = new Spacer();
-        FourthPanel.add(spacer5, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer6 = new Spacer();
-        FourthPanel.add(spacer6, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        JavaPath = new JLabel();
-        Font JavaPathFont = this.$$$getFont$$$(null, -1, 16, JavaPath.getFont());
-        if (JavaPathFont != null) JavaPath.setFont(JavaPathFont);
-        this.$$$loadLabelText$$$(JavaPath, this.$$$getMessageFromBundle$$$("messages", "JavaPath"));
-        FourthPanel.add(JavaPath, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        FreeUpMemory = new JButton();
-        FreeUpMemory.setActionCommand(this.$$$getMessageFromBundle$$$("messages", "FreeUpMemory"));
-        Font FreeUpMemoryFont = this.$$$getFont$$$(null, -1, 16, FreeUpMemory.getFont());
-        if (FreeUpMemoryFont != null) FreeUpMemory.setFont(FreeUpMemoryFont);
-        FreeUpMemory.setRequestFocusEnabled(false);
-        FreeUpMemory.setRolloverEnabled(false);
-        this.$$$loadButtonText$$$(FreeUpMemory, this.$$$getMessageFromBundle$$$("messages", "FreeUpMemory"));
-        FourthPanel.add(FreeUpMemory, new GridConstraints(10, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        OpenCLSelectedDeviceNameLavel = new JLabel();
-        Font OpenCLSelectedDeviceNameLavelFont = this.$$$getFont$$$(null, -1, 16, OpenCLSelectedDeviceNameLavel.getFont());
-        if (OpenCLSelectedDeviceNameLavelFont != null)
-            OpenCLSelectedDeviceNameLavel.setFont(OpenCLSelectedDeviceNameLavelFont);
-        this.$$$loadLabelText$$$(OpenCLSelectedDeviceNameLavel, this.$$$getMessageFromBundle$$$("messages", "About_OpenCLSelectedDeviceNameLabel"));
-        FourthPanel.add(OpenCLSelectedDeviceNameLavel, new GridConstraints(2, 0, 1, 7, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        TopLabel = new JLabel();
-        Font TopLabelFont = this.$$$getFont$$$(null, -1, 20, TopLabel.getFont());
-        if (TopLabelFont != null) TopLabel.setFont(TopLabelFont);
-        TopLabel.setHorizontalTextPosition(0);
-        TopLabel.setText("Picture Player by nserly");
-        panel1.add(TopLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+    static {
+        String classPath = System.getProperty("java.class.path");
+        if (classPath == null || classPath.isBlank()) {
+            System.setProperty("java.home", ".");
+        }
+
+        ExceptionHandler.setUncaughtExceptionHandler(log);
+        SOFTWARE_FRAME_ICON = SystemNotifications.bufferedImage;
+        //初始化Init
+        new Thread(Init::init).start();
+        init.setUpdate(true);
+        log.info("The software starts running...");
+        System.setProperty("SoftwareName", "PicturePlayer");
+        log.info("SoftwareName:{}", System.getProperty("SoftwareName"));
+    }
+
+    //更新界面
+    public static void UpdateForm(CheckAndDownloadUpdate downloadUpdate) {
+        StringFormation stringFormation_title = new StringFormation(Bundle.getMessage("FindUpdateTitle"));
+        stringFormation_title.add("version", PicturePlayerVersion.getVersion());
+        stringFormation_title.add("version", downloadUpdate.NewVersionName);
+        stringFormation_title.add("versionID", String.valueOf(downloadUpdate.NewVersionID));
+        if (SystemNotifications.isSupportedSystemNotifications)
+            SystemNotifications.sendMessage(SystemNotifications.DefaultIcon,
+                    stringFormation_title.getProcessingString(),
+                    Bundle.getMessage("SystemTrayMenu_FindNewVersionContent"),
+                    TrayIcon.MessageType.INFO);
+        ConfirmUpdateDialog confirmUpdateDialog = new ConfirmUpdateDialog(downloadUpdate);
+        confirmUpdateDialog.pack();
+        confirmUpdateDialog.setVisible(true);
+    }
+
+    public GUIStarter(String title) {
+        super(title);
+        {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+            panel1 = new JPanel();
+            panel1.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+            panel1.setRequestFocusEnabled(true);
+            tabbedPane1 = new JTabbedPane();
+            tabbedPane1.setRequestFocusEnabled(false);
+            tabbedPane1.setToolTipText("");
+            panel1.add(tabbedPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+            FirstPanel = new JPanel();
+            FirstPanel.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+            FirstPanel.setName("");
+            FirstPanel.setToolTipText("");
+            tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "FirstPanel"), FirstPanel);
+            textField1 = new JTextField();
+            FirstPanel.add(textField1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+            TurnButton = new JButton();
+            TurnButton.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(TurnButton, this.$$$getMessageFromBundle$$$("messages", "TurnButton"));
+            FirstPanel.add(TurnButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            final JPanel panel2 = new JPanel();
+            panel2.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+            FirstPanel.add(panel2, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_SOUTHEAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+            VersionView = new JLabel();
+            VersionView.setRequestFocusEnabled(false);
+            VersionView.setText("Version:");
+            panel2.add(VersionView, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            BuildView = new JLabel();
+            BuildView.setText("");
+            BuildView.setVerticalAlignment(3);
+            BuildView.setVerticalTextPosition(3);
+            panel2.add(BuildView, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            FileChoosePaneScrollPane = new JScrollPane();
+            FirstPanel.add(FileChoosePaneScrollPane, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+            FileChoosePane = new JPanel();
+            FileChoosePane.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+            FileChoosePane.setOpaque(true);
+            FileChoosePane.setVerifyInputWhenFocusTarget(true);
+            FileChoosePane.putClientProperty("html.disable", Boolean.FALSE);
+            FileChoosePaneScrollPane.setViewportView(FileChoosePane);
+            SecondPanel = new JPanel();
+            SecondPanel.setLayout(new GridBagLayout());
+            tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "SecondPanel"), SecondPanel);
+            Display_1st = new JLabel();
+            Font Display_1stFont = this.$$$getFont$$$(null, -1, 35, Display_1st.getFont());
+            if (Display_1stFont != null) Display_1st.setFont(Display_1stFont);
+            Display_1st.setHorizontalTextPosition(11);
+            this.$$$loadLabelText$$$(Display_1st, this.$$$getMessageFromBundle$$$("messages", "Display_1st"));
+            GridBagConstraints gbc;
+            gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            SecondPanel.add(Display_1st, gbc);
+            Display_2nd = new JLabel();
+            Font Display_2ndFont = this.$$$getFont$$$(null, -1, 20, Display_2nd.getFont());
+            if (Display_2ndFont != null) Display_2nd.setFont(Display_2ndFont);
+            this.$$$loadLabelText$$$(Display_2nd, this.$$$getMessageFromBundle$$$("messages", "Display_2nd"));
+            gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 1;
+            gbc.gridwidth = 2;
+            gbc.anchor = GridBagConstraints.WEST;
+            SecondPanel.add(Display_2nd, gbc);
+            Display_3rd = new JLabel();
+            Display_3rd.setBackground(new Color(-2104859));
+            Font Display_3rdFont = this.$$$getFont$$$(null, -1, 15, Display_3rd.getFont());
+            if (Display_3rdFont != null) Display_3rd.setFont(Display_3rdFont);
+            Display_3rd.setHorizontalAlignment(0);
+            Display_3rd.setHorizontalTextPosition(0);
+            this.$$$loadLabelText$$$(Display_3rd, this.$$$getMessageFromBundle$$$("messages", "Display_3rd"));
+            gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 2;
+            SecondPanel.add(Display_3rd, gbc);
+            ThirdPanel = new JPanel();
+            ThirdPanel.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
+            tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "ThirdPanel"), ThirdPanel);
+            A = new JPanel();
+            A.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
+            ThirdPanel.add(A, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+            final Spacer spacer1 = new Spacer();
+            A.add(spacer1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+            ResetButton = new JButton();
+            ResetButton.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(ResetButton, this.$$$getMessageFromBundle$$$("messages", "ResetButton"));
+            A.add(ResetButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            RefreshButton = new JButton();
+            RefreshButton.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(RefreshButton, this.$$$getMessageFromBundle$$$("messages", "RefreshButton"));
+            A.add(RefreshButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            SaveButton = new JButton();
+            SaveButton.setHorizontalAlignment(0);
+            SaveButton.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(SaveButton, this.$$$getMessageFromBundle$$$("messages", "SaveButton"));
+            SaveButton.setVerticalTextPosition(0);
+            A.add(SaveButton, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_SOUTH, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            B = new JPanel();
+            B.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+            ThirdPanel.add(B, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, 1, 1, null, null, null, 0, false));
+            final JScrollPane scrollPane1 = new JScrollPane();
+            B.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(502, 372), null, 0, false));
+            final JPanel panel3 = new JPanel();
+            panel3.setLayout(new GridLayoutManager(12, 2, new Insets(0, 0, 0, 0), -1, -1));
+            scrollPane1.setViewportView(panel3);
+            EnableHistoryLoaderCheckBox = new JCheckBox();
+            EnableHistoryLoaderCheckBox.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(EnableHistoryLoaderCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableHistoryLoader"));
+            panel3.add(EnableHistoryLoaderCheckBox, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+            EnableHardwareAccelerationCheckBox = new JCheckBox();
+            EnableHardwareAccelerationCheckBox.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(EnableHardwareAccelerationCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableHardwareAcceleration"));
+            panel3.add(EnableHardwareAccelerationCheckBox, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+            EnableCursorDisplayCheckBox = new JCheckBox();
+            EnableCursorDisplayCheckBox.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(EnableCursorDisplayCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableCursorDisplayCheckBox"));
+            panel3.add(EnableCursorDisplayCheckBox, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+            MouseMoveOffsetsLabel = new JLabel();
+            MouseMoveOffsetsLabel.setRequestFocusEnabled(false);
+            this.$$$loadLabelText$$$(MouseMoveOffsetsLabel, this.$$$getMessageFromBundle$$$("messages", "MouseMoveOffsetsLabel"));
+            panel3.add(MouseMoveOffsetsLabel, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
+            MouseMoveOffsetsSlider = new JSlider();
+            MouseMoveOffsetsSlider.setMaximum(150);
+            MouseMoveOffsetsSlider.setMinimum(-65);
+            MouseMoveOffsetsSlider.setRequestFocusEnabled(false);
+            panel3.add(MouseMoveOffsetsSlider, new GridConstraints(7, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            EnableProxyServerCheckBox = new JCheckBox();
+            EnableProxyServerCheckBox.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(EnableProxyServerCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableProxyServerCheckBox"));
+            panel3.add(EnableProxyServerCheckBox, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+            ProxyServerLabel = new JLabel();
+            ProxyServerLabel.setRequestFocusEnabled(false);
+            this.$$$loadLabelText$$$(ProxyServerLabel, this.$$$getMessageFromBundle$$$("messages", "ProxyServerLabel"));
+            panel3.add(ProxyServerLabel, new GridConstraints(9, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 17), null, 0, false));
+            EnableSecureConnectionCheckBox = new JCheckBox();
+            EnableSecureConnectionCheckBox.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(EnableSecureConnectionCheckBox, this.$$$getMessageFromBundle$$$("messages", "EnableSecureConnectionCheckBox"));
+            panel3.add(EnableSecureConnectionCheckBox, new GridConstraints(10, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+            AutoCheckUpdateCheckBox = new JCheckBox();
+            AutoCheckUpdateCheckBox.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(AutoCheckUpdateCheckBox, this.$$$getMessageFromBundle$$$("messages", "AutoCheckUpdateCheckBox"));
+            panel3.add(AutoCheckUpdateCheckBox, new GridConstraints(11, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(402, 25), null, 0, false));
+            ProxyServerButton = new JButton();
+            ProxyServerButton.setRequestFocusEnabled(false);
+            this.$$$loadButtonText$$$(ProxyServerButton, this.$$$getMessageFromBundle$$$("messages", "ProxyServerButton"));
+            panel3.add(ProxyServerButton, new GridConstraints(9, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            ThemeModeLabel = new JLabel();
+            ThemeModeLabel.setRequestFocusEnabled(false);
+            this.$$$loadLabelText$$$(ThemeModeLabel, this.$$$getMessageFromBundle$$$("messages", "ThemeModeLabel"));
+            panel3.add(ThemeModeLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            final JLabel label1 = new JLabel();
+            this.$$$loadLabelText$$$(label1, this.$$$getMessageFromBundle$$$("messages", "Settings_ExitControlLabel"));
+            panel3.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            CloseMainFrameControlComboBox = new NComboBox();
+            panel3.add(CloseMainFrameControlComboBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            ThemeModeComboBox = new NComboBox();
+            panel3.add(ThemeModeComboBox, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            OpenCLDevicesChooserLabel = new JLabel();
+            this.$$$loadLabelText$$$(OpenCLDevicesChooserLabel, this.$$$getMessageFromBundle$$$("messages", "Settings_OpenCLDevicesChooserLabel"));
+            panel3.add(OpenCLDevicesChooserLabel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            OpenCLDevicesChooser = new NComboBox();
+            panel3.add(OpenCLDevicesChooser, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            final JScrollPane scrollPane2 = new JScrollPane();
+            tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("messages", "FourthPanel"), scrollPane2);
+            FourthPanel = new JPanel();
+            FourthPanel.setLayout(new GridLayoutManager(12, 7, new Insets(0, 0, 0, 0), -1, -1));
+            scrollPane2.setViewportView(FourthPanel);
+            JVMVersionLabel = new JLabel();
+            Font JVMVersionLabelFont = this.$$$getFont$$$(null, -1, 16, JVMVersionLabel.getFont());
+            if (JVMVersionLabelFont != null) JVMVersionLabel.setFont(JVMVersionLabelFont);
+            this.$$$loadLabelText$$$(JVMVersionLabel, this.$$$getMessageFromBundle$$$("messages", "JVMVersionLabel"));
+            FourthPanel.add(JVMVersionLabel, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            final Spacer spacer2 = new Spacer();
+            FourthPanel.add(spacer2, new GridConstraints(11, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+            CurrentSoftwareVersionLabel = new JLabel();
+            Font CurrentSoftwareVersionLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareVersionLabel.getFont());
+            if (CurrentSoftwareVersionLabelFont != null)
+                CurrentSoftwareVersionLabel.setFont(CurrentSoftwareVersionLabelFont);
+            this.$$$loadLabelText$$$(CurrentSoftwareVersionLabel, this.$$$getMessageFromBundle$$$("messages", "CurrentSoftwareVersionLabel"));
+            FourthPanel.add(CurrentSoftwareVersionLabel, new GridConstraints(8, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            CurrentSoftwareInteriorLabel = new JLabel();
+            Font CurrentSoftwareInteriorLabelFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareInteriorLabel.getFont());
+            if (CurrentSoftwareInteriorLabelFont != null)
+                CurrentSoftwareInteriorLabel.setFont(CurrentSoftwareInteriorLabelFont);
+            this.$$$loadLabelText$$$(CurrentSoftwareInteriorLabel, this.$$$getMessageFromBundle$$$("messages", "CurrentSoftwareInteriorLabel"));
+            FourthPanel.add(CurrentSoftwareInteriorLabel, new GridConstraints(8, 2, 1, 5, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            CheckVersionButton = new JButton();
+            Font CheckVersionButtonFont = this.$$$getFont$$$(null, -1, 16, CheckVersionButton.getFont());
+            if (CheckVersionButtonFont != null) CheckVersionButton.setFont(CheckVersionButtonFont);
+            CheckVersionButton.setRequestFocusEnabled(false);
+            CheckVersionButton.setRolloverEnabled(false);
+            this.$$$loadButtonText$$$(CheckVersionButton, this.$$$getMessageFromBundle$$$("messages", "CheckVersionButton"));
+            FourthPanel.add(CheckVersionButton, new GridConstraints(9, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            OSLabel = new JLabel();
+            Font OSLabelFont = this.$$$getFont$$$(null, -1, 16, OSLabel.getFont());
+            if (OSLabelFont != null) OSLabel.setFont(OSLabelFont);
+            this.$$$loadLabelText$$$(OSLabel, this.$$$getMessageFromBundle$$$("messages", "OSLabel"));
+            FourthPanel.add(OSLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            ProgramStartTime = new JLabel();
+            Font ProgramStartTimeFont = this.$$$getFont$$$(null, -1, 16, ProgramStartTime.getFont());
+            if (ProgramStartTimeFont != null) ProgramStartTime.setFont(ProgramStartTimeFont);
+            this.$$$loadLabelText$$$(ProgramStartTime, this.$$$getMessageFromBundle$$$("messages", "ProgramStartTime"));
+            FourthPanel.add(ProgramStartTime, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            CurrentSoftwareLanguage = new JLabel();
+            CurrentSoftwareLanguage.setEnabled(true);
+            Font CurrentSoftwareLanguageFont = this.$$$getFont$$$(null, -1, 16, CurrentSoftwareLanguage.getFont());
+            if (CurrentSoftwareLanguageFont != null) CurrentSoftwareLanguage.setFont(CurrentSoftwareLanguageFont);
+            this.$$$loadLabelText$$$(CurrentSoftwareLanguage, this.$$$getMessageFromBundle$$$("messages", "CurrentSoftwareLanguage"));
+            FourthPanel.add(CurrentSoftwareLanguage, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            CPUName = new JLabel();
+            Font CPUNameFont = this.$$$getFont$$$(null, -1, 16, CPUName.getFont());
+            if (CPUNameFont != null) CPUName.setFont(CPUNameFont);
+            this.$$$loadLabelText$$$(CPUName, this.$$$getMessageFromBundle$$$("messages", "CPULabel"));
+            FourthPanel.add(CPUName, new GridConstraints(1, 0, 1, 7, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            TotalThread = new JLabel();
+            Font TotalThreadFont = this.$$$getFont$$$(null, -1, 16, TotalThread.getFont());
+            if (TotalThreadFont != null) TotalThread.setFont(TotalThreadFont);
+            this.$$$loadLabelText$$$(TotalThread, this.$$$getMessageFromBundle$$$("messages", "TotalThread"));
+            FourthPanel.add(TotalThread, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            MemUsed = new JLabel();
+            Font MemUsedFont = this.$$$getFont$$$(null, -1, 16, MemUsed.getFont());
+            if (MemUsedFont != null) MemUsed.setFont(MemUsedFont);
+            this.$$$loadLabelText$$$(MemUsed, this.$$$getMessageFromBundle$$$("messages", "MemUsed"));
+            FourthPanel.add(MemUsed, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            DefaultJVMMem = new JLabel();
+            Font DefaultJVMMemFont = this.$$$getFont$$$(null, -1, 16, DefaultJVMMem.getFont());
+            if (DefaultJVMMemFont != null) DefaultJVMMem.setFont(DefaultJVMMemFont);
+            this.$$$loadLabelText$$$(DefaultJVMMem, this.$$$getMessageFromBundle$$$("messages", "DefaultJVMMem"));
+            FourthPanel.add(DefaultJVMMem, new GridConstraints(6, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            final Spacer spacer3 = new Spacer();
+            FourthPanel.add(spacer3, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+            final Spacer spacer4 = new Spacer();
+            FourthPanel.add(spacer4, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+            final Spacer spacer5 = new Spacer();
+            FourthPanel.add(spacer5, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+            final Spacer spacer6 = new Spacer();
+            FourthPanel.add(spacer6, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+            JavaPath = new JLabel();
+            Font JavaPathFont = this.$$$getFont$$$(null, -1, 16, JavaPath.getFont());
+            if (JavaPathFont != null) JavaPath.setFont(JavaPathFont);
+            this.$$$loadLabelText$$$(JavaPath, this.$$$getMessageFromBundle$$$("messages", "JavaPath"));
+            FourthPanel.add(JavaPath, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            FreeUpMemory = new JButton();
+            FreeUpMemory.setActionCommand(this.$$$getMessageFromBundle$$$("messages", "FreeUpMemory"));
+            Font FreeUpMemoryFont = this.$$$getFont$$$(null, -1, 16, FreeUpMemory.getFont());
+            if (FreeUpMemoryFont != null) FreeUpMemory.setFont(FreeUpMemoryFont);
+            FreeUpMemory.setRequestFocusEnabled(false);
+            FreeUpMemory.setRolloverEnabled(false);
+            this.$$$loadButtonText$$$(FreeUpMemory, this.$$$getMessageFromBundle$$$("messages", "FreeUpMemory"));
+            FourthPanel.add(FreeUpMemory, new GridConstraints(10, 0, 1, 7, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            OpenCLSelectedDeviceNameLavel = new JLabel();
+            Font OpenCLSelectedDeviceNameLavelFont = this.$$$getFont$$$(null, -1, 16, OpenCLSelectedDeviceNameLavel.getFont());
+            if (OpenCLSelectedDeviceNameLavelFont != null)
+                OpenCLSelectedDeviceNameLavel.setFont(OpenCLSelectedDeviceNameLavelFont);
+            this.$$$loadLabelText$$$(OpenCLSelectedDeviceNameLavel, this.$$$getMessageFromBundle$$$("messages", "About_OpenCLSelectedDeviceNameLabel"));
+            FourthPanel.add(OpenCLSelectedDeviceNameLavel, new GridConstraints(2, 0, 1, 7, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+            TopLabel = new JLabel();
+            Font TopLabelFont = this.$$$getFont$$$(null, -1, 20, TopLabel.getFont());
+            if (TopLabelFont != null) TopLabel.setFont(TopLabelFont);
+            TopLabel.setHorizontalTextPosition(0);
+            TopLabel.setText("Picture Player by nserly");
+            panel1.add(TopLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        }
+
+        SwingUtilities.invokeLater(() -> {
+            setIconImage(SOFTWARE_FRAME_ICON);
+            setContentPane(this.panel1);
+            log.info("Start GUI");
+            setVisible(true);
+
+            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+            Dimension dimension = SizeOperate.FreeOfScreenSize;
+            setSize((int) (dimension.getWidth() * 0.5), (int) (dimension.getHeight() * 0.6));
+            setLocationRelativeTo(null);
+            setMinimumSize(new Dimension(680, 335));
+            setMaximumSize(dimension);
+        });
+
+        changeFocusListener = new ChangeFocusListener(this);
+        new Thread(() -> {
+            ExceptionHandler.setUncaughtExceptionHandler(log);
+            ProxyServerPrefix = ProxyServerLabel.getText();
+            MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
+            centre = new SettingsInfoHandle();
+            init();
+            if (!OpenCLBlurProcessor.getIsSupportedOpenCL()) {
+                centre.CurrentData.replace("EnableHardwareAcceleration", "false");
+                EnableHardwareAccelerationCheckBox.setSelected(false);
+                EnableHardwareAccelerationCheckBox.setEnabled(false);
+                centre.save();
+            }
+            about();
+            if (SettingsInfoHandle.getBoolean("EnableProxyServer", main.centre.CurrentData)) {
+                setProxyServerOfInit();
+                log.info("Proxy Server is turned on, and all networking activities of the Program will be handled by the proxy server");
+                log.info("proxy server ip(or domain):{}", UPDATE_WEBSITE);
+            }
+            proxyServerChooser = new ProxyServerChooser();
+            proxyServerChooser.pack();
+            proxyServerChooser.setTitle(Bundle.getMessage("InputProxyServer_Title"));
+
+            CheckAndDownloadUpdate.secureConnection(EnableSecureConnectionCheckBox.isSelected());
+            if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
+                CheckAndDownloadUpdate downloadUpdate = new CheckAndDownloadUpdate(UPDATE_WEBSITE);
+                new Thread(() -> {
+                    ExceptionHandler.setUncaughtExceptionHandler(log);
+                    NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
+                    if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
+                        UpdateForm(downloadUpdate);
+                    }
+                }).start();
+            }
+
+            ThreadControl.waitThreadsComplete(init_PaintPicture);
+            paintPicture.pictureInformationStorageManagement.optimize();
+        }).start();
     }
 
     /**
@@ -633,95 +717,6 @@ public class GUIStarter extends JFrame {
      */
     public JComponent $$$getRootComponent$$$() {
         return panel1;
-    }
-
-    static {
-        String classPath = System.getProperty("java.class.path");
-        if (classPath == null || classPath.isBlank()) {
-            System.setProperty("java.home", ".");
-        }
-
-        ExceptionHandler.setUncaughtExceptionHandler(log);
-        SOFTWARE_FRAME_ICON = SystemNotifications.bufferedImage;
-        //初始化Init
-        new Thread(Init::init).start();
-        init.setUpdate(true);
-        log.info("The software starts running...");
-        System.setProperty("SoftwareName", "PicturePlayer");
-        log.info("SoftwareName:{}", System.getProperty("SoftwareName"));
-    }
-
-    //更新界面
-    public static void UpdateForm(CheckAndDownloadUpdate downloadUpdate) {
-        StringFormation stringFormation_title = new StringFormation(Bundle.getMessage("FindUpdateTitle"));
-        stringFormation_title.add("version", PicturePlayerVersion.getVersion());
-        stringFormation_title.add("version", downloadUpdate.NewVersionName);
-        stringFormation_title.add("versionID", String.valueOf(downloadUpdate.NewVersionID));
-        if (SystemNotifications.isSupportedSystemNotifications)
-            SystemNotifications.sendMessage(SystemNotifications.DefaultIcon,
-                    stringFormation_title.getProcessingString(),
-                    Bundle.getMessage("SystemTrayMenu_FindNewVersionContent"),
-                    TrayIcon.MessageType.INFO);
-        ConfirmUpdateDialog confirmUpdateDialog = new ConfirmUpdateDialog(downloadUpdate);
-        confirmUpdateDialog.pack();
-        confirmUpdateDialog.setVisible(true);
-    }
-
-    public GUIStarter(String title) {
-        super(title);
-        $$$setupUI$$$();
-
-        SwingUtilities.invokeLater(() -> {
-            setIconImage(SOFTWARE_FRAME_ICON);
-            setContentPane(this.panel1);
-            log.info("Start GUI");
-            setVisible(true);
-
-            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-            Dimension dimension = SizeOperate.FreeOfScreenSize;
-            setSize((int) (dimension.getWidth() * 0.5), (int) (dimension.getHeight() * 0.6));
-            setLocationRelativeTo(null);
-            setMinimumSize(new Dimension(680, 335));
-        });
-
-        changeFocusListener = new ChangeFocusListener(this);
-        new Thread(() -> {
-            ExceptionHandler.setUncaughtExceptionHandler(log);
-            ProxyServerPrefix = ProxyServerLabel.getText();
-            MouseMoveLabelPrefix = MouseMoveOffsetsLabel.getText();
-            centre = new SettingsInfoHandle();
-            init();
-            if (!OpenCLBlurProcessor.getIsSupportedOpenCL()) {
-                centre.CurrentData.replace("EnableHardwareAcceleration", "false");
-                EnableHardwareAccelerationCheckBox.setSelected(false);
-                EnableHardwareAccelerationCheckBox.setEnabled(false);
-                centre.save();
-            }
-            about();
-            if (SettingsInfoHandle.getBoolean("EnableProxyServer", main.centre.CurrentData)) {
-                setProxyServerOfInit();
-                log.info("Proxy Server is turned on, and all networking activities of the Program will be handled by the proxy server");
-                log.info("proxy server ip(or domain):{}", UPDATE_WEBSITE);
-            }
-            proxyServerChooser = new ProxyServerChooser();
-            proxyServerChooser.pack();
-            proxyServerChooser.setTitle(Bundle.getMessage("InputProxyServer_Title"));
-
-            CheckAndDownloadUpdate.secureConnection(EnableSecureConnectionCheckBox.isSelected());
-            if (init.containsKey("AutoCheckUpdate") && init.getProperties().get("AutoCheckUpdate").equals("true")) {
-                CheckAndDownloadUpdate downloadUpdate = new CheckAndDownloadUpdate(UPDATE_WEBSITE);
-                new Thread(() -> {
-                    ExceptionHandler.setUncaughtExceptionHandler(log);
-                    NewVersionDownloadingWebSide = downloadUpdate.getUpdateWebSide();
-                    if (NewVersionDownloadingWebSide != null && !NewVersionDownloadingWebSide.isEmpty()) {
-                        UpdateForm(downloadUpdate);
-                    }
-                }).start();
-            }
-
-            ThreadControl.waitThreadsComplete(init_PaintPicture);
-            paintPicture.pictureInformationStorageManagement.optimize();
-        }).start();
     }
 
     //初始化所有组件设置

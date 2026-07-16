@@ -134,7 +134,7 @@ public class SizeOperate {
 
 
     private double decide(double size) {
-        return Math.max(MinPercent, Math.min(size, MaxPercent));
+        return Math.clamp(size, MinPercent, MaxPercent);
     }
 
     //获取图片最佳比例
